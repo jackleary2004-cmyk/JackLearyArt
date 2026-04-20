@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JACK LEARY — PRODUCTION DESIGN</title>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #00ff41;
+      --green-dim: #00b32c;
+      --green-dark: #003b00;
+      --black: #000;
+      --bg: #020a02;
+    }
+
+    html, body {
+      width: 100%;
+      background: var(--bg);
+      color: var(--green);
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px, transparent 3px,
+        rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 4px
+      );
+      pointer-events: none; z-index: 600;
+    }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: 42px;
+      border-bottom: 1px solid var(--green-dark);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1.4rem;
+      background: rgba(0,0,0,0.95);
+      z-index: 500;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 1rem; }
+    .topbar-back {
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      color: var(--green-dim);
+      text-decoration: none;
+      letter-spacing: 0.1em;
+      transition: color 0.2s;
+    }
+    .topbar-back:hover { color: var(--green); }
+    .topbar-title {
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      color: var(--green);
+      letter-spacing: 0.12em;
+    }
+    .topbar-right {
+      font-size: 10px;
+      color: var(--green-dark);
+      letter-spacing: 0.1em;
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      padding: 5rem 1.6rem 2.5rem;
+      border-bottom: 1px solid var(--green-dark);
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .page-eyebrow {
+      font-size: 10px;
+      color: var(--green-dark);
+      letter-spacing: 0.22em;
+      margin-bottom: 0.5rem;
+    }
+
+    .page-title {
+      font-family: 'VT323', monospace;
+      font-size: clamp(48px, 9vw, 100px);
+      color: var(--green);
+      letter-spacing: 0.06em;
+      line-height: 1;
+      text-shadow: 0 0 40px rgba(0,255,65,0.2);
+    }
+
+    .page-sub {
+      font-size: 10px;
+      color: var(--green-dark);
+      letter-spacing: 0.18em;
+      margin-top: 0.6rem;
+    }
+
+    /* ── PROJECTS ── */
+    .projects { padding-bottom: 6rem; }
+
+    /* ── PROJECT BLOCK ── */
+    .project {
+      border-bottom: 1px solid var(--green-dark);
+      padding: 0;
+    }
+
+    /* Big title banner */
+    .project-banner {
+      padding: 2.5rem 1.6rem 1.5rem;
+      max-width: 1000px;
+      margin: 0 auto;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .project-num {
+      font-size: 10px;
+      color: var(--green-dark);
+      letter-spacing: 0.22em;
+      margin-bottom: 0.3rem;
+    }
+
+    .project-title {
+      font-family: 'VT323', monospace;
+      font-size: clamp(36px, 7vw, 80px);
+      color: var(--green);
+      letter-spacing: 0.08em;
+      line-height: 1;
+      text-shadow: 0 0 24px rgba(0,255,65,0.25);
+    }
+
+    .project-artist {
+      font-size: 11px;
+      color: var(--green-dim);
+      letter-spacing: 0.12em;
+      margin-top: 0.4rem;
+    }
+
+    .project-links {
+      display: flex;
+      gap: 0.6rem;
+      flex-shrink: 0;
+      align-items: center;
+    }
+
+    .project-link {
+      font-size: 10px;
+      color: var(--green-dim);
+      letter-spacing: 0.14em;
+      text-decoration: none;
+      border: 1px solid var(--green-dark);
+      padding: 5px 12px;
+      transition: color 0.2s, border-color 0.2s, text-shadow 0.2s;
+      white-space: nowrap;
+    }
+    .project-link:hover {
+      color: var(--green);
+      border-color: var(--green-dim);
+      text-shadow: 0 0 8px var(--green);
+    }
+
+    /* Glitch divider */
+    .glitch-divider {
+      width: 100%;
+      height: 1px;
+      background: var(--green-dark);
+      position: relative;
+      overflow: hidden;
+    }
+    .glitch-divider::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 60%;
+      height: 100%;
+      background: var(--green-dim);
+      animation: glitch-slide 4s linear infinite;
+    }
+    @keyframes glitch-slide {
+      0% { left: -60%; }
+      100% { left: 110%; }
+    }
+
+    /* ── VIDEO SECTION ── */
+    .video-section {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 1.5rem 1.6rem;
+    }
+
+    .video-wrap {
+      position: relative;
+      width: 100%;
+      background: #000;
+      border: 1px solid var(--green-dark);
+    }
+
+    .project-video {
+      width: 100%;
+      display: block;
+      max-height: 70vh;
+      object-fit: contain;
+    }
+
+    /* Mute toggle */
+    .mute-toggle {
+      position: absolute;
+      bottom: 10px; right: 12px;
+      font-size: 10px;
+      color: var(--green-dim);
+      letter-spacing: 0.14em;
+      cursor: pointer;
+      border: 1px solid var(--green-dark);
+      padding: 3px 8px;
+      background: rgba(0,0,0,0.75);
+      transition: color 0.2s, border-color 0.2s;
+      z-index: 2;
+    }
+    .mute-toggle:hover { color: var(--green); border-color: var(--green-dim); }
+
+    /* Corner brackets on video */
+    .video-wrap::before, .video-wrap::after {
+      content: '';
+      position: absolute;
+      width: 16px; height: 16px;
+      border-color: var(--green-dim);
+      border-style: solid;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .video-wrap::before { top: 8px; left: 8px; border-width: 2px 0 0 2px; }
+    .video-wrap::after  { bottom: 8px; right: 8px; border-width: 0 2px 2px 0; }
+
+    /* ── INFO + STILLS ── */
+    .project-bottom {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 1.6rem 2rem;
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    @media (max-width: 640px) {
+      .project-bottom { grid-template-columns: 1fr; }
+    }
+
+    .project-desc {
+      font-size: 11px;
+      color: var(--green-dim);
+      letter-spacing: 0.06em;
+      line-height: 1.9;
+      padding-top: 0.4rem;
+    }
+
+    /* Stills strip */
+    .stills-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.4rem;
+    }
+
+    .still-item {
+      position: relative;
+      cursor: pointer;
+      border: 1px solid var(--green-dark);
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .still-item:hover { border-color: var(--green-dim); }
+
+    .still-item img {
+      width: 100%;
+      height: 110px;
+      object-fit: cover;
+      display: block;
+      transition: filter 0.2s;
+    }
+    .still-item:hover img { filter: brightness(0.7); }
+
+    .still-expand {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s;
+      font-family: 'VT323', monospace;
+      font-size: 13px;
+      color: var(--green);
+      letter-spacing: 0.12em;
+      text-shadow: 0 0 8px var(--green);
+    }
+    .still-item:hover .still-expand { opacity: 1; }
+
+    .still-num {
+      position: absolute;
+      top: 4px; left: 6px;
+      font-size: 9px;
+      color: var(--green);
+      letter-spacing: 0.1em;
+      text-shadow: 0 0 6px rgba(0,0,0,0.9);
+    }
+
+    /* ── LIGHTBOX ── */
+    .lightbox {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.97);
+      z-index: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .lightbox.open { opacity: 1; pointer-events: all; }
+
+    .lb-img {
+      max-width: 92vw;
+      max-height: 90vh;
+      object-fit: contain;
+      border: 1px solid var(--green-dim);
+      box-shadow: 0 0 60px rgba(0,255,65,0.1);
+      display: block;
+    }
+
+    .lb-close {
+      position: absolute;
+      top: 1rem; right: 1.4rem;
+      font-family: 'VT323', monospace;
+      font-size: 20px;
+      color: var(--green-dim);
+      cursor: pointer;
+      letter-spacing: 0.15em;
+      transition: color 0.2s;
+      z-index: 10;
+    }
+    .lb-close:hover { color: var(--green); }
+
+    .lb-nav {
+      position: absolute;
+      top: 50%; transform: translateY(-50%);
+      font-family: 'VT323', monospace;
+      font-size: 36px;
+      color: var(--green-dim);
+      cursor: pointer;
+      padding: 1rem;
+      transition: color 0.2s;
+      z-index: 10;
+    }
+    .lb-nav:hover { color: var(--green); text-shadow: 0 0 10px var(--green); }
+    .lb-nav.prev { left: 0.2rem; }
+    .lb-nav.next { right: 0.2rem; }
+
+    .lb-label {
+      position: absolute;
+      bottom: 1rem; left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      color: var(--green-dark);
+      letter-spacing: 0.15em;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <a class="topbar-back" href="work.html">← BACK</a>
+      <span class="topbar-title">PRODUCTION DESIGN</span>
+    </div>
+    <div class="topbar-right">/DIR/SET — 3 PROJECTS</div>
+  </div>
+
+  <div class="page-header">
+    <div class="page-eyebrow">/DIR/SET/PRODUCTION</div>
+    <div class="page-title">PRODUCTION<br>DESIGN</div>
+    <div class="page-sub">3 PROJECTS — ON-SET PRODUCTION DESIGN & ART DIRECTION</div>
+  </div>
+
+  <div class="projects">
+
+    <!-- ── PROJECT 1: AL FINAL ── -->
+    <div class="project">
+      <div class="project-banner">
+        <div>
+          <div class="project-num">PROJECT 01</div>
+          <div class="project-title">AL FINAL</div>
+          <div class="project-artist">SOFÍA LAFUENTE</div>
+        </div>
+        <div class="project-links">
+          <a class="project-link" href="https://www.youtube.com/watch?v=BZIJaHtU3pA&list=RDBZIJaHtU3pA&start_radio=1" target="_blank">[ WATCH ON YOUTUBE ↗ ]</a>
+        </div>
+      </div>
+      <div class="glitch-divider"></div>
+      <div class="video-section">
+        <div class="video-wrap">
+          <video class="project-video" id="vid1" src="images/production/al_final/video/al_final_video.mp4" muted loop autoplay playsinline controls></video>
+          <div class="mute-toggle" onclick="toggleMute('vid1', this)">[ UNMUTE ]</div>
+        </div>
+      </div>
+      <div class="project-bottom">
+        <div class="project-desc">Produced and directed by Madeline Leary, I served as the main production assistant and production designer on Sofía's set.</div>
+        <div class="stills-strip" id="stills1"></div>
+      </div>
+    </div>
+
+    <!-- ── PROJECT 2: BI ── -->
+    <div class="project">
+      <div class="project-banner">
+        <div>
+          <div class="project-num">PROJECT 02</div>
+          <div class="project-title">BI</div>
+          <div class="project-artist">SOFÍA REYES</div>
+        </div>
+        <div class="project-links">
+          <a class="project-link" href="https://www.youtube.com/watch?v=GjzHSGQB2Qs&list=RDGjzHSGQB2Qs&start_radio=1" target="_blank">[ WATCH ON YOUTUBE ↗ ]</a>
+        </div>
+      </div>
+      <div class="glitch-divider"></div>
+      <div class="video-section">
+        <div class="video-wrap">
+          <video class="project-video" id="vid2" src="images/production/bi/video/bi_video.mp4" muted loop autoplay playsinline controls></video>
+          <div class="mute-toggle" onclick="toggleMute('vid2', this)">[ UNMUTE ]</div>
+        </div>
+      </div>
+      <div class="project-bottom">
+        <div class="project-desc">I served as an on-set production designer and production assistant, while also training someone new in what I do and shadowing the art director of the project.</div>
+        <div class="stills-strip" id="stills2"></div>
+      </div>
+    </div>
+
+    <!-- ── PROJECT 3: A BABY GIRL NAMED HEAVEN ── -->
+    <div class="project">
+      <div class="project-banner">
+        <div>
+          <div class="project-num">PROJECT 03</div>
+          <div class="project-title">A BABY GIRL<br>NAMED HEAVEN</div>
+          <div class="project-artist">SAM AUSTINS</div>
+        </div>
+        <div class="project-links">
+          <a class="project-link" href="https://www.youtube.com/watch?v=8fZv7ublKPk&list=RD8fZv7ublKPk&start_radio=1" target="_blank">[ WATCH ON YOUTUBE ↗ ]</a>
+        </div>
+      </div>
+      <div class="glitch-divider"></div>
+      <div class="video-section">
+        <div class="video-wrap">
+          <video class="project-video" id="vid3" src="images/production/a_baby_girl_named_heaven/video/a_baby_girl_named_heaven_video.mp4" muted loop autoplay playsinline controls></video>
+          <div class="mute-toggle" onclick="toggleMute('vid3', this)">[ UNMUTE ]</div>
+        </div>
+      </div>
+      <div class="project-bottom">
+        <div class="project-desc">Produced by Pulse Films, director Nico asked me to work as a set production assistant, building and designing the backdrops to the music video on sight in collaboration with the behind-the-camera team.</div>
+        <div class="stills-strip" id="stills3"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox">
+    <span class="lb-close" id="lbClose">[ CLOSE ]</span>
+    <span class="lb-nav prev" id="lbPrev">&#8592;</span>
+    <img class="lb-img" id="lbImg" src="" alt="">
+    <span class="lb-nav next" id="lbNext">&#8594;</span>
+    <div class="lb-label" id="lbLabel"></div>
+  </div>
+
+  <script>
+    // Stills data
+    const stillsData = {
+      stills1: [
+        'images/production/al_final/stills/al_final_1_still.jpg',
+        'images/production/al_final/stills/al_final_2_still.jpg',
+        'images/production/al_final/stills/al_final_3_still.jpg'
+      ],
+      stills2: [
+        'images/production/bi/stills/bi_1_still.jpeg',
+        'images/production/bi/stills/bi_2_still.jpeg',
+        'images/production/bi/stills/bi_3_still.jpg'
+      ],
+      stills3: [
+        'images/production/a_baby_girl_named_heaven/stills/a_baby_girl_named_heaven_1_still.png',
+        'images/production/a_baby_girl_named_heaven/stills/a_baby_girl_named_heaven_2_still.png',
+        'images/production/a_baby_girl_named_heaven/stills/a_baby_girl_named_heaven_3_still.png'
+      ]
+    };
+
+    // Build stills strips
+    const lightbox = document.getElementById('lightbox');
+    const lbImg = document.getElementById('lbImg');
+    const lbLabel = document.getElementById('lbLabel');
+    const lbPrev = document.getElementById('lbPrev');
+    const lbNext = document.getElementById('lbNext');
+    let lbImages = [];
+    let lbCurrent = 0;
+
+    Object.entries(stillsData).forEach(([id, imgs]) => {
+      const container = document.getElementById(id);
+      imgs.forEach((src, i) => {
+        const item = document.createElement('div');
+        item.className = 'still-item';
+
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = 'Still ' + (i + 1);
+        img.loading = 'lazy';
+
+        const num = document.createElement('span');
+        num.className = 'still-num';
+        num.textContent = 'STILL ' + (i + 1);
+
+        const expand = document.createElement('div');
+        expand.className = 'still-expand';
+        expand.textContent = '[ EXPAND ]';
+
+        item.appendChild(img);
+        item.appendChild(num);
+        item.appendChild(expand);
+
+        item.addEventListener('click', () => {
+          lbImages = imgs;
+          lbCurrent = i;
+          renderLightbox();
+          lightbox.classList.add('open');
+        });
+
+        container.appendChild(item);
+      });
+    });
+
+    function renderLightbox() {
+      lbImg.src = lbImages[lbCurrent];
+      lbLabel.textContent = 'STILL ' + (lbCurrent + 1) + ' / ' + lbImages.length;
+    }
+
+    document.getElementById('lbClose').onclick = () => lightbox.classList.remove('open');
+    lbNext.onclick = () => { lbCurrent = (lbCurrent + 1) % lbImages.length; renderLightbox(); };
+    lbPrev.onclick = () => { lbCurrent = (lbCurrent - 1 + lbImages.length) % lbImages.length; renderLightbox(); };
+
+    document.addEventListener('keydown', e => {
+      if (!lightbox.classList.contains('open')) return;
+      if (e.key === 'Escape') lightbox.classList.remove('open');
+      if (e.key === 'ArrowRight') lbNext.click();
+      if (e.key === 'ArrowLeft') lbPrev.click();
+    });
+
+    // Mute toggle
+    function toggleMute(videoId, btn) {
+      const video = document.getElementById(videoId);
+      video.muted = !video.muted;
+      if (!video.muted) video.play().catch(() => {});
+      btn.textContent = video.muted ? '[ UNMUTE ]' : '[ MUTE ]';
+    }
+
+    // Swipe lightbox
+    let swipeX = 0;
+    lightbox.addEventListener('touchstart', e => { swipeX = e.touches[0].clientX; }, { passive: true });
+    lightbox.addEventListener('touchend', e => {
+      const dx = swipeX - e.changedTouches[0].clientX;
+      if (Math.abs(dx) > 40) dx > 0 ? lbNext.click() : lbPrev.click();
+    }, { passive: true });
+  </script>
+</body>
+</html>

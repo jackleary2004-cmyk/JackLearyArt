@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JACK LEARY — SURF</title>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #00ff41;
+      --green-dim: #00b32c;
+      --green-dark: #003b00;
+      --black: #000;
+      --bg: #020a02;
+    }
+
+    html, body {
+      width: 100%;
+      background: var(--bg);
+      color: var(--green);
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px, transparent 3px,
+        rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 4px
+      );
+      pointer-events: none; z-index: 600;
+    }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: 42px;
+      border-bottom: 1px solid var(--green-dark);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1.4rem;
+      background: rgba(0,0,0,0.95);
+      z-index: 500;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 1rem; }
+    .topbar-back {
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      color: var(--green-dim);
+      text-decoration: none;
+      letter-spacing: 0.1em;
+      transition: color 0.2s;
+    }
+    .topbar-back:hover { color: var(--green); }
+    .topbar-title {
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      color: var(--green);
+      letter-spacing: 0.12em;
+    }
+    .topbar-right {
+      font-size: 10px;
+      color: var(--green-dark);
+      letter-spacing: 0.1em;
+    }
+
+    /* ── INTRO ── */
+    .intro {
+      padding: 5rem 2rem 2rem;
+      max-width: 720px;
+      margin: 0 auto;
+      border-bottom: 1px solid var(--green-dark);
+    }
+
+    .intro-label {
+      font-size: 10px;
+      color: var(--green-dark);
+      letter-spacing: 0.2em;
+      margin-bottom: 0.6rem;
+    }
+
+    .intro-title {
+      font-family: 'VT323', monospace;
+      font-size: clamp(28px, 5vw, 48px);
+      color: var(--green);
+      letter-spacing: 0.1em;
+      line-height: 1.1;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 20px rgba(0,255,65,0.3);
+    }
+
+    .intro-text {
+      font-size: 11px;
+      color: var(--green-dim);
+      letter-spacing: 0.06em;
+      line-height: 1.9;
+      margin-bottom: 1rem;
+    }
+
+    .intro-link {
+      display: inline-block;
+      font-size: 10px;
+      color: var(--green-dim);
+      letter-spacing: 0.15em;
+      text-decoration: none;
+      border: 1px solid var(--green-dark);
+      padding: 4px 12px;
+      margin-bottom: 1.5rem;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .intro-link:hover {
+      color: var(--green);
+      border-color: var(--green-dim);
+      text-shadow: 0 0 8px var(--green);
+    }
+
+    /* ── GALLERY ── */
+    .gallery {
+      padding: 2rem 1.4rem 4rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.6rem;
+    }
+
+    @media (min-width: 640px) {
+      .gallery { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    @media (min-width: 1024px) {
+      .gallery { grid-template-columns: repeat(4, 1fr); }
+    }
+
+    .slide-item {
+      position: relative;
+      cursor: pointer;
+      border: 1px solid var(--green-dark);
+      overflow: hidden;
+      transition: border-color 0.3s, box-shadow 0.3s;
+      background: #000;
+    }
+
+    .slide-item:hover {
+      border-color: var(--green-dim);
+      box-shadow: 0 0 20px rgba(0,255,65,0.08);
+    }
+
+    .slide-item img,
+    .slide-item video {
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+      display: block;
+    }
+
+    .slide-num {
+      position: absolute;
+      top: 8px; left: 10px;
+      font-size: 11px;
+      color: var(--green);
+      letter-spacing: 0.12em;
+      z-index: 2;
+      text-shadow: 0 0 8px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.9);
+    }
+
+    .slide-type {
+      position: absolute;
+      top: 8px; right: 10px;
+      font-size: 10px;
+      color: var(--green);
+      letter-spacing: 0.12em;
+      z-index: 2;
+      text-shadow: 0 0 8px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.9);
+    }
+
+    .slide-item:hover .slide-num,
+    .slide-item:hover .slide-type {
+      text-shadow: 0 0 10px var(--green), 0 0 4px rgba(0,0,0,0.9);
+    }
+
+    /* hover hint */
+    .slide-hint {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.35);
+      opacity: 0;
+      transition: opacity 0.25s;
+      z-index: 3;
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      color: var(--green);
+      letter-spacing: 0.15em;
+      text-shadow: 0 0 10px var(--green);
+    }
+    .slide-item:hover .slide-hint { opacity: 1; }
+
+    /* ── LIGHTBOX ── */
+    .lightbox {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.97);
+      z-index: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .lightbox.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .lb-media {
+      max-width: 92vw;
+      max-height: 88vh;
+      object-fit: contain;
+      border: 1px solid var(--green-dim);
+      box-shadow: 0 0 60px rgba(0,255,65,0.1);
+      display: block;
+    }
+
+    .lb-close {
+      position: absolute;
+      top: 1rem; right: 1.4rem;
+      font-family: 'VT323', monospace;
+      font-size: 20px;
+      color: var(--green-dim);
+      cursor: pointer;
+      letter-spacing: 0.15em;
+      transition: color 0.2s;
+      z-index: 10;
+    }
+    .lb-close:hover { color: var(--green); }
+
+    .lb-nav {
+      position: absolute;
+      top: 50%; transform: translateY(-50%);
+      font-family: 'VT323', monospace;
+      font-size: 36px;
+      color: var(--green-dim);
+      cursor: pointer;
+      padding: 1rem;
+      transition: color 0.2s, text-shadow 0.2s;
+      z-index: 10;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .lb-nav:hover { color: var(--green); text-shadow: 0 0 12px var(--green); }
+    .lb-nav.prev { left: 0.5rem; }
+    .lb-nav.next { right: 0.5rem; }
+
+    .lb-counter {
+      position: absolute;
+      bottom: 1rem; left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      color: var(--green-dark);
+      letter-spacing: 0.15em;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <a class="topbar-back" href="work.html">← BACK</a>
+      <span class="topbar-title">SURF</span>
+    </div>
+    <div class="topbar-right">/DIR/PHOTO — 74 FILES</div>
+  </div>
+
+  <div class="intro">
+    <div class="intro-label">/DIR/PHOTO/SURF</div>
+    <div class="intro-title">"WHAT DOES SURF MEAN?"</div>
+    <div class="intro-text">Designed an original visual presentation built around a simple question and expanded it into a full creative concept. Handled everything from art direction to layout and typography, translating an idea into a cohesive visual story.</div>
+    <a class="intro-link" href="https://indd.adobe.com/view/730efa77-bc96-4323-aecb-9931e5010657" target="_blank">[ VIEW FULL PRESENTATION ↗ ]</a>
+  </div>
+
+  <div class="gallery" id="gallery"></div>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox">
+    <span class="lb-close" id="lbClose">[ CLOSE ]</span>
+    <span class="lb-nav prev" id="lbPrev">&#8592;</span>
+    <img class="lb-media" id="lbImg" src="" alt="" style="display:none">
+    <video class="lb-media" id="lbVideo" muted loop playsinline style="display:none"></video>
+    <span class="lb-nav next" id="lbNext">&#8594;</span>
+    <div class="lb-counter" id="lbCounter"></div>
+    
+  </div>
+
+  <script>
+    const movNums = new Set([5,7,12,17,22,24,32,37,42,46,49,51,54,56,58,60,63,68,71]);
+    const pngNums = new Set([61]);
+    const total = 74;
+    const folder = 'images/surf/';
+
+    const gallery = document.getElementById('gallery');
+    const files = [];
+
+    for (let i = 1; i <= total; i++) {
+      const isMov = movNums.has(i);
+      const isPng = pngNums.has(i);
+      const ext = isMov ? 'mp4' : isPng ? 'png' : 'jpg';
+      files.push({ num: i, type: isMov ? 'mp4' : 'jpg', ext });
+
+      const item = document.createElement('div');
+      item.className = 'slide-item';
+      item.dataset.index = i - 1;
+
+      const numLabel = document.createElement('span');
+      numLabel.className = 'slide-num';
+      numLabel.textContent = String(i).padStart(2, '0');
+
+      const typeLabel = document.createElement('span');
+      typeLabel.className = 'slide-type';
+      typeLabel.textContent = isMov ? '.MP4' : '.JPG';
+
+      const hint = document.createElement('div');
+      hint.className = 'slide-hint';
+      hint.textContent = '[ EXPAND ]';
+
+      if (isMov) {
+        const video = document.createElement('video');
+        video.src = folder + 'surf_' + i + '.mp4';
+        video.muted = true;
+        video.loop = true;
+        video.playsInline = true;
+        video.autoplay = true;
+        video.play().catch(() => {});
+        item.appendChild(video);
+      } else {
+        const img = document.createElement('img');
+        img.src = folder + 'surf_' + i + '.' + ext;
+        img.alt = 'Surf ' + i;
+        img.loading = 'lazy';
+        item.appendChild(img);
+      }
+
+      item.appendChild(numLabel);
+      item.appendChild(typeLabel);
+      item.appendChild(hint);
+
+      item.addEventListener('click', () => openLightbox(i - 1));
+      gallery.appendChild(item);
+    }
+
+    // Lightbox
+    const lightbox = document.getElementById('lightbox');
+    const lbImg = document.getElementById('lbImg');
+    const lbVideo = document.getElementById('lbVideo');
+    const lbCounter = document.getElementById('lbCounter');
+    let lbCurrent = 0;
+
+    function openLightbox(index) {
+      lbCurrent = index;
+      renderLightbox();
+      lightbox.classList.add('open');
+    }
+
+    function renderLightbox() {
+      const f = files[lbCurrent];
+      lbCounter.textContent = String(f.num).padStart(2, '0') + ' / ' + String(total).padStart(2, '0');
+
+      if (f.type === 'mp4') {
+        lbImg.style.display = 'none';
+        lbVideo.style.display = 'block';
+        lbVideo.src = folder + 'surf_' + f.num + '.mp4';
+        lbVideo.muted = true;
+        lbVideo.play().catch(() => {});
+      } else {
+        lbVideo.pause();
+        lbVideo.style.display = 'none';
+        lbImg.style.display = 'block';
+        lbImg.src = folder + 'surf_' + f.num + '.' + f.ext;
+      }
+    }
+
+    function closeLightbox() {
+      lightbox.classList.remove('open');
+      lbVideo.pause();
+    }
+
+    function lbNext() {
+      lbCurrent = (lbCurrent + 1) % total;
+      renderLightbox();
+    }
+
+    function lbPrev() {
+      lbCurrent = (lbCurrent - 1 + total) % total;
+      renderLightbox();
+    }
+
+    document.getElementById('lbClose').onclick = closeLightbox;
+    document.getElementById('lbNext').onclick = lbNext;
+    document.getElementById('lbPrev').onclick = lbPrev;
+
+    // Keyboard
+    document.addEventListener('keydown', e => {
+      if (!lightbox.classList.contains('open')) return;
+      if (e.key === 'ArrowRight') lbNext();
+      if (e.key === 'ArrowLeft') lbPrev();
+      if (e.key === 'Escape') closeLightbox();
+    });
+
+    // Swipe in lightbox
+    let swipeStartX = 0;
+    lightbox.addEventListener('touchstart', e => { swipeStartX = e.touches[0].clientX; }, { passive: true });
+    lightbox.addEventListener('touchend', e => {
+      const dx = swipeStartX - e.changedTouches[0].clientX;
+      if (Math.abs(dx) > 40) dx > 0 ? lbNext() : lbPrev();
+    }, { passive: true });
+  </script>
+</body>
+</html>

@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JACK LEARY — WORK</title>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #00ff41;
+      --green-dim: #00b32c;
+      --green-dark: #003b00;
+      --black: #000;
+      --bg: #020a02;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: var(--bg);
+      color: var(--green);
+      font-family: 'Share Tech Mono', monospace;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px, transparent 3px,
+        rgba(0,0,0,0.18) 3px, rgba(0,0,0,0.18) 4px
+      );
+      pointer-events: none; z-index: 500;
+    }
+
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.75) 100%);
+      pointer-events: none; z-index: 501;
+    }
+
+    .topbar {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: 42px;
+      border-bottom: 1px solid var(--green-dark);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem;
+      background: rgba(0,0,0,0.9);
+      z-index: 400;
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      color: var(--green-dim);
+    }
+    .topbar-left { display: flex; align-items: center; gap: 1.5rem; }
+    .topbar-title { font-family: 'VT323', monospace; font-size: 20px; color: var(--green); letter-spacing: 0.15em; }
+    .topbar-status { font-size: 11px; color: var(--green-dark); }
+    .topbar-right { display: flex; align-items: center; gap: 1.4rem; }
+    .topbar-right a {
+      color: var(--green-dim);
+      text-decoration: none;
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      letter-spacing: 0.12em;
+      transition: color 0.2s;
+    }
+    .topbar-right a:hover { color: var(--green); text-shadow: 0 0 8px var(--green); }
+    .topbar-divider { width: 1px; height: 16px; background: var(--green-dark); }
+
+    @media (max-width: 600px) {
+      .topbar-right { gap: 0.8rem; }
+      .topbar-right a { font-size: 14px; letter-spacing: 0.08em; }
+      .topbar-divider { display: none; }
+      .topbar-status { display: none; }
+    }
+
+    .grid-container {
+      position: fixed;
+      inset: 42px 0 40px 0;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--green-dark);
+      z-index: 10;
+    }
+
+    .section-cell {
+      position: relative;
+      background: var(--bg);
+      cursor: pointer;
+      overflow: hidden;
+    }
+
+    .cell-img {
+      position: absolute; inset: 0;
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      filter: brightness(0.6) saturate(1.2);
+    }
+
+    .cell-img::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: rgba(0, 15, 0, 0.2);
+    }
+
+    .cell-img::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px, transparent 3px,
+        rgba(0,0,0,0.08) 3px, rgba(0,0,0,0.08) 4px
+      );
+      z-index: 1;
+    }
+
+    .cell-content {
+      position: relative;
+      z-index: 2;
+      width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 1.2rem 1.4rem;
+    }
+
+    .cell-tag {
+      font-size: 10px;
+      color: var(--green-dark);
+      letter-spacing: 0.15em;
+      transition: color 0.3s;
+    }
+
+    .cell-name {
+      font-family: 'VT323', monospace;
+      font-size: clamp(22px, 2.8vw, 34px);
+      color: var(--green);
+      letter-spacing: 0.08em;
+      line-height: 1.1;
+      text-shadow: 0 0 10px rgba(0,255,65,0.3);
+      transition: text-shadow 0.3s;
+    }
+
+    .cell-meta {
+      font-size: 10px;
+      color: var(--green-dark);
+      letter-spacing: 0.1em;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      transition: color 0.3s;
+    }
+
+    .cell-bracket {
+      position: absolute;
+      bottom: 1rem; right: 1rem;
+      width: 14px; height: 14px;
+      border-right: 1px solid var(--green-dark);
+      border-bottom: 1px solid var(--green-dark);
+      z-index: 3;
+      transition: border-color 0.3s, width 0.3s, height 0.3s;
+    }
+
+    .section-cell:hover .cell-img { opacity: 1; }
+    .section-cell:hover .cell-name { text-shadow: 0 0 18px rgba(0,255,65,0.7); animation: cell-glitch 5s infinite; }
+    .section-cell:hover .cell-bracket { border-color: var(--green); width: 20px; height: 20px; }
+    .section-cell:hover .cell-tag { color: var(--green-dim); }
+    .section-cell:hover .cell-meta { color: var(--green-dim); }
+
+    .cell-video {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      filter: brightness(0.6) saturate(1.2);
+      z-index: 1;
+    }
+    .section-cell:hover .cell-video { opacity: 1; }
+
+    .cell-img[data-placeholder="1"] { background-color: #011001; opacity: 0.4; }
+
+    /* ── EXPAND CARD ── */
+    .expand-card {
+      position: fixed;
+      z-index: 200;
+      pointer-events: none;
+      opacity: 0;
+      border: 1px solid var(--green-dim);
+      overflow: hidden;
+      box-shadow: 0 0 80px rgba(0,255,65,0.12), 0 0 160px rgba(0,255,65,0.05);
+      background: #000;
+      transition:
+        opacity 0.35s ease,
+        left 0.45s cubic-bezier(0.16,1,0.3,1),
+        top 0.45s cubic-bezier(0.16,1,0.3,1),
+        width 0.45s cubic-bezier(0.16,1,0.3,1),
+        height 0.45s cubic-bezier(0.16,1,0.3,1);
+    }
+
+    .expand-card.visible { opacity: 1; }
+
+    .expand-bg {
+      position: absolute; inset: 0;
+      background-size: cover;
+      background-position: center;
+      filter: brightness(0.78) saturate(1.3);
+    }
+
+    .expand-scanlines {
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px, transparent 3px,
+        rgba(0,0,0,0.1) 3px, rgba(0,0,0,0.1) 4px
+      );
+      z-index: 1;
+    }
+
+    .expand-vignette {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.65) 100%);
+      z-index: 2;
+    }
+
+    .expand-video {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      filter: brightness(0.78) saturate(1.2);
+      z-index: 0;
+      display: none;
+    }
+
+    .expand-content {
+      position: absolute; inset: 0;
+      z-index: 3;
+      display: flex; flex-direction: column;
+      justify-content: flex-end;
+      padding: 1.5rem 1.8rem;
+    }
+
+    .expand-tag {
+      font-size: 10px;
+      color: var(--green-dim);
+      letter-spacing: 0.18em;
+      margin-bottom: 0.3rem;
+    }
+
+    .expand-title {
+      font-family: 'VT323', monospace;
+      font-size: clamp(28px, 3.5vw, 48px);
+      color: var(--green);
+      letter-spacing: 0.06em;
+      line-height: 1;
+      text-shadow: 0 0 30px rgba(0,255,65,0.5);
+      animation: glitch-idle 4s infinite;
+      word-break: break-word;
+    }
+
+    .expand-enter {
+      margin-top: 0.8rem;
+      font-size: 10px;
+      color: var(--green-dim);
+      letter-spacing: 0.18em;
+      animation: blink 1s step-end infinite;
+    }
+
+    .expand-corner-tl, .expand-corner-br {
+      position: absolute;
+      width: 22px; height: 22px;
+      border-color: var(--green);
+      border-style: solid;
+      z-index: 4;
+    }
+    .expand-corner-tl { top: 14px; left: 14px; border-width: 2px 0 0 2px; }
+    .expand-corner-br { bottom: 14px; right: 14px; border-width: 0 2px 2px 0; }
+
+    .statusbar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      height: 40px;
+      border-top: 1px solid var(--green-dark);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem;
+      background: rgba(0,0,0,0.9);
+      z-index: 400;
+      font-size: 11px;
+      color: var(--green-dark);
+      letter-spacing: 0.1em;
+    }
+
+    .status-dot {
+      display: inline-block;
+      width: 6px; height: 6px;
+      background: var(--green);
+      border-radius: 50%;
+      margin-right: 6px;
+      box-shadow: 0 0 6px var(--green);
+      animation: pulse 2s infinite;
+    }
+
+    /* ── CONTACT CELL ICONS ── */
+    .contact-icons {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.2rem;
+      background: rgba(0,0,0,0.88);
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      z-index: 4;
+      pointer-events: none;
+      overflow: hidden;
+      padding: 0 0.5rem;
+    }
+
+    .contact-cell:hover .contact-icons {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .contact-icon-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+      flex-shrink: 0;
+    }
+
+    .contact-icon-btn:hover { transform: scale(1.15); }
+
+    .contact-icon-btn svg {
+      image-rendering: pixelated;
+      filter: drop-shadow(0 0 8px #00ff41);
+      width: 36px;
+      height: 36px;
+    }
+
+    .contact-icon-btn span {
+      font-family: 'VT323', monospace;
+      font-size: 14px;
+      color: var(--green-dim);
+      letter-spacing: 0.12em;
+    }
+
+    .contact-icon-btn:hover span { color: var(--green); text-shadow: 0 0 6px var(--green); }
+
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 6px var(--green); }
+      50% { opacity: 0.4; box-shadow: 0 0 2px var(--green); }
+    }
+    @keyframes glitch-idle {
+      0%, 92%, 100% { transform: none; }
+      93% { transform: translateX(-3px); text-shadow: -2px 0 #ff0040, 2px 0 #00ffff; }
+      94% { transform: translateX(3px); text-shadow: 2px 0 #ff0040, -2px 0 #00ffff; }
+      95% { transform: none; text-shadow: 0 0 30px rgba(0,255,65,0.5); }
+    }
+    @keyframes cell-glitch {
+      0%, 94%, 100% { transform: none; }
+      95% { transform: translateX(-2px); filter: drop-shadow(-1px 0 #ff0040); }
+      96% { transform: translateX(2px); filter: drop-shadow(1px 0 #00ffff); }
+      97% { transform: none; filter: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="topbar-title">JL://WORK</span>
+      <span class="topbar-status">9 DIRECTORIES FOUND</span>
+    </div>
+    <div class="topbar-right">
+      <a href="about.html">ABOUT</a>
+      <div class="topbar-divider"></div>
+      <a href="https://www.instagram.com/jacklearyart/" target="_blank">INSTAGRAM</a>
+      <a href="https://www.behance.net/jackleary/projects" target="_blank">BEHANCE</a>
+      <div class="topbar-divider"></div>
+      <a href="mailto:jack.leary2004@gmail.com">CONTACT</a>
+    </div>
+  </div>
+
+  <div class="grid-container" id="grid">
+
+    <div class="section-cell" data-name="POSTER ARCHIVES" data-tag="/DIR/PRINT" data-href="posters.html" data-img="images/preview_images/poster_archives_preview.jpg">
+      <div class="cell-img"></div>
+      <div class="cell-content">
+        <span class="cell-tag">/DIR/PRINT</span>
+        <span class="cell-name">POSTER<br>ARCHIVES</span>
+        <div class="cell-meta"><span>52 FILES</span><span>.JPG .PDF</span></div>
+      </div>
+      <div class="cell-bracket"></div>
+    </div>
+
+    <div class="section-cell" data-name="MOTION GRAPHICS" data-tag="/DIR/MOTION" data-href="motion.html" data-img="" data-video="images/preview_images/motion_graphics_preview.mp4">
+      <div class="cell-img"></div>
+      <video class="cell-video" muted loop playsinline preload="none"></video>
+      <div class="cell-content">
+        <span class="cell-tag">/DIR/MOTION</span>
+        <span class="cell-name">MOTION<br>GRAPHICS</span>
+        <div class="cell-meta"><span>18 FILES</span><span>.MP4 .MOV</span></div>
+      </div>
+      <div class="cell-bracket"></div>
+    </div>
+
+    <div class="section-cell" data-name="GREAT IDEAS OF HUMANITY" data-tag="/DIR/CONCEPT" data-href="ideas.html" data-img="images/preview_images/great_ideas_of_humanity_preview.jpg">
+      <div class="cell-img"></div>
+      <div class="cell-content">
+        <span class="cell-tag">/DIR/CONCEPT</span>
+        <span class="cell-name">GREAT IDEAS<br>OF HUMANITY</span>
+        <div class="cell-meta"><span>7 FILES</span><span>.PDF .PNG</span></div>
+      </div>
+      <div class="cell-bracket"></div>
+    </div>
+
+    <div class="section-cell" data-name="SURF" data-tag="/DIR/PHOTO" data-href="surf.html" data-img="images/preview_images/surf_preview.jpg">
+      <div class="cell-img"></div>
+      <div class="cell-content">
+        <span class="cell-tag">/DIR/PHOTO</span>
+        <span class="cell-name">SURF</span>
+        <div class="cell-meta"><span>34 FILES</span><span>.JPG .RAW</span></div>
+      </div>
+      <div class="cell-bracket"></div>
+    </div>
+
+    <div class="section-cell" data-name="SOCIAL MEDIA" data-tag="/DIR/DIGITAL" data-href="social.html" data-img="images/preview_images/social_media_preview.jpg">
+      <div class="cell-img"></div>
+      <div class="cell-content">
+        <span class="cell-tag">/DIR/DIGITAL</span>
+        <span class="cell-name">SOCIAL<br>MEDIA</span>
+        <div class="cell-meta"><span>80 FILES</span><span>.JPG .MP4</span></div>
+      </div>
+      <div class="cell-bracket"></div>
+    </div>
+
+    <div class="section-cell" data-name="PRODUCTION DESIGN" data-tag="/DIR/SET" data-href="production.html" data-img="images/preview_images/production_design_preview.jpeg">
+      <div class="cell-img"></div>
+      <div class="cell-content">
+        <span class="cell-tag">/DIR/SET</span>
+        <span class="cell-name">PRODUCTION<br>DESIGN</span>
+        <div class="cell-meta"><span>29 FILES</span><span>.JPG .PNG</span></div>
+      </div>
+      <div class="cell-bracket"></div>
+    </div>
+
+    <div class="section-cell" data-name="GRANITE CHIEF" data-tag="/DIR/PROJECT" data-href="granite_chief.html" data-img="images/preview_images/granite_chief_preview.jpg">
+      <div class="cell-img"></div>
+      <div class="cell-content">
+        <span class="cell-tag">/DIR/PROJECT</span>
+        <span class="cell-name">GRANITE<br>CHIEF</span>
+        <div class="cell-meta"><span>41 FILES</span><span>.PNG</span></div>
+      </div>
+      <div class="cell-bracket"></div>
+    </div>
+
+    <div class="section-cell" data-name="ABOUT" data-tag="/DIR/SYS" data-href="about.html" data-img="images/preview_images/about_preview.jpg">
+      <div class="cell-img"></div>
+      <div class="cell-content">
+        <span class="cell-tag">/DIR/SYS</span>
+        <span class="cell-name">ABOUT</span>
+        <div class="cell-meta"><span>1 FILE</span><span>.TXT</span></div>
+      </div>
+      <div class="cell-bracket"></div>
+    </div>
+
+    <div class="section-cell contact-cell" data-name="CONTACT & SOCIALS" data-tag="/DIR/COMM" data-href="" data-img="images/preview_images/contacts_social_preview.png">
+      <div class="cell-img"></div>
+      <div class="cell-content">
+        <span class="cell-tag">/DIR/COMM</span>
+        <span class="cell-name">CONTACT<br>& SOCIALS</span>
+        <div class="cell-meta"><span>LINKS</span><span>.URL</span></div>
+      </div>
+      <div class="contact-icons" id="contactIcons">
+        <a class="contact-icon-btn" href="mailto:jack.leary2004@gmail.com" title="Email">
+          <svg width="32" height="32" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="1" y="3" width="14" height="10" fill="#00ff41"/>
+            <rect x="2" y="4" width="12" height="8" fill="#020a02"/>
+            <rect x="2" y="4" width="1" height="1" fill="#00ff41"/>
+            <rect x="3" y="5" width="1" height="1" fill="#00ff41"/>
+            <rect x="4" y="6" width="1" height="1" fill="#00ff41"/>
+            <rect x="5" y="7" width="1" height="1" fill="#00ff41"/>
+            <rect x="6" y="8" width="1" height="1" fill="#00ff41"/>
+            <rect x="7" y="9" width="2" height="1" fill="#00ff41"/>
+            <rect x="9" y="8" width="1" height="1" fill="#00ff41"/>
+            <rect x="10" y="7" width="1" height="1" fill="#00ff41"/>
+            <rect x="11" y="6" width="1" height="1" fill="#00ff41"/>
+            <rect x="12" y="5" width="1" height="1" fill="#00ff41"/>
+            <rect x="13" y="4" width="1" height="1" fill="#00ff41"/>
+            <rect x="3" y="11" width="1" height="1" fill="#00ff41"/>
+            <rect x="12" y="11" width="1" height="1" fill="#00ff41"/>
+          </svg>
+          <span>MAIL</span>
+        </a>
+        <a class="contact-icon-btn" href="https://www.instagram.com/jacklearyart/" target="_blank" title="Instagram">
+          <svg width="32" height="32" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="12" height="12" fill="#00ff41"/>
+            <rect x="3" y="3" width="10" height="10" fill="#020a02"/>
+            <rect x="4" y="4" width="8" height="8" fill="#00ff41"/>
+            <rect x="5" y="5" width="6" height="6" fill="#020a02"/>
+            <rect x="6" y="6" width="4" height="4" fill="#00ff41"/>
+            <rect x="7" y="7" width="2" height="2" fill="#020a02"/>
+            <rect x="11" y="3" width="2" height="2" fill="#00ff41"/>
+            <rect x="12" y="4" width="1" height="1" fill="#020a02"/>
+          </svg>
+          <span>INSTAGRAM</span>
+        </a>
+        <a class="contact-icon-btn" href="https://www.behance.net/jackleary/projects" target="_blank" title="Behance">
+          <svg width="32" height="32" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="1" y="4" width="7" height="2" fill="#00ff41"/>
+            <rect x="1" y="7" width="7" height="2" fill="#00ff41"/>
+            <rect x="1" y="10" width="7" height="2" fill="#00ff41"/>
+            <rect x="1" y="4" width="2" height="8" fill="#00ff41"/>
+            <rect x="6" y="4" width="2" height="4" fill="#00ff41"/>
+            <rect x="6" y="7" width="2" height="5" fill="#00ff41"/>
+            <rect x="9" y="5" width="6" height="2" fill="#00ff41"/>
+            <rect x="9" y="9" width="6" height="2" fill="#00ff41"/>
+            <rect x="9" y="5" width="2" height="6" fill="#00ff41"/>
+            <rect x="13" y="7" width="2" height="2" fill="#00ff41"/>
+          </svg>
+          <span>BEHANCE</span>
+        </a>
+      </div>
+      <div class="cell-bracket"></div>
+    </div>
+
+  </div>
+
+  <!-- Floating expand card -->
+  <div class="expand-card" id="expandCard">
+    <div class="expand-bg" id="expandBg"></div>
+    <div class="expand-scanlines"></div>
+    <div class="expand-vignette"></div>
+    <video class="expand-video" id="expandVideo" muted loop playsinline></video>
+    <div class="expand-corner-tl"></div>
+    <div class="expand-corner-br"></div>
+    <div class="expand-content">
+      <span class="expand-tag" id="expandTag"></span>
+      <div class="expand-title" id="expandTitle"></div>
+      <div class="expand-enter">[ CLICK TO ENTER ]</div>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span><span class="status-dot"></span>SYSTEM ONLINE — JACK LEARY CREATIVE SYSTEMS v1.0</span>
+    <span id="statusRight">HOVER A DIRECTORY TO PREVIEW</span>
+  </div>
+
+  <script>
+    const cells = document.querySelectorAll('.section-cell');
+    const expandCard = document.getElementById('expandCard');
+    const expandBg = document.getElementById('expandBg');
+    const expandTitle = document.getElementById('expandTitle');
+    const expandTag = document.getElementById('expandTag');
+    const expandVideo = document.getElementById('expandVideo');
+    const statusRight = document.getElementById('statusRight');
+
+    let activeHref = '';
+    let hoverTimer = null;
+    let currentCell = null;
+
+    cells.forEach(cell => {
+      const img = cell.dataset.img;
+      const videoSrc = cell.dataset.video;
+      const cellImg = cell.querySelector('.cell-img');
+      const cellVideo = cell.querySelector('.cell-video');
+
+      if (img) {
+        cellImg.style.backgroundImage = `url('${img}')`;
+      } else {
+        cellImg.dataset.placeholder = '1';
+      }
+
+      if (cellVideo && videoSrc) {
+        cellVideo.src = videoSrc;
+      }
+
+      cell.addEventListener('mouseenter', () => {
+        currentCell = cell;
+        statusRight.textContent = 'SELECTED: ' + cell.dataset.name;
+
+        if (cellVideo && videoSrc) {
+          cellVideo.play().catch(() => {});
+        }
+
+        if (cell.classList.contains('contact-cell')) return;
+        clearTimeout(hoverTimer);
+        hoverTimer = setTimeout(() => showExpand(cell), 350);
+      });
+
+      cell.addEventListener('mouseleave', () => {
+        clearTimeout(hoverTimer);
+
+        if (cellVideo && videoSrc) {
+          cellVideo.pause();
+          cellVideo.currentTime = 0;
+        }
+
+        setTimeout(() => {
+          if (currentCell === cell) hideExpand();
+        }, 80);
+
+        statusRight.textContent = 'HOVER A DIRECTORY TO PREVIEW';
+      });
+
+      // Don't navigate or expand contact cell — it has its own icon overlay
+      if (cell.classList.contains('contact-cell')) return;
+      cell.addEventListener('click', () => navigate(cell.dataset.href));
+    });
+
+    function showExpand(cell) {
+      const rect = cell.getBoundingClientRect();
+      const img = cell.dataset.img;
+      const videoSrc = cell.dataset.video;
+
+      activeHref = cell.dataset.href;
+      expandTitle.textContent = cell.dataset.name;
+      expandTag.textContent = cell.dataset.tag;
+
+      if (videoSrc) {
+        expandVideo.src = videoSrc;
+        expandVideo.style.display = 'block';
+        expandBg.style.backgroundImage = 'none';
+        expandVideo.play().catch(() => {});
+      } else {
+        expandVideo.style.display = 'none';
+        expandVideo.pause();
+        expandBg.style.backgroundImage = img ? `url('${img}')` : 'none';
+      }
+
+      // Snap to exact cell position — no movement
+      const expandW = rect.width;
+      const expandH = rect.height;
+      const expandL = rect.left;
+      const expandT = rect.top;
+
+      // Set position directly, no start-from-cell animation
+      expandCard.style.transition = 'none';
+      expandCard.style.left = expandL + 'px';
+      expandCard.style.top = expandT + 'px';
+      expandCard.style.width = expandW + 'px';
+      expandCard.style.height = expandH + 'px';
+
+      // Force reflow then fade in only
+      expandCard.offsetHeight;
+      expandCard.style.transition = 'opacity 0.3s ease';
+      expandCard.classList.add('visible');
+    }
+
+    function hideExpand() {
+      expandCard.classList.remove('visible');
+      expandVideo.pause();
+      activeHref = '';
+      currentCell = null;
+    }
+
+    expandCard.addEventListener('mouseenter', () => {
+      clearTimeout(hoverTimer);
+      expandCard.style.pointerEvents = 'all';
+      expandCard.style.cursor = 'pointer';
+    });
+
+    expandCard.addEventListener('mouseleave', () => {
+      expandCard.style.pointerEvents = 'none';
+      hideExpand();
+    });
+
+    expandCard.addEventListener('click', () => {
+      if (activeHref) navigate(activeHref);
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') hideExpand();
+    });
+
+    function navigate(href) { window.location.href = href; }
+
+    // Stagger entrance
+    cells.forEach((cell, i) => {
+      cell.style.opacity = '0';
+      cell.style.transition = 'opacity 0.4s ease';
+      setTimeout(() => { cell.style.opacity = '1'; }, 80 + i * 70);
+    });
+
+    // Random occasional image flicker on idle cells
+    function randomFlicker() {
+      // Pick a random non-contact, non-hovered cell
+      const eligible = Array.from(cells).filter(c =>
+        !c.classList.contains('contact-cell') &&
+        c !== currentCell &&
+        c.dataset.img
+      );
+      if (eligible.length === 0) return;
+
+      const cell = eligible[Math.floor(Math.random() * eligible.length)];
+      const cellImg = cell.querySelector('.cell-img');
+      if (!cellImg) return;
+
+      // Quick flicker: show image briefly then hide
+      cellImg.style.transition = 'opacity 0.15s ease';
+      cellImg.style.opacity = '0.8';
+
+      setTimeout(() => {
+        cellImg.style.opacity = '0.3';
+        setTimeout(() => {
+          cellImg.style.opacity = '0.9';
+          setTimeout(() => {
+            cellImg.style.opacity = '0.2';
+            setTimeout(() => {
+              cellImg.style.opacity = '0.85';
+              setTimeout(() => {
+                cellImg.style.opacity = '0';
+                setTimeout(() => {
+                  cellImg.style.transition = 'opacity 0.35s ease';
+                }, 150);
+              }, 400);
+            }, 100);
+          }, 150);
+        }, 80);
+      }, 200);
+
+      // Schedule next flicker — random between 1.5 and 4 seconds
+      const next = 1500 + Math.random() * 2500;
+      setTimeout(randomFlicker, next);
+    }
+
+    // Start flickering after a short delay
+    setTimeout(randomFlicker, 3000);
+  </script>
+</body>
+</html>

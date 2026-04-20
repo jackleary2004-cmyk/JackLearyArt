@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JACK LEARY — ACCESS TERMINAL</title>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #00ff41;
+      --green-dim: #00b32c;
+      --green-dark: #003b00;
+      --green-glow: rgba(0, 255, 65, 0.15);
+      --black: #000000;
+      --scanline: rgba(0, 0, 0, 0.25);
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: var(--black);
+      color: var(--green);
+      font-family: 'Share Tech Mono', monospace;
+      overflow: hidden;
+    }
+
+    /* Scanline overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 3px,
+        var(--scanline) 3px,
+        var(--scanline) 4px
+      );
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    /* CRT vignette */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.7) 100%);
+      pointer-events: none;
+      z-index: 101;
+    }
+
+    .terminal {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+      z-index: 1;
+    }
+
+    .terminal-window {
+      width: 100%;
+      max-width: 680px;
+      border: 1px solid var(--green-dim);
+      padding: 3rem 3.5rem;
+      position: relative;
+      background: rgba(0, 20, 0, 0.4);
+      box-shadow: 0 0 40px rgba(0,255,65,0.08), inset 0 0 30px rgba(0,255,65,0.04);
+    }
+
+    /* Corner brackets */
+    .terminal-window::before,
+    .terminal-window::after {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-color: var(--green);
+      border-style: solid;
+    }
+    .terminal-window::before {
+      top: -1px; left: -1px;
+      border-width: 2px 0 0 2px;
+    }
+    .terminal-window::after {
+      bottom: -1px; right: -1px;
+      border-width: 0 2px 2px 0;
+    }
+
+    .corner-br {
+      position: absolute;
+      bottom: -1px; left: -1px;
+      width: 18px; height: 18px;
+      border-color: var(--green);
+      border-style: solid;
+      border-width: 0 0 2px 2px;
+    }
+    .corner-tr {
+      position: absolute;
+      top: -1px; right: -1px;
+      width: 18px; height: 18px;
+      border-color: var(--green);
+      border-style: solid;
+      border-width: 2px 2px 0 0;
+    }
+
+    .system-line {
+      font-family: 'VT323', monospace;
+      font-size: 13px;
+      color: var(--green-dim);
+      letter-spacing: 0.08em;
+      margin-bottom: 0.3rem;
+      opacity: 0;
+      animation: fadein 0.4s forwards;
+    }
+    .system-line:nth-child(1) { animation-delay: 0.2s; }
+    .system-line:nth-child(2) { animation-delay: 0.6s; }
+    .system-line:nth-child(3) { animation-delay: 1.0s; }
+    .system-line:nth-child(4) { animation-delay: 1.4s; }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--green-dark);
+      margin: 1.8rem 0;
+      opacity: 0;
+      animation: fadein 0.4s 1.8s forwards;
+    }
+
+    .prompt-label {
+      font-family: 'VT323', monospace;
+      font-size: 22px;
+      letter-spacing: 0.12em;
+      color: var(--green);
+      margin-bottom: 1.6rem;
+      opacity: 0;
+      animation: fadein 0.5s 2.1s forwards;
+      text-shadow: 0 0 12px rgba(0,255,65,0.5);
+    }
+
+    .input-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      opacity: 0;
+      animation: fadein 0.5s 2.4s forwards;
+    }
+
+    .prompt-symbol {
+      font-family: 'VT323', monospace;
+      font-size: 24px;
+      color: var(--green);
+      flex-shrink: 0;
+    }
+
+    .name-input {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--green-dim);
+      color: var(--green);
+      font-family: 'VT323', monospace;
+      font-size: 24px;
+      letter-spacing: 0.1em;
+      outline: none;
+      width: 100%;
+      padding: 4px 0;
+      caret-color: var(--green);
+      text-transform: uppercase;
+    }
+
+    .name-input::placeholder {
+      color: var(--green-dark);
+      font-size: 20px;
+    }
+
+    .enter-hint {
+      margin-top: 2rem;
+      font-size: 12px;
+      color: var(--green-dark);
+      letter-spacing: 0.1em;
+      opacity: 0;
+      animation: fadein 0.5s 2.8s forwards;
+    }
+
+    /* Welcome transition overlay */
+    .welcome-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--black);
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 1.2rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+
+    .welcome-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .welcome-line-1 {
+      font-family: 'VT323', monospace;
+      font-size: clamp(32px, 5vw, 52px);
+      color: var(--green);
+      letter-spacing: 0.15em;
+      text-shadow: 0 0 20px rgba(0,255,65,0.6);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      text-align: center;
+    }
+
+    .welcome-line-2 {
+      font-family: 'VT323', monospace;
+      font-size: clamp(18px, 3vw, 28px);
+      color: var(--green-dim);
+      letter-spacing: 0.2em;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.5s 0.4s ease, transform 0.5s 0.4s ease;
+      text-align: center;
+    }
+
+    .welcome-overlay.active .welcome-line-1,
+    .welcome-overlay.active .welcome-line-2 {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .progress-bar {
+      width: 260px;
+      height: 2px;
+      background: var(--green-dark);
+      margin-top: 2.5rem;
+      position: relative;
+      overflow: hidden;
+      opacity: 0;
+      transition: opacity 0.3s 0.8s ease;
+    }
+
+    .welcome-overlay.active .progress-bar {
+      opacity: 1;
+    }
+
+    .progress-fill {
+      position: absolute;
+      left: 0; top: 0;
+      height: 100%;
+      width: 0%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+    }
+
+    .progress-fill.run {
+      animation: load 2s 1s linear forwards;
+    }
+
+    .progress-label {
+      font-size: 11px;
+      color: var(--green-dark);
+      letter-spacing: 0.12em;
+      margin-top: 0.6rem;
+      opacity: 0;
+      transition: opacity 0.3s 0.9s ease;
+    }
+    .welcome-overlay.active .progress-label {
+      opacity: 1;
+    }
+
+    @keyframes fadein {
+      to { opacity: 1; }
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    @keyframes load {
+      0% { width: 0%; }
+      100% { width: 100%; }
+    }
+
+    @keyframes flicker {
+      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+      20%, 24%, 55% { opacity: 0.4; }
+    }
+
+    .cursor-blink {
+      display: inline-block;
+      width: 10px;
+      height: 2px;
+      background: var(--green);
+      margin-left: 4px;
+      vertical-align: middle;
+      animation: blink 1s step-end infinite;
+    }
+
+    /* Noise / flicker on window */
+    .terminal-window {
+      animation: flicker 8s infinite;
+    }
+
+    /* ambient floating chars */
+    .bg-chars {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .bg-char {
+      position: absolute;
+      font-family: 'VT323', monospace;
+      font-size: 14px;
+      color: rgba(0,255,65,0.06);
+      animation: drift linear infinite;
+      user-select: none;
+    }
+
+    @keyframes drift {
+      0% { transform: translateY(-20px); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 0.06; }
+      100% { transform: translateY(100vh); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient background characters -->
+  <div class="bg-chars" id="bgChars"></div>
+
+  <div class="terminal">
+    <div class="terminal-window">
+      <div class="corner-br"></div>
+      <div class="corner-tr"></div>
+
+      <div class="system-line">JACK LEARY CREATIVE SYSTEMS v1.0</div>
+      <div class="system-line">BOOT SEQUENCE COMPLETE .................. OK</div>
+      <div class="system-line">USER AUTHENTICATION REQUIRED</div>
+      <div class="system-line">SECURE TERMINAL INITIALIZED<span class="cursor-blink"></span></div>
+
+      <hr class="divider">
+
+      <div class="prompt-label">ENTER YOUR NAME TO ACCESS</div>
+
+      <div class="input-row">
+        <span class="prompt-symbol">&gt;_</span>
+        <input
+          class="name-input"
+          id="nameInput"
+          type="text"
+          placeholder="TYPE YOUR NAME"
+          autocomplete="off"
+          spellcheck="false"
+          maxlength="30"
+        />
+      </div>
+
+      <div class="enter-hint">[ PRESS ENTER TO CONTINUE ]</div>
+    </div>
+  </div>
+
+  <!-- Welcome transition -->
+  <div class="welcome-overlay" id="welcomeOverlay">
+    <div class="welcome-line-1" id="welcomeName"></div>
+    <div class="welcome-line-2">WELCOME TO JACK LEARY ART</div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <div class="progress-label">LOADING PORTFOLIO...</div>
+  </div>
+
+  <script>
+    // Ambient background characters
+    const chars = '01アイウエオ#@%$<>/\\{}[]01JACK10';
+    const bgEl = document.getElementById('bgChars');
+    for (let i = 0; i < 40; i++) {
+      const span = document.createElement('span');
+      span.className = 'bg-char';
+      span.textContent = chars[Math.floor(Math.random() * chars.length)];
+      span.style.left = Math.random() * 100 + 'vw';
+      span.style.top = Math.random() * 100 + 'vh';
+      span.style.animationDuration = (8 + Math.random() * 20) + 's';
+      span.style.animationDelay = (Math.random() * 10) + 's';
+      bgEl.appendChild(span);
+    }
+
+    // Input handler
+    const input = document.getElementById('nameInput');
+    const overlay = document.getElementById('welcomeOverlay');
+    const welcomeName = document.getElementById('welcomeName');
+    const progressFill = document.getElementById('progressFill');
+
+    // Auto-focus after animations settle
+    setTimeout(() => input.focus(), 2600);
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const name = input.value.trim().toUpperCase() || 'STRANGER';
+        triggerWelcome(name);
+      }
+    });
+
+    function triggerWelcome(name) {
+      welcomeName.textContent = 'WELCOME, ' + name;
+      overlay.classList.add('active');
+
+      // Start progress bar
+      setTimeout(() => {
+        progressFill.classList.add('run');
+      }, 50);
+
+      // Redirect to work page after bar completes
+      setTimeout(() => {
+        window.location.href = 'work.html';
+      }, 3200);
+    }
+  </script>
+</body>
+</html>

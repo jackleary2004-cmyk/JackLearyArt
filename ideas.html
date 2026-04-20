@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JACK LEARY — GREAT IDEAS OF HUMANITY</title>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #00ff41;
+      --green-dim: #00b32c;
+      --green-dark: #003b00;
+      --black: #000;
+      --bg: #020a02;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      color: var(--green);
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px, transparent 3px,
+        rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 4px
+      );
+      pointer-events: none; z-index: 600;
+    }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: 42px;
+      border-bottom: 1px solid var(--green-dark);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1.4rem;
+      background: rgba(0,0,0,0.95);
+      z-index: 500;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 1rem; }
+    .topbar-back {
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      color: var(--green-dim);
+      text-decoration: none;
+      letter-spacing: 0.1em;
+      transition: color 0.2s;
+    }
+    .topbar-back:hover { color: var(--green); }
+    .topbar-title {
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      color: var(--green);
+      letter-spacing: 0.12em;
+    }
+    .topbar-right {
+      font-size: 10px;
+      color: var(--green-dark);
+      letter-spacing: 0.1em;
+    }
+
+    /* ── SPLIT LAYOUT ── */
+    .split {
+      display: flex;
+      min-height: 100vh;
+      padding-top: 42px;
+    }
+
+    /* ── LEFT — STICKY FINAL POSTER ── */
+    .left-panel {
+      width: 50%;
+      position: sticky;
+      top: 42px;
+      height: calc(100vh - 42px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+      border-right: 1px solid var(--green-dark);
+      flex-shrink: 0;
+    }
+
+    .final-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 380px;
+      cursor: pointer;
+    }
+
+    .final-img {
+      width: 100%;
+      display: block;
+      border: 1px solid var(--green-dim);
+      box-shadow: 0 0 50px rgba(0,255,65,0.1), 0 0 100px rgba(0,255,65,0.04);
+      transition: box-shadow 0.3s, border-color 0.3s;
+    }
+
+    .final-wrap:hover .final-img {
+      border-color: var(--green);
+      box-shadow: 0 0 70px rgba(0,255,65,0.2), 0 0 120px rgba(0,255,65,0.08);
+    }
+
+    .final-hint {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.4);
+      opacity: 0;
+      transition: opacity 0.25s;
+      font-family: 'VT323', monospace;
+      font-size: 20px;
+      color: var(--green);
+      letter-spacing: 0.2em;
+      text-shadow: 0 0 10px var(--green);
+    }
+    .final-wrap:hover .final-hint { opacity: 1; }
+
+    /* Corner brackets on final */
+    .final-wrap::before, .final-wrap::after {
+      content: '';
+      position: absolute;
+      width: 18px; height: 18px;
+      border-color: var(--green);
+      border-style: solid;
+      z-index: 2;
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+    .final-wrap::before { top: 8px; left: 8px; border-width: 2px 0 0 2px; }
+    .final-wrap::after  { bottom: 8px; right: 8px; border-width: 0 2px 2px 0; }
+    .final-wrap:hover::before, .final-wrap:hover::after { opacity: 1; }
+
+    .final-label {
+      margin-top: 1rem;
+      font-size: 10px;
+      color: var(--green-dark);
+      letter-spacing: 0.2em;
+      text-align: center;
+    }
+
+    /* ── RIGHT — SCROLLABLE CONTENT ── */
+    .right-panel {
+      flex: 1;
+      overflow-y: auto;
+      padding: 2.5rem 2rem 5rem;
+    }
+
+    /* Header info */
+    .info-block {
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--green-dark);
+      margin-bottom: 2.5rem;
+    }
+
+    .info-eyebrow {
+      font-size: 10px;
+      color: var(--green-dark);
+      letter-spacing: 0.22em;
+      margin-bottom: 0.5rem;
+    }
+
+    .info-title {
+      font-family: 'VT323', monospace;
+      font-size: clamp(28px, 4vw, 48px);
+      color: var(--green);
+      letter-spacing: 0.08em;
+      line-height: 1.05;
+      text-shadow: 0 0 20px rgba(0,255,65,0.25);
+      margin-bottom: 0.8rem;
+    }
+
+    .info-badge {
+      display: inline-block;
+      font-size: 9px;
+      color: var(--green-dim);
+      letter-spacing: 0.18em;
+      border: 1px solid var(--green-dark);
+      padding: 3px 10px;
+      margin-bottom: 1rem;
+    }
+
+    .info-desc {
+      font-size: 11px;
+      color: var(--green-dim);
+      letter-spacing: 0.06em;
+      line-height: 1.9;
+      margin-bottom: 1.2rem;
+    }
+
+    .info-link {
+      display: inline-block;
+      font-size: 10px;
+      color: var(--green-dim);
+      letter-spacing: 0.15em;
+      text-decoration: none;
+      border: 1px solid var(--green-dark);
+      padding: 5px 14px;
+      transition: color 0.2s, border-color 0.2s, text-shadow 0.2s;
+    }
+    .info-link:hover {
+      color: var(--green);
+      border-color: var(--green-dim);
+      text-shadow: 0 0 8px var(--green);
+    }
+
+    /* Drafts */
+    .drafts-header {
+      margin-bottom: 0.6rem;
+    }
+
+    .drafts-eyebrow {
+      font-size: 13px;
+      color: var(--green-dim);
+      letter-spacing: 0.18em;
+      margin-bottom: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    .drafts-eyebrow::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--green-dark);
+    }
+
+    .drafts-note {
+      font-size: 11px;
+      color: var(--green-dim);
+      letter-spacing: 0.08em;
+      line-height: 1.8;
+      border-left: 2px solid var(--green-dim);
+      padding-left: 0.8rem;
+      margin-bottom: 1.4rem;
+    }
+
+    .drafts-grid {
+      columns: 3;
+      column-gap: 0.5rem;
+    }
+
+    @media (min-width: 900px) {
+      .drafts-grid { columns: 4; }
+    }
+
+    .draft-item {
+      position: relative;
+      cursor: pointer;
+      border: 1px solid var(--green-dark);
+      overflow: hidden;
+      opacity: 0.6;
+      transition: opacity 0.25s, border-color 0.25s;
+      break-inside: avoid;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+    .draft-item:hover { opacity: 1; border-color: var(--green-dim); }
+
+    .draft-item img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .draft-num {
+      position: absolute;
+      top: 5px; left: 7px;
+      font-size: 10px;
+      color: var(--green);
+      letter-spacing: 0.1em;
+      text-shadow: 0 0 6px rgba(0,0,0,0.9);
+    }
+
+    .draft-expand {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.4);
+      opacity: 0;
+      transition: opacity 0.2s;
+      font-family: 'VT323', monospace;
+      font-size: 14px;
+      color: var(--green);
+      letter-spacing: 0.12em;
+    }
+    .draft-item:hover .draft-expand { opacity: 1; }
+
+    /* ── MOBILE: stack layout ── */
+    @media (max-width: 640px) {
+      .split { flex-direction: column; }
+      .left-panel {
+        width: 100%;
+        position: relative;
+        top: auto;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--green-dark);
+        padding: 2rem 1.4rem;
+      }
+      .right-panel { padding: 2rem 1.4rem 4rem; }
+    }
+
+    /* ── LIGHTBOX ── */
+    .lightbox {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.97);
+      z-index: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .lightbox.open { opacity: 1; pointer-events: all; }
+
+    .lb-img {
+      max-width: 92vw;
+      max-height: 90vh;
+      object-fit: contain;
+      border: 1px solid var(--green-dim);
+      box-shadow: 0 0 60px rgba(0,255,65,0.1);
+      display: block;
+    }
+
+    .lb-close {
+      position: absolute;
+      top: 1rem; right: 1.4rem;
+      font-family: 'VT323', monospace;
+      font-size: 20px;
+      color: var(--green-dim);
+      cursor: pointer;
+      letter-spacing: 0.15em;
+      transition: color 0.2s;
+      z-index: 10;
+    }
+    .lb-close:hover { color: var(--green); }
+
+    .lb-nav {
+      position: absolute;
+      top: 50%; transform: translateY(-50%);
+      font-family: 'VT323', monospace;
+      font-size: 36px;
+      color: var(--green-dim);
+      cursor: pointer;
+      padding: 1rem;
+      transition: color 0.2s;
+      z-index: 10;
+    }
+    .lb-nav:hover { color: var(--green); text-shadow: 0 0 10px var(--green); }
+    .lb-nav.prev { left: 0.2rem; }
+    .lb-nav.next { right: 0.2rem; }
+
+    .lb-label {
+      position: absolute;
+      bottom: 1rem; left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      color: var(--green-dark);
+      letter-spacing: 0.15em;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <a class="topbar-back" href="work.html">← BACK</a>
+      <span class="topbar-title">GREAT IDEAS OF HUMANITY</span>
+    </div>
+    <div class="topbar-right">/DIR/CONCEPT</div>
+  </div>
+
+  <div class="split">
+
+    <!-- LEFT: sticky final poster -->
+    <div class="left-panel">
+      <div class="final-wrap" id="finalWrap">
+        <img class="final-img" src="images/ideas/final/final_1.png" alt="Final Poster">
+        <div class="final-hint">[ EXPAND ]</div>
+      </div>
+      <div class="final-label">/FINAL/final_1.png</div>
+    </div>
+
+    <!-- RIGHT: scrollable content -->
+    <div class="right-panel">
+
+      <div class="info-block">
+        <div class="info-eyebrow">/DIR/CONCEPT/IDEAS</div>
+        <div class="info-title">GREAT IDEAS<br>OF HUMANITY</div>
+        <div class="info-badge">FEATURED IN THE CHICAGO MUSEUM OF DESIGN</div>
+        <div class="info-desc">Created a poster selected for inclusion in the Chicago Museum of Design's Great Ideas of Humanity exhibition.</div>
+        <a class="info-link" href="https://greatideasofhumanity.com/jack-leary-on-michel-foucault/" target="_blank">[ VIEW EXHIBITION ENTRY ↗ ]</a>
+      </div>
+
+      <div class="drafts-header">
+        <div class="drafts-eyebrow">PROCESS — DRAFTS</div>
+        <div class="drafts-note">
+          The following drafts document the design process —<br>
+          iterating through concept, composition, and color<br>
+          to arrive at the final work.
+        </div>
+      </div>
+
+      <div class="drafts-grid" id="draftsGrid"></div>
+
+    </div>
+  </div>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox">
+    <span class="lb-close" id="lbClose">[ CLOSE ]</span>
+    <span class="lb-nav prev" id="lbPrev">&#8592;</span>
+    <img class="lb-img" id="lbImg" src="" alt="">
+    <span class="lb-nav next" id="lbNext">&#8594;</span>
+    <div class="lb-label" id="lbLabel"></div>
+  </div>
+
+  <script>
+    const totalDrafts = 11;
+    const draftFolder = 'images/ideas/drafts/';
+
+    // Build drafts grid
+    const draftsGrid = document.getElementById('draftsGrid');
+    for (let i = 1; i <= totalDrafts; i++) {
+      const item = document.createElement('div');
+      item.className = 'draft-item';
+
+      const img = document.createElement('img');
+      img.src = draftFolder + 'draft_' + i + (i === 1 ? '.jpg' : '.png');
+      img.alt = 'Draft ' + i;
+      img.loading = 'lazy';
+
+      const num = document.createElement('span');
+      num.className = 'draft-num';
+      num.textContent = 'DRAFT ' + String(i).padStart(2, '0');
+
+      const hint = document.createElement('div');
+      hint.className = 'draft-expand';
+      hint.textContent = '[ EXPAND ]';
+
+      item.appendChild(img);
+      item.appendChild(num);
+      item.appendChild(hint);
+      item.addEventListener('click', () => openDraftLightbox(i));
+      draftsGrid.appendChild(item);
+    }
+
+    // Lightbox
+    const lightbox = document.getElementById('lightbox');
+    const lbImg = document.getElementById('lbImg');
+    const lbLabel = document.getElementById('lbLabel');
+    const lbPrev = document.getElementById('lbPrev');
+    const lbNext = document.getElementById('lbNext');
+    let lbMode = 'final';
+    let lbCurrent = 1;
+
+    // Final poster
+    document.getElementById('finalWrap').addEventListener('click', () => {
+      lbMode = 'final';
+      lbImg.src = 'images/ideas/final/final_1.png';
+      lbLabel.textContent = 'FINAL POSTER';
+      lbPrev.style.display = 'none';
+      lbNext.style.display = 'none';
+      lightbox.classList.add('open');
+    });
+
+    function openDraftLightbox(num) {
+      lbMode = 'draft';
+      lbCurrent = num;
+      lbPrev.style.display = '';
+      lbNext.style.display = '';
+      renderDraft();
+      lightbox.classList.add('open');
+    }
+
+    function renderDraft() {
+      lbImg.src = draftFolder + 'draft_' + lbCurrent + (lbCurrent === 1 ? '.jpg' : '.png');
+      lbLabel.textContent = 'DRAFT ' + lbCurrent + ' / ' + totalDrafts;
+    }
+
+    document.getElementById('lbClose').onclick = () => lightbox.classList.remove('open');
+
+    lbNext.onclick = () => {
+      if (lbMode !== 'draft') return;
+      lbCurrent = (lbCurrent % totalDrafts) + 1;
+      renderDraft();
+    };
+
+    lbPrev.onclick = () => {
+      if (lbMode !== 'draft') return;
+      lbCurrent = ((lbCurrent - 2 + totalDrafts) % totalDrafts) + 1;
+      renderDraft();
+    };
+
+    document.addEventListener('keydown', e => {
+      if (!lightbox.classList.contains('open')) return;
+      if (e.key === 'Escape') lightbox.classList.remove('open');
+      if (lbMode === 'draft') {
+        if (e.key === 'ArrowRight') lbNext.click();
+        if (e.key === 'ArrowLeft') lbPrev.click();
+      }
+    });
+
+    // Swipe
+    let swipeX = 0;
+    lightbox.addEventListener('touchstart', e => { swipeX = e.touches[0].clientX; }, { passive: true });
+    lightbox.addEventListener('touchend', e => {
+      if (lbMode !== 'draft') return;
+      const dx = swipeX - e.changedTouches[0].clientX;
+      if (Math.abs(dx) > 40) dx > 0 ? lbNext.click() : lbPrev.click();
+    }, { passive: true });
+  </script>
+</body>
+</html>

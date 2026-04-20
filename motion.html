@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>JACK LEARY — MOTION GRAPHICS</title>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #00ff41;
+      --green-dim: #00b32c;
+      --green-dark: #003b00;
+      --black: #000;
+      --bg: #020a02;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: var(--bg);
+      color: var(--green);
+      font-family: 'Share Tech Mono', monospace;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px, transparent 3px,
+        rgba(0,0,0,0.05) 3px, rgba(0,0,0,0.05) 4px
+      );
+      pointer-events: none; z-index: 600;
+    }
+
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.8) 100%);
+      pointer-events: none; z-index: 601;
+    }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: 42px;
+      border-bottom: 1px solid var(--green-dark);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1.4rem;
+      background: rgba(0,0,0,0.92);
+      z-index: 500;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 1rem; }
+    .topbar-back {
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      color: var(--green-dim);
+      text-decoration: none;
+      letter-spacing: 0.1em;
+      transition: color 0.2s;
+    }
+    .topbar-back:hover { color: var(--green); }
+    .topbar-title {
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      color: var(--green);
+      letter-spacing: 0.12em;
+    }
+    .topbar-right {
+      font-size: 10px;
+      color: var(--green-dark);
+      letter-spacing: 0.1em;
+    }
+
+    /* ── LAYOUT ── */
+    .room {
+      position: fixed;
+      inset: 42px 0 0 0;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem 1.4rem 1rem;
+      gap: 0.8rem;
+    }
+
+    /* ── MAIN MONITOR ── */
+    .main-monitor {
+      position: relative;
+      flex: 1;
+      background: #000;
+      border: 1px solid var(--green-dim);
+      overflow: hidden;
+      box-shadow: 0 0 30px rgba(0,255,65,0.08), inset 0 0 20px rgba(0,0,0,0.8);
+    }
+
+    /* Corner brackets */
+    .main-monitor::before,
+    .main-monitor::after {
+      content: '';
+      position: absolute;
+      width: 18px; height: 18px;
+      border-color: var(--green);
+      border-style: solid;
+      z-index: 10;
+    }
+    .main-monitor::before { top: 8px; left: 8px; border-width: 2px 0 0 2px; }
+    .main-monitor::after  { bottom: 8px; right: 8px; border-width: 0 2px 2px 0; }
+
+    .main-video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    /* Static glitch overlay */
+    .static-overlay {
+      position: absolute; inset: 0;
+      z-index: 8;
+      pointer-events: none;
+      opacity: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.25'/%3E%3C/svg%3E");
+      background-size: 150px 150px;
+      mix-blend-mode: overlay;
+    }
+    .static-overlay.active { animation: static-cut 0.4s forwards; }
+
+    /* Scanline on main monitor */
+    .monitor-scanlines {
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px, transparent 2px,
+        rgba(0,0,0,0.12) 2px, rgba(0,0,0,0.12) 3px
+      );
+      pointer-events: none; z-index: 7;
+    }
+
+    /* Info bar on main monitor */
+    .main-info {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 0.7rem 1rem;
+      background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, transparent 100%);
+      z-index: 9;
+    }
+
+    .main-title {
+      font-family: 'VT323', monospace;
+      font-size: clamp(18px, 3vw, 26px);
+      color: var(--green);
+      letter-spacing: 0.1em;
+      text-shadow: 0 0 10px rgba(0,255,65,0.4);
+    }
+
+    .main-attribution {
+      font-size: 10px;
+      color: var(--green-dim);
+      letter-spacing: 0.1em;
+      margin-top: 3px;
+      line-height: 1.6;
+    }
+
+    /* Live indicator */
+    .live-badge {
+      position: absolute;
+      top: 10px; right: 14px;
+      font-size: 10px;
+      color: var(--green);
+      letter-spacing: 0.15em;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .live-dot {
+      width: 6px; height: 6px;
+      background: var(--green);
+      border-radius: 50%;
+      box-shadow: 0 0 6px var(--green);
+      animation: pulse 1.5s infinite;
+    }
+
+    /* Channel label */
+    .channel-label {
+      position: absolute;
+      top: 10px; left: 14px;
+      font-size: 10px;
+      color: var(--green-dark);
+      letter-spacing: 0.15em;
+      z-index: 10;
+    }
+
+    /* ── SWITCHER ROW ── */
+    .switcher {
+      display: flex;
+      gap: 0.8rem;
+      height: 120px;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 600px) {
+      .switcher { height: 90px; }
+    }
+
+    .preview-monitor {
+      flex: 1;
+      position: relative;
+      background: #000;
+      border: 1px solid var(--green-dark);
+      cursor: pointer;
+      overflow: hidden;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .preview-monitor:hover {
+      border-color: var(--green-dim);
+      box-shadow: 0 0 16px rgba(0,255,65,0.1);
+    }
+
+    .preview-monitor.active {
+      border-color: var(--green);
+      box-shadow: 0 0 20px rgba(0,255,65,0.18);
+    }
+
+    .preview-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      opacity: 0.5;
+      transition: opacity 0.3s;
+    }
+
+    .preview-monitor.active .preview-video { opacity: 0.85; }
+    .preview-monitor:hover .preview-video { opacity: 0.7; }
+
+    .preview-label {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 4px 6px;
+      background: rgba(0,0,0,0.85);
+      font-family: 'VT323', monospace;
+      font-size: 13px;
+      color: var(--green-dark);
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: color 0.2s;
+    }
+
+    .preview-monitor.active .preview-label { color: var(--green); }
+    .preview-monitor:hover .preview-label { color: var(--green-dim); }
+
+    .preview-num {
+      position: absolute;
+      top: 5px; left: 6px;
+      font-size: 9px;
+      color: var(--green-dark);
+      letter-spacing: 0.1em;
+    }
+
+    .preview-monitor.active .preview-num { color: var(--green-dim); }
+
+    /* Preview scanlines */
+    .preview-monitor::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px, transparent 2px,
+        rgba(0,0,0,0.2) 2px, rgba(0,0,0,0.2) 3px
+      );
+      pointer-events: none; z-index: 2;
+    }
+
+    .fullscreen-btn {
+      position: absolute;
+      bottom: 10px; left: 12px;
+      font-size: 11px;
+      color: var(--green-dim);
+      letter-spacing: 0.15em;
+      cursor: pointer;
+      z-index: 10;
+      border: 1px solid var(--green-dark);
+      padding: 3px 8px;
+      background: rgba(0,0,0,0.7);
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .fullscreen-btn:hover { color: var(--green); border-color: var(--green-dim); }
+
+    .mute-btn {
+      position: absolute;
+      bottom: 10px; right: 12px;
+      font-size: 11px;
+      color: var(--green-dim);
+      letter-spacing: 0.15em;
+      cursor: pointer;
+      z-index: 10;
+      border: 1px solid var(--green-dark);
+      padding: 3px 8px;
+      background: rgba(0,0,0,0.7);
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .mute-btn:hover { color: var(--green); border-color: var(--green-dim); }
+
+    @keyframes static-cut {
+      0%   { opacity: 0; }
+      10%  { opacity: 0.9; }
+      25%  { opacity: 0.3; }
+      40%  { opacity: 0.8; }
+      55%  { opacity: 0.1; }
+      70%  { opacity: 0.6; }
+      85%  { opacity: 0; }
+      100% { opacity: 0; }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 6px var(--green); }
+      50% { opacity: 0.4; box-shadow: 0 0 2px var(--green); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <a class="topbar-back" href="work.html">← BACK</a>
+      <span class="topbar-title">MOTION GRAPHICS</span>
+    </div>
+    <div class="topbar-right">/DIR/MOTION — 3 FILES</div>
+  </div>
+
+  <div class="room">
+
+    <!-- Main monitor -->
+    <div class="main-monitor" id="mainMonitor">
+      <div class="monitor-scanlines"></div>
+      <div class="static-overlay" id="staticOverlay"></div>
+      <span class="channel-label">CH-01</span>
+      <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+      <div class="mute-btn" id="muteBtn">[ UNMUTE ]</div>
+      <div class="fullscreen-btn" id="fullscreenBtn">[ FULLSCREEN ]</div>
+      <video class="main-video" id="mainVideo" autoplay loop muted playsinline></video>
+      <div class="main-info">
+        <div class="main-title" id="mainTitle"></div>
+        <div class="main-attribution" id="mainAttrib"></div>
+      </div>
+    </div>
+
+    <!-- Switcher row -->
+    <div class="switcher" id="switcher">
+
+      <div class="preview-monitor active" data-index="0">
+        <span class="preview-num">CH-01</span>
+        <video class="preview-video" src="images/motion_graphics/a_place_where_love_goes.mp4" muted loop playsinline></video>
+        <div class="preview-label">A PLACE WHERE LOVE GOES</div>
+      </div>
+
+      <div class="preview-monitor" data-index="1">
+        <span class="preview-num">CH-02</span>
+        <video class="preview-video" src="images/motion_graphics/925.mp4" muted loop playsinline></video>
+        <div class="preview-label">925</div>
+      </div>
+
+      <div class="preview-monitor" data-index="2">
+        <span class="preview-num">CH-03</span>
+        <video class="preview-video" src="images/motion_graphics/a_good_day.mp4" muted loop playsinline></video>
+        <div class="preview-label">A GOOD DAY</div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const videos = [
+      {
+        src: 'images/motion_graphics/a_place_where_love_goes.mp4',
+        title: 'A PLACE WHERE LOVE GOES',
+        attrib: 'A Place Where Love Goes — Childish Gambino (Donald Glover)',
+        ch: 'CH-01'
+      },
+      {
+        src: 'images/motion_graphics/925.mp4',
+        title: '925',
+        attrib: '"925 – Four Tet Remix" — Sammy Virgi, Chris Lake, RoRo, Four Tet',
+        ch: 'CH-02'
+      },
+      {
+        src: 'images/motion_graphics/a_good_day.mp4',
+        title: 'A GOOD DAY',
+        attrib: 'Hope you have a good day.\n"It Was A Good Day" — Ice Cube',
+        ch: 'CH-03'
+      }
+    ];
+
+    const mainVideo = document.getElementById('mainVideo');
+    const mainTitle = document.getElementById('mainTitle');
+    const mainAttrib = document.getElementById('mainAttrib');
+    const staticOverlay = document.getElementById('staticOverlay');
+    const channelLabel = document.querySelector('.channel-label');
+    const previews = document.querySelectorAll('.preview-monitor');
+
+    let current = 0;
+
+    // Play all preview videos
+    previews.forEach(p => {
+      const v = p.querySelector('.preview-video');
+      v.play().catch(() => {});
+    });
+
+    function switchTo(index) {
+      if (index === current) return;
+
+      // Static glitch
+      staticOverlay.classList.remove('active');
+      void staticOverlay.offsetWidth;
+      staticOverlay.classList.add('active');
+
+      setTimeout(() => {
+        current = index;
+        const v = videos[index];
+
+        mainVideo.src = v.src;
+        mainVideo.play().catch(() => {});
+        mainTitle.textContent = v.title;
+        mainAttrib.innerHTML = v.attrib.replace('\n', '<br>');
+        channelLabel.textContent = v.ch;
+
+        previews.forEach((p, i) => p.classList.toggle('active', i === index));
+      }, 120);
+    }
+
+    // Init first video
+    mainVideo.src = videos[0].src;
+    mainVideo.play().catch(() => {});
+    mainTitle.textContent = videos[0].title;
+    mainAttrib.innerHTML = videos[0].attrib.replace('\n', '<br>');
+
+    // Mute toggle
+    const muteBtn = document.getElementById('muteBtn');
+    let muted = true;
+    muteBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      muted = !muted;
+      mainVideo.muted = muted;
+      if (!muted) {
+        mainVideo.play().catch(() => {});
+      }
+      muteBtn.textContent = muted ? '[ UNMUTE ]' : '[ MUTE ]';
+    });
+
+    // Fullscreen
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    fullscreenBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (mainVideo.requestFullscreen) mainVideo.requestFullscreen();
+      else if (mainVideo.webkitRequestFullscreen) mainVideo.webkitRequestFullscreen();
+      else if (mainVideo.webkitEnterFullscreen) mainVideo.webkitEnterFullscreen();
+    });
+
+    // Click handlers
+    previews.forEach((p, i) => {
+      p.addEventListener('click', () => switchTo(i));
+    });
+
+    // Keyboard
+    document.addEventListener('keydown', e => {
+      if (e.key === '1') switchTo(0);
+      if (e.key === '2') switchTo(1);
+      if (e.key === '3') switchTo(2);
+      if (e.key === 'ArrowRight') switchTo((current + 1) % 3);
+      if (e.key === 'ArrowLeft') switchTo((current - 1 + 3) % 3);
+    });
+  </script>
+</body>
+</html>

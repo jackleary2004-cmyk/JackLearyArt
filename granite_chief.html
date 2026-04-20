@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JACK LEARY — GRANITE CHIEF</title>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #00ff41;
+      --green-dim: #00b32c;
+      --green-dark: #003b00;
+      --black: #000;
+      --bg: #020a02;
+    }
+
+    html, body {
+      width: 100%;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--green);
+      font-family: 'Share Tech Mono', monospace;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px, transparent 3px,
+        rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 4px
+      );
+      pointer-events: none; z-index: 600;
+    }
+
+    .topbar {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: 42px;
+      border-bottom: 1px solid var(--green-dark);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1.4rem;
+      background: rgba(0,0,0,0.95);
+      z-index: 500;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 1rem; }
+    .topbar-back {
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      color: var(--green-dim);
+      text-decoration: none;
+      letter-spacing: 0.1em;
+      transition: color 0.2s;
+    }
+    .topbar-back:hover { color: var(--green); }
+    .topbar-title {
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      color: var(--green);
+      letter-spacing: 0.12em;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 5rem 1.6rem 1.2rem;
+      max-width: 960px;
+      margin: 0 auto;
+      border-bottom: 1px solid var(--green-dark);
+      display: flex;
+      align-items: baseline;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .hero-eyebrow {
+      display: none;
+    }
+
+    .hero-title {
+      font-family: 'VT323', monospace;
+      font-size: clamp(28px, 4vw, 44px);
+      color: var(--green);
+      letter-spacing: 0.08em;
+      line-height: 1;
+      text-shadow: 0 0 20px rgba(0,255,65,0.2);
+      flex-shrink: 0;
+    }
+
+    .hero-desc {
+      font-size: 10px;
+      color: var(--green-dark);
+      letter-spacing: 0.05em;
+      line-height: 1.8;
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .hero-coords {
+      font-size: 9px;
+      color: var(--green-dark);
+      letter-spacing: 0.15em;
+      flex-shrink: 0;
+      align-self: center;
+    }
+
+    /* ── BOOK SECTION ── */
+    .book-section {
+      padding: 2rem 1.6rem 5rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .book-eyebrow {
+      font-size: 10px;
+      color: var(--green-dark);
+      letter-spacing: 0.22em;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    .book-eyebrow::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--green-dark);
+    }
+
+    /* ── VIEWER ── */
+    .viewer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    /* The book stage */
+    .book-stage {
+      position: relative;
+      width: 100%;
+      min-height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Each view */
+    .book-view {
+      position: absolute;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(60px);
+      transition: opacity 0.35s ease, transform 0.4s cubic-bezier(0.16,1,0.3,1);
+    }
+
+    .book-view.active {
+      opacity: 1;
+      pointer-events: all;
+      transform: translateX(0);
+      position: relative;
+    }
+
+    .book-view.exit-left {
+      opacity: 0;
+      transform: translateX(-60px);
+    }
+
+    /* Solo page */
+    .view-solo {
+      justify-content: center;
+    }
+
+    .view-solo .page-card {
+      max-width: 560px;
+      width: 100%;
+    }
+
+    /* Spread */
+    .view-spread {
+      gap: 4px;
+    }
+
+    .view-spread .page-card {
+      flex: 1;
+      max-width: 460px;
+    }
+
+    /* Page card */
+    .page-card {
+      position: relative;
+      cursor: pointer;
+      border: 1px solid var(--green-dark);
+      overflow: hidden;
+      background: #000;
+      transition: border-color 0.25s, box-shadow 0.25s;
+      box-shadow: 4px 4px 0 rgba(0,255,65,0.06);
+    }
+
+    .page-card:hover {
+      border-color: var(--green-dim);
+      box-shadow: 4px 4px 0 rgba(0,255,65,0.15), 0 0 20px rgba(0,255,65,0.08);
+    }
+
+    .page-card img {
+      width: 100%;
+      display: block;
+    }
+
+    .page-card-hint {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.4);
+      opacity: 0;
+      transition: opacity 0.2s;
+      font-family: 'VT323', monospace;
+      font-size: 16px;
+      color: var(--green);
+      letter-spacing: 0.2em;
+      text-shadow: 0 0 8px var(--green);
+    }
+    .page-card:hover .page-card-hint { opacity: 1; }
+
+    .page-card::before, .page-card::after {
+      content: '';
+      position: absolute;
+      width: 14px; height: 14px;
+      border-color: var(--green);
+      border-style: solid;
+      z-index: 2;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+    }
+    .page-card::before { top: 6px; left: 6px; border-width: 2px 0 0 2px; }
+    .page-card::after  { bottom: 6px; right: 6px; border-width: 0 2px 2px 0; }
+    .page-card:hover::before, .page-card:hover::after { opacity: 1; }
+
+    /* Spine between spread pages */
+    .spine {
+      width: 5px;
+      align-self: stretch;
+      background: linear-gradient(to bottom,
+        transparent,
+        var(--green-dark) 20%,
+        rgba(0,255,65,0.4) 50%,
+        var(--green-dark) 80%,
+        transparent
+      );
+      flex-shrink: 0;
+      border-radius: 1px;
+    }
+
+    /* ── NAV ── */
+    .book-controls {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .nav-row {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+    }
+
+    .nav-btn {
+      font-family: 'VT323', monospace;
+      font-size: 26px;
+      color: var(--green-dim);
+      background: none;
+      border: 1px solid var(--green-dark);
+      width: 52px; height: 38px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: color 0.2s, border-color 0.2s, text-shadow 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .nav-btn:hover {
+      color: var(--green);
+      border-color: var(--green-dim);
+      text-shadow: 0 0 8px var(--green);
+    }
+    .nav-btn:disabled { opacity: 0.25; pointer-events: none; }
+
+    .view-tabs {
+      display: flex;
+      gap: 0.4rem;
+    }
+
+    .view-tab {
+      font-size: 9px;
+      color: var(--green-dark);
+      letter-spacing: 0.14em;
+      padding: 3px 10px;
+      border: 1px solid var(--green-dark);
+      cursor: pointer;
+      background: none;
+      font-family: 'Share Tech Mono', monospace;
+      transition: color 0.2s, border-color 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .view-tab:hover { color: var(--green-dim); border-color: var(--green-dim); }
+    .view-tab.active {
+      color: var(--green);
+      border-color: var(--green);
+      text-shadow: 0 0 6px rgba(0,255,65,0.4);
+    }
+
+    .view-label {
+      font-size: 10px;
+      color: var(--green-dark);
+      letter-spacing: 0.18em;
+    }
+
+    /* ── LIGHTBOX ── */
+    .lightbox {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.97);
+      z-index: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .lightbox.open { opacity: 1; pointer-events: all; }
+
+    .lb-img {
+      max-width: 92vw;
+      max-height: 92vh;
+      object-fit: contain;
+      border: 1px solid var(--green-dim);
+      box-shadow: 0 0 60px rgba(0,255,65,0.1);
+      display: block;
+    }
+
+    .lb-close {
+      position: absolute;
+      top: 1rem; right: 1.4rem;
+      font-family: 'VT323', monospace;
+      font-size: 20px;
+      color: var(--green-dim);
+      cursor: pointer;
+      letter-spacing: 0.15em;
+      transition: color 0.2s;
+      z-index: 10;
+    }
+    .lb-close:hover { color: var(--green); }
+
+    .lb-nav {
+      position: absolute;
+      top: 50%; transform: translateY(-50%);
+      font-family: 'VT323', monospace;
+      font-size: 36px;
+      color: var(--green-dim);
+      cursor: pointer;
+      padding: 1rem;
+      transition: color 0.2s;
+      z-index: 10;
+    }
+    .lb-nav:hover { color: var(--green); text-shadow: 0 0 10px var(--green); }
+    .lb-nav.prev { left: 0.2rem; }
+    .lb-nav.next { right: 0.2rem; }
+
+    .lb-label {
+      position: absolute;
+      bottom: 1rem; left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      color: var(--green-dark);
+      letter-spacing: 0.15em;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 540px) {
+      .view-spread { flex-direction: column; gap: 0.4rem; }
+      .spine { width: 100%; height: 5px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <a class="topbar-back" href="work.html">← BACK</a>
+      <span class="topbar-title">GRANITE CHIEF</span>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="hero-eyebrow">/DIR/PROJECT/GRANITE_CHIEF</div>
+    <div class="hero-title">GRANITE CHIEF</div>
+    <div class="hero-desc">An exploratory booklet tracing the story of Granite Chief Peak — a place defined by altitude, history, and the kind of silence you only find above the treeline. Through photography, typography, and layout, the project translates landscape into language, turning a single peak in Olympic Valley, California into a narrative worth sitting with.</div>
+    <div class="hero-coords">39°11'06"N · 120°14'45"W · ELEV. 9,006 FT</div>
+  </div>
+
+  <div class="book-section">
+    <div class="book-eyebrow">THE BOOKLET</div>
+
+    <div class="viewer">
+      <div class="book-stage" id="bookStage">
+
+        <!-- View 0: Cover -->
+        <div class="book-view view-solo active" id="view0">
+          <div class="page-card" data-src="images/granite_chief/granite_chief_cover.jpg" data-label="COVER" data-index="0">
+            <img src="images/granite_chief/granite_chief_cover.jpg" alt="Cover">
+            <div class="page-card-hint">[ EXPAND ]</div>
+          </div>
+        </div>
+
+        <!-- View 1: Spread pages 1–2 -->
+        <div class="book-view view-spread" id="view1">
+          <div class="page-card" data-src="images/granite_chief/granite_chief_page_1.jpg" data-label="PAGE 1" data-index="1">
+            <img src="images/granite_chief/granite_chief_page_1.jpg" alt="Page 1">
+            <div class="page-card-hint">[ EXPAND ]</div>
+          </div>
+          <div class="spine"></div>
+          <div class="page-card" data-src="images/granite_chief/granite_chief_page_2.jpg" data-label="PAGE 2" data-index="2">
+            <img src="images/granite_chief/granite_chief_page_2.jpg" alt="Page 2">
+            <div class="page-card-hint">[ EXPAND ]</div>
+          </div>
+        </div>
+
+        <!-- View 2: Spread pages 3–4 -->
+        <div class="book-view view-spread" id="view2">
+          <div class="page-card" data-src="images/granite_chief/granite_chief_page_3.png" data-label="PAGE 3" data-index="3">
+            <img src="images/granite_chief/granite_chief_page_3.png" alt="Page 3">
+            <div class="page-card-hint">[ EXPAND ]</div>
+          </div>
+          <div class="spine"></div>
+          <div class="page-card" data-src="images/granite_chief/granite_chief_page_4.jpg" data-label="PAGE 4" data-index="4">
+            <img src="images/granite_chief/granite_chief_page_4.jpg" alt="Page 4">
+            <div class="page-card-hint">[ EXPAND ]</div>
+          </div>
+        </div>
+
+        <!-- View 3: Back cover -->
+        <div class="book-view view-solo" id="view3">
+          <div class="page-card" data-src="images/granite_chief/granite_chief_back_cover.jpg" data-label="BACK COVER" data-index="5">
+            <img src="images/granite_chief/granite_chief_back_cover.jpg" alt="Back Cover">
+            <div class="page-card-hint">[ EXPAND ]</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="book-controls">
+        <div class="nav-row">
+          <button class="nav-btn" id="btnPrev" disabled>&#8592;</button>
+          <div class="view-tabs" id="viewTabs">
+            <button class="view-tab active" data-view="0">COVER</button>
+            <button class="view-tab" data-view="1">PG 1–2</button>
+            <button class="view-tab" data-view="2">PG 3–4</button>
+            <button class="view-tab" data-view="3">BACK</button>
+          </div>
+          <button class="nav-btn" id="btnNext">&#8594;</button>
+        </div>
+        <div class="view-label" id="viewLabel">COVER</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox">
+    <span class="lb-close" id="lbClose">[ CLOSE ]</span>
+    <span class="lb-nav prev" id="lbPrev">&#8592;</span>
+    <img class="lb-img" id="lbImg" src="" alt="">
+    <span class="lb-nav next" id="lbNext">&#8594;</span>
+    <div class="lb-label" id="lbLabel"></div>
+  </div>
+
+  <script>
+    const views = document.querySelectorAll('.book-view');
+    const tabs = document.querySelectorAll('.view-tab');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const viewLabel = document.getElementById('viewLabel');
+    const lightbox = document.getElementById('lightbox');
+    const lbImg = document.getElementById('lbImg');
+    const lbLabel = document.getElementById('lbLabel');
+
+    const viewLabels = ['COVER', 'PAGES 1 — 2', 'PAGES 3 — 4', 'BACK COVER'];
+    let current = 0;
+    let isAnimating = false;
+
+    const allPages = [
+      { src: 'images/granite_chief/granite_chief_cover.jpg',      label: 'COVER' },
+      { src: 'images/granite_chief/granite_chief_page_1.jpg',     label: 'PAGE 1' },
+      { src: 'images/granite_chief/granite_chief_page_2.jpg',     label: 'PAGE 2' },
+      { src: 'images/granite_chief/granite_chief_page_3.png',     label: 'PAGE 3' },
+      { src: 'images/granite_chief/granite_chief_page_4.jpg',     label: 'PAGE 4' },
+      { src: 'images/granite_chief/granite_chief_back_cover.jpg', label: 'BACK COVER' }
+    ];
+
+    let lbCurrent = 0;
+
+    function goTo(index, direction) {
+      if (index === current || isAnimating) return;
+      isAnimating = true;
+
+      const dir = direction || (index > current ? 1 : -1);
+
+      // Exit current
+      views[current].classList.remove('active');
+      views[current].classList.add(dir > 0 ? 'exit-left' : 'exit-right');
+      views[current].style.transform = dir > 0 ? 'translateX(-60px)' : 'translateX(60px)';
+      views[current].style.opacity = '0';
+      views[current].style.position = 'absolute';
+      views[current].style.pointerEvents = 'none';
+
+      setTimeout(() => {
+        views[current].classList.remove('exit-left', 'exit-right');
+        views[current].style.transform = '';
+        views[current].style.opacity = '';
+        views[current].style.position = '';
+
+        current = index;
+
+        // Enter new
+        views[current].style.transform = dir > 0 ? 'translateX(60px)' : 'translateX(-60px)';
+        views[current].style.opacity = '0';
+        views[current].style.position = 'relative';
+        views[current].classList.add('active');
+
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            views[current].style.transform = 'translateX(0)';
+            views[current].style.opacity = '1';
+          });
+        });
+
+        updateUI();
+
+        setTimeout(() => {
+          isAnimating = false;
+        }, 400);
+      }, 350);
+    }
+
+    function updateUI() {
+      tabs.forEach((t, i) => t.classList.toggle('active', i === current));
+      btnPrev.disabled = current === 0;
+      btnNext.disabled = current === views.length - 1;
+      viewLabel.textContent = viewLabels[current];
+    }
+
+    btnPrev.onclick = () => goTo(current - 1, -1);
+    btnNext.onclick = () => goTo(current + 1, 1);
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => goTo(parseInt(tab.dataset.view)));
+    });
+
+    // Keyboard
+    document.addEventListener('keydown', e => {
+      if (lightbox.classList.contains('open')) {
+        if (e.key === 'Escape') lightbox.classList.remove('open');
+        if (e.key === 'ArrowRight') lbNextClick();
+        if (e.key === 'ArrowLeft') lbPrevClick();
+      } else {
+        if (e.key === 'ArrowRight') goTo(Math.min(current + 1, views.length - 1), 1);
+        if (e.key === 'ArrowLeft') goTo(Math.max(current - 1, 0), -1);
+      }
+    });
+
+    // Swipe
+    let swipeX = 0;
+    document.addEventListener('touchstart', e => { swipeX = e.touches[0].clientX; }, { passive: true });
+    document.addEventListener('touchend', e => {
+      if (lightbox.classList.contains('open')) return;
+      const dx = swipeX - e.changedTouches[0].clientX;
+      if (Math.abs(dx) > 40) {
+        if (dx > 0) goTo(Math.min(current + 1, views.length - 1), 1);
+        else goTo(Math.max(current - 1, 0), -1);
+      }
+    }, { passive: true });
+
+    // Page card clicks → lightbox
+    document.querySelectorAll('.page-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const index = parseInt(card.dataset.index);
+        lbCurrent = index;
+        renderLb();
+        lightbox.classList.add('open');
+      });
+    });
+
+    function renderLb() {
+      lbImg.src = allPages[lbCurrent].src;
+      lbLabel.textContent = allPages[lbCurrent].label + ' — ' + (lbCurrent + 1) + ' / ' + allPages.length;
+    }
+
+    function lbNextClick() {
+      lbCurrent = (lbCurrent + 1) % allPages.length;
+      renderLb();
+    }
+
+    function lbPrevClick() {
+      lbCurrent = (lbCurrent - 1 + allPages.length) % allPages.length;
+      renderLb();
+    }
+
+    document.getElementById('lbClose').onclick = () => lightbox.classList.remove('open');
+    document.getElementById('lbNext').onclick = lbNextClick;
+    document.getElementById('lbPrev').onclick = lbPrevClick;
+
+    // Swipe in lightbox
+    lightbox.addEventListener('touchstart', e => { swipeX = e.touches[0].clientX; }, { passive: true });
+    lightbox.addEventListener('touchend', e => {
+      const dx = swipeX - e.changedTouches[0].clientX;
+      if (Math.abs(dx) > 40) dx > 0 ? lbNextClick() : lbPrevClick();
+    }, { passive: true });
+  </script>
+</body>
+</html>

@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JACK LEARY — ABOUT</title>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #00ff41;
+      --green-dim: #00b32c;
+      --green-dark: #003b00;
+      --black: #000;
+      --bg: #020a02;
+    }
+
+    html, body {
+      width: 100%;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--green);
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px, transparent 3px,
+        rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 4px
+      );
+      pointer-events: none; z-index: 600;
+    }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: 42px;
+      border-bottom: 1px solid var(--green-dark);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1.4rem;
+      background: rgba(0,0,0,0.95);
+      z-index: 500;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 1rem; }
+    .topbar-back {
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      color: var(--green-dim);
+      text-decoration: none;
+      letter-spacing: 0.1em;
+      transition: color 0.2s;
+    }
+    .topbar-back:hover { color: var(--green); }
+    .topbar-title {
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      color: var(--green);
+      letter-spacing: 0.12em;
+    }
+
+    /* ── PAGE ── */
+    .page {
+      padding-top: 42px;
+      max-width: 960px;
+      margin: 0 auto;
+      padding-left: 1.6rem;
+      padding-right: 1.6rem;
+      padding-bottom: 6rem;
+    }
+
+    /* ── SPLIT: photo + bio ── */
+    .split {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 3rem;
+      padding: 3rem 0 3rem;
+      border-bottom: 1px solid var(--green-dark);
+    }
+
+    @media (max-width: 700px) {
+      .split { grid-template-columns: 1fr; gap: 2rem; }
+    }
+
+    /* ── PHOTO ── */
+    .photo-wrap {
+      position: relative;
+    }
+
+    .photo-frame {
+      position: relative;
+      border: 1px solid var(--green-dim);
+      overflow: hidden;
+      box-shadow: 6px 6px 0 var(--green-dark), 0 0 40px rgba(0,255,65,0.08);
+    }
+
+    .photo-frame img {
+      width: 100%;
+      display: block;
+      filter: brightness(0.92) saturate(0.9);
+      transition: filter 0.4s;
+    }
+
+    .photo-frame:hover img { filter: brightness(1) saturate(1); }
+
+    /* Scanline over photo */
+    .photo-frame::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px, transparent 3px,
+        rgba(0,0,0,0.08) 3px, rgba(0,0,0,0.08) 4px
+      );
+      pointer-events: none;
+    }
+
+    /* Corner brackets */
+    .photo-frame::before {
+      content: '';
+      position: absolute;
+      top: 8px; left: 8px;
+      width: 18px; height: 18px;
+      border-top: 2px solid var(--green);
+      border-left: 2px solid var(--green);
+      z-index: 2;
+    }
+
+    .bracket-br {
+      position: absolute;
+      bottom: 8px; right: 8px;
+      width: 18px; height: 18px;
+      border-bottom: 2px solid var(--green);
+      border-right: 2px solid var(--green);
+      z-index: 2;
+    }
+
+    .photo-label {
+      margin-top: 0.7rem;
+      font-size: 9px;
+      color: var(--green-dark);
+      letter-spacing: 0.18em;
+    }
+
+    /* ── BIO ── */
+    .bio {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 1.4rem;
+    }
+
+    .bio-eyebrow {
+      font-size: 10px;
+      color: var(--green-dark);
+      letter-spacing: 0.22em;
+    }
+
+    .bio-name {
+      font-family: 'VT323', monospace;
+      font-size: clamp(40px, 6vw, 70px);
+      color: var(--green);
+      letter-spacing: 0.06em;
+      line-height: 1;
+      text-shadow: 0 0 24px rgba(0,255,65,0.25);
+    }
+
+    .bio-text {
+      font-size: 11px;
+      color: var(--green-dim);
+      letter-spacing: 0.06em;
+      line-height: 2;
+    }
+
+    .bio-reach {
+      font-size: 10px;
+      color: var(--green-dark);
+      letter-spacing: 0.1em;
+      line-height: 1.8;
+    }
+
+    /* Social links */
+    .bio-links {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .bio-link {
+      font-size: 10px;
+      color: var(--green-dim);
+      letter-spacing: 0.15em;
+      text-decoration: none;
+      border: 1px solid var(--green-dark);
+      padding: 5px 12px;
+      transition: color 0.2s, border-color 0.2s, text-shadow 0.2s;
+    }
+    .bio-link:hover {
+      color: var(--green);
+      border-color: var(--green-dim);
+      text-shadow: 0 0 8px var(--green);
+    }
+
+    /* ── SKILLS ── */
+    .skills-section {
+      padding: 2.5rem 0;
+    }
+
+    .skills-eyebrow {
+      font-family: 'VT323', monospace;
+      font-size: 24px;
+      color: var(--green-dim);
+      letter-spacing: 0.18em;
+      margin-bottom: 1.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    .skills-eyebrow::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--green-dark);
+    }
+
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1px;
+      background: var(--green-dark);
+      border: 1px solid var(--green-dark);
+    }
+
+    @media (min-width: 640px) {
+      .skills-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    @media (min-width: 900px) {
+      .skills-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+
+    .skill-block {
+      background: var(--bg);
+      padding: 1.2rem 1.3rem;
+      transition: background 0.2s;
+    }
+
+    .skill-block:hover { background: rgba(0,25,0,0.9); }
+
+    .skill-category {
+      font-family: 'VT323', monospace;
+      font-size: 26px;
+      color: var(--green);
+      letter-spacing: 0.12em;
+      margin-bottom: 0.6rem;
+      text-shadow: 0 0 10px rgba(0,255,65,0.3);
+      border-bottom: 1px solid var(--green-dark);
+      padding-bottom: 0.4rem;
+    }
+
+    .skill-items {
+      font-size: 11px;
+      color: var(--green-dim);
+      letter-spacing: 0.06em;
+      line-height: 2;
+    }
+
+    .skill-block:hover .skill-items { color: var(--green); }
+    .skill-block:hover .skill-category { text-shadow: 0 0 14px rgba(0,255,65,0.5); }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <a class="topbar-back" href="work.html">← BACK</a>
+      <span class="topbar-title">ABOUT</span>
+    </div>
+  </div>
+
+  <div class="page">
+
+    <!-- ── SPLIT: photo + bio ── -->
+    <div class="split">
+
+      <div class="photo-wrap">
+        <div class="photo-frame">
+          <img src="images/about/about_pic.jpg" alt="Jack Leary">
+          <div class="bracket-br"></div>
+        </div>
+        <div class="photo-label">/SYS/USER/about_pic.jpg</div>
+      </div>
+
+      <div class="bio">
+        <div class="bio-eyebrow">/DIR/SYS/ABOUT</div>
+        <div class="bio-name">JACK<br>LEARY</div>
+        <div class="bio-text">I work in graphic and visual media, set and art design, and have experience with social media marketing. Skilled in both traditional and digital art — accustomed to everything from web design to printmaking. Based in Los Angeles and a California native.</div>
+        <div class="bio-reach">Please reach out with any questions about me or my work.</div>
+        <div class="bio-links">
+          <a class="bio-link" href="mailto:jack.leary2004@gmail.com">[ MAIL ]</a>
+          <a class="bio-link" href="https://www.instagram.com/jacklearyart/" target="_blank">[ INSTAGRAM ]</a>
+          <a class="bio-link" href="https://www.behance.net/jackleary/projects" target="_blank">[ BEHANCE ]</a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── SKILLS ── -->
+    <div class="skills-section">
+      <div class="skills-eyebrow">SKILLS & TOOLS</div>
+      <div class="skills-grid">
+
+        <div class="skill-block">
+          <div class="skill-category">ADOBE</div>
+          <div class="skill-items">Acrobat · After Effects<br>Illustrator · InDesign<br>Photoshop · Premiere Pro</div>
+        </div>
+
+        <div class="skill-block">
+          <div class="skill-category">DESIGN</div>
+          <div class="skill-items">Branding · Illustration<br>Photography · Typography<br>Packaging Design</div>
+        </div>
+
+        <div class="skill-block">
+          <div class="skill-category">FILM</div>
+          <div class="skill-items">Camera Work<br>Prop Design<br>Set Design</div>
+        </div>
+
+        <div class="skill-block">
+          <div class="skill-category">AI</div>
+          <div class="skill-items">ChatGPT · Gemini<br>Midjourney · Perplexity<br>Comfy UI · Claude</div>
+        </div>
+
+        <div class="skill-block">
+          <div class="skill-category">SOCIAL</div>
+          <div class="skill-items">Instagram · LinkedIn<br>Pinterest · Reddit<br>TikTok · X</div>
+        </div>
+
+        <div class="skill-block">
+          <div class="skill-category">MICROSOFT</div>
+          <div class="skill-items">Outlook · PowerPoint<br>Word · Teams · Meet</div>
+        </div>
+
+        <div class="skill-block">
+          <div class="skill-category">COMMS</div>
+          <div class="skill-items">Discord · GroupMe<br>Slack · Zoom</div>
+        </div>
+
+        <div class="skill-block">
+          <div class="skill-category">OTHER</div>
+          <div class="skill-items">Blender · Canva<br>Cargo · ReadyMag</div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

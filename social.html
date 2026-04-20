@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JACK LEARY — SOCIAL MEDIA</title>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #00ff41;
+      --green-dim: #00b32c;
+      --green-dark: #003b00;
+      --black: #000;
+      --bg: #020a02;
+    }
+
+    html, body {
+      width: 100%;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--green);
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px, transparent 3px,
+        rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 4px
+      );
+      pointer-events: none; z-index: 600;
+    }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: 42px;
+      border-bottom: 1px solid var(--green-dark);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1.4rem;
+      background: rgba(0,0,0,0.95);
+      z-index: 500;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 1rem; }
+    .topbar-back {
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      color: var(--green-dim);
+      text-decoration: none;
+      letter-spacing: 0.1em;
+      transition: color 0.2s;
+    }
+    .topbar-back:hover { color: var(--green); }
+    .topbar-title {
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      color: var(--green);
+      letter-spacing: 0.12em;
+    }
+
+    /* ── PAGE ── */
+    .page {
+      padding: 62px 1.6rem 6rem;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    /* ── PAGE TITLE ── */
+    .page-title-block {
+      padding: 1.8rem 0 2rem;
+      border-bottom: 1px solid var(--green-dark);
+      margin-bottom: 2.5rem;
+    }
+
+    .page-eyebrow {
+      font-size: 10px;
+      color: var(--green-dark);
+      letter-spacing: 0.22em;
+      margin-bottom: 0.4rem;
+    }
+
+    .page-title {
+      font-family: 'VT323', monospace;
+      font-size: clamp(42px, 8vw, 80px);
+      color: var(--green);
+      letter-spacing: 0.08em;
+      line-height: 1;
+      text-shadow: 0 0 30px rgba(0,255,65,0.2);
+    }
+
+    .page-subtitle {
+      font-size: 10px;
+      color: var(--green-dark);
+      letter-spacing: 0.15em;
+      margin-top: 0.5rem;
+    }
+
+    /* ── FOLDERS ── */
+    .folders-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* ── FOLDER ── */
+    .folder {
+      border: 1px solid var(--green-dark);
+      overflow: hidden;
+      transition: border-color 0.3s;
+    }
+
+    .folder.open {
+      border-color: var(--green-dim);
+    }
+
+    /* Folder tab + header */
+    .folder-tab {
+      display: flex;
+      align-items: stretch;
+      cursor: pointer;
+      background: rgba(0,10,0,0.6);
+      transition: background 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .folder-tab:hover { background: rgba(0,20,0,0.8); }
+    .folder.open .folder-tab { background: rgba(0,20,0,0.9); }
+
+    /* Left accent bar */
+    .folder-accent {
+      width: 4px;
+      background: var(--green-dark);
+      flex-shrink: 0;
+      transition: background 0.3s;
+    }
+    .folder.open .folder-accent,
+    .folder-tab:hover .folder-accent { background: var(--green-dim); }
+
+    .folder-header {
+      flex: 1;
+      padding: 1rem 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .folder-left { flex: 1; }
+
+    .folder-index {
+      font-size: 9px;
+      color: var(--green-dark);
+      letter-spacing: 0.2em;
+      margin-bottom: 0.3rem;
+    }
+
+    .folder-name {
+      font-family: 'VT323', monospace;
+      font-size: clamp(22px, 4vw, 34px);
+      color: var(--green);
+      letter-spacing: 0.1em;
+      text-shadow: 0 0 12px rgba(0,255,65,0.2);
+    }
+
+    .folder-meta {
+      font-size: 9px;
+      color: var(--green-dark);
+      letter-spacing: 0.12em;
+      margin-top: 0.2rem;
+    }
+
+    /* Preview strip — images peeking out */
+    .folder-preview {
+      display: flex;
+      gap: 3px;
+      align-items: center;
+      flex-shrink: 0;
+      overflow: hidden;
+      max-width: 220px;
+    }
+
+    .preview-thumb {
+      width: 54px;
+      height: 54px;
+      object-fit: cover;
+      border: 1px solid var(--green-dark);
+      opacity: 0.55;
+      flex-shrink: 0;
+      transition: opacity 0.3s;
+      filter: brightness(0.8);
+    }
+
+    .folder-tab:hover .preview-thumb { opacity: 0.85; }
+    .folder.open .preview-thumb { opacity: 0.9; }
+
+    .preview-more {
+      font-family: 'VT323', monospace;
+      font-size: 16px;
+      color: var(--green-dark);
+      letter-spacing: 0.1em;
+      flex-shrink: 0;
+      padding: 0 4px;
+    }
+
+    /* Toggle arrow */
+    .folder-arrow {
+      font-family: 'VT323', monospace;
+      font-size: 22px;
+      color: var(--green-dark);
+      flex-shrink: 0;
+      transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), color 0.2s;
+      margin-left: 0.5rem;
+    }
+    .folder.open .folder-arrow {
+      transform: rotate(90deg);
+      color: var(--green-dim);
+    }
+
+    /* ── FOLDER BODY ── */
+    .folder-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.5s cubic-bezier(0.16,1,0.3,1);
+      border-top: 0px solid var(--green-dark);
+    }
+
+    .folder.open .folder-body {
+      max-height: 2000px;
+      border-top: 1px solid var(--green-dark);
+    }
+
+    .folder-content {
+      padding: 1.4rem 1.2rem 1.6rem;
+    }
+
+    .folder-desc {
+      font-size: 12px;
+      color: var(--green-dim);
+      letter-spacing: 0.08em;
+      line-height: 2;
+      margin-bottom: 1.2rem;
+      max-width: 640px;
+    }
+
+    .folder-ig-link {
+      display: inline-block;
+      font-size: 12px;
+      color: var(--green-dim);
+      letter-spacing: 0.18em;
+      text-decoration: none;
+      border: 1px solid var(--green-dark);
+      padding: 7px 16px;
+      margin-bottom: 1.6rem;
+      transition: color 0.2s, border-color 0.2s, text-shadow 0.2s;
+    }
+    .folder-ig-link:hover {
+      color: var(--green);
+      border-color: var(--green-dim);
+      text-shadow: 0 0 8px var(--green);
+    }
+
+    /* Image grid inside folder */
+    .folder-grid {
+      columns: 2;
+      column-gap: 0.4rem;
+    }
+
+    @media (min-width: 540px) {
+      .folder-grid { columns: 3; }
+    }
+
+    @media (min-width: 768px) {
+      .folder-grid { columns: 4; }
+    }
+
+    .grid-item {
+      position: relative;
+      cursor: pointer;
+      border: 1px solid var(--green-dark);
+      overflow: hidden;
+      transition: border-color 0.2s;
+      break-inside: avoid;
+      margin-bottom: 0.4rem;
+      display: block;
+    }
+    .grid-item:hover { border-color: var(--green-dim); }
+
+    .grid-item img {
+      width: 100%;
+      height: auto;
+      display: block;
+      transition: filter 0.2s;
+    }
+    .grid-item:hover img { filter: brightness(0.7); }
+
+    .grid-expand {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s;
+      font-family: 'VT323', monospace;
+      font-size: 14px;
+      color: var(--green);
+      letter-spacing: 0.12em;
+      text-shadow: 0 0 8px var(--green);
+    }
+    .grid-item:hover .grid-expand { opacity: 1; }
+
+    /* ── LIGHTBOX ── */
+    .lightbox {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.97);
+      z-index: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .lightbox.open { opacity: 1; pointer-events: all; }
+
+    .lb-img {
+      max-width: 92vw;
+      max-height: 90vh;
+      object-fit: contain;
+      border: 1px solid var(--green-dim);
+      box-shadow: 0 0 60px rgba(0,255,65,0.1);
+      display: block;
+    }
+
+    .lb-close {
+      position: absolute;
+      top: 1rem; right: 1.4rem;
+      font-family: 'VT323', monospace;
+      font-size: 20px;
+      color: var(--green-dim);
+      cursor: pointer;
+      letter-spacing: 0.15em;
+      transition: color 0.2s;
+      z-index: 10;
+    }
+    .lb-close:hover { color: var(--green); }
+
+    .lb-nav {
+      position: absolute;
+      top: 50%; transform: translateY(-50%);
+      font-family: 'VT323', monospace;
+      font-size: 36px;
+      color: var(--green-dim);
+      cursor: pointer;
+      padding: 1rem;
+      transition: color 0.2s;
+      z-index: 10;
+    }
+    .lb-nav:hover { color: var(--green); text-shadow: 0 0 10px var(--green); }
+    .lb-nav.prev { left: 0.2rem; }
+    .lb-nav.next { right: 0.2rem; }
+
+    .lb-label {
+      position: absolute;
+      bottom: 1rem; left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      color: var(--green-dark);
+      letter-spacing: 0.15em;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <a class="topbar-back" href="work.html">← BACK</a>
+      <span class="topbar-title">SOCIAL MEDIA</span>
+    </div>
+  </div>
+
+  <div class="page">
+
+    <div class="page-title-block">
+      <div class="page-eyebrow">/DIR/DIGITAL</div>
+      <div class="page-title">SOCIAL<br>MEDIA</div>
+      <div class="page-subtitle">3 BRAND IDENTITIES — CLICK A FOLDER TO OPEN</div>
+    </div>
+
+    <div class="folders-list" id="foldersList"></div>
+
+  </div>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox">
+    <span class="lb-close" id="lbClose">[ CLOSE ]</span>
+    <span class="lb-nav prev" id="lbPrev">&#8592;</span>
+    <img class="lb-img" id="lbImg" src="" alt="">
+    <span class="lb-nav next" id="lbNext">&#8594;</span>
+    <div class="lb-label" id="lbLabel"></div>
+  </div>
+
+  <script>
+    const sections = [
+      {
+        name: 'OVER THE HUMP',
+        index: '01',
+        desc: 'Developed brand identity for a student wellness organization focused on mental health at the university level — creating a visual language that felt safe, inclusive, and authentic to who students are.',
+        igLink: 'https://www.instagram.com/overthehumpinitiative/',
+        igHandle: '@overthehumpinitiative',
+        folder: 'images/social/over_the_hump/',
+        files: ['over_the_hump_1.png','over_the_hump_2.jpg','over_the_hump_3.jpg','over_the_hump_4.jpg','over_the_hump_5.jpg','over_the_hump_6.jpg','over_the_hump_7.jpg','over_the_hump_8.jpg','over_the_hump_9.jpg']
+      },
+      {
+        name: 'STRIDES',
+        index: '02',
+        desc: 'Crafted a brand identity for an LA-based run club centered on college student well-being — building a visual system that felt energetic, community-driven, and rooted in the culture of the city.',
+        igLink: 'https://www.instagram.com/strideslosangeles/',
+        igHandle: '@strideslosangeles',
+        folder: 'images/social/strides/',
+        files: ['strides_1.png','strides_2.jpg','strides_3.jpg','strides_4.png']
+      },
+      {
+        name: 'SIG EP',
+        index: '03',
+        desc: 'Built a brand identity for a social fraternity rooted in brotherhood, scholarship, and a genuine commitment to doing the work — translating those values into a visual presence that felt both timeless and sharp.',
+        igLink: 'https://www.instagram.com/lmusigep/',
+        igHandle: '@lmusigep',
+        folder: 'images/social/sig_ep/',
+        files: ['sig_ep_1.jpg','sig_ep_2.jpg','sig_ep_3.jpg','sig_ep_4.jpg','sig_ep_5.png','sig_ep_6.png','sig_ep_7.png','sig_ep_8.png']
+      }
+    ];
+
+    const foldersList = document.getElementById('foldersList');
+    const lightbox = document.getElementById('lightbox');
+    const lbImg = document.getElementById('lbImg');
+    const lbLabel = document.getElementById('lbLabel');
+    const lbPrev = document.getElementById('lbPrev');
+    const lbNext = document.getElementById('lbNext');
+
+    let lbImages = [];
+    let lbCurrent = 0;
+
+    sections.forEach(sec => {
+      const imgs = sec.files.map(f => sec.folder + f);
+
+      // Folder element
+      const folder = document.createElement('div');
+      folder.className = 'folder';
+
+      // Preview thumbs (first 3)
+      const previewImgs = imgs.slice(0, 3).map(src => {
+        return `<img class="preview-thumb" src="${src}" alt="" loading="lazy">`;
+      }).join('');
+
+      const moreCount = sec.count - 3;
+
+      folder.innerHTML = `
+        <div class="folder-tab">
+          <div class="folder-accent"></div>
+          <div class="folder-header">
+            <div class="folder-left">
+              <div class="folder-index">FOLDER ${sec.index} — ${sec.files.length} FILES</div>
+              <div class="folder-name">${sec.name}</div>
+              <div class="folder-meta">${sec.igHandle}</div>
+            </div>
+            <div class="folder-preview">
+              ${previewImgs}
+              ${moreCount > 0 ? `<span class="preview-more">+${moreCount}</span>` : ''}
+            </div>
+            <span class="folder-arrow">▶</span>
+          </div>
+        </div>
+        <div class="folder-body">
+          <div class="folder-content">
+            <div class="folder-desc">${sec.desc}</div>
+            <a class="folder-ig-link" href="${sec.igLink}" target="_blank">[ VIEW ON INSTAGRAM ↗ ]</a>
+            <div class="folder-grid"></div>
+          </div>
+        </div>
+      `;
+
+      // Toggle open/close
+      const tab = folder.querySelector('.folder-tab');
+      tab.addEventListener('click', () => {
+        folder.classList.toggle('open');
+      });
+
+      // Build grid
+      const grid = folder.querySelector('.folder-grid');
+      imgs.forEach((src, i) => {
+        const item = document.createElement('div');
+        item.className = 'grid-item';
+
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = sec.name + ' ' + (i + 1);
+        img.loading = 'lazy';
+
+        const expand = document.createElement('div');
+        expand.className = 'grid-expand';
+        expand.textContent = '[ EXPAND ]';
+
+        item.appendChild(img);
+        item.appendChild(expand);
+
+        item.addEventListener('click', () => {
+          lbImages = imgs;
+          lbCurrent = i;
+          renderLightbox();
+          lightbox.classList.add('open');
+        });
+
+        grid.appendChild(item);
+      });
+
+      foldersList.appendChild(folder);
+    });
+
+    function renderLightbox() {
+      lbImg.src = lbImages[lbCurrent];
+      lbLabel.textContent = String(lbCurrent + 1).padStart(2,'0') + ' / ' + String(lbImages.length).padStart(2,'0');
+    }
+
+    document.getElementById('lbClose').onclick = () => lightbox.classList.remove('open');
+
+    lbNext.onclick = () => {
+      lbCurrent = (lbCurrent + 1) % lbImages.length;
+      renderLightbox();
+    };
+
+    lbPrev.onclick = () => {
+      lbCurrent = (lbCurrent - 1 + lbImages.length) % lbImages.length;
+      renderLightbox();
+    };
+
+    document.addEventListener('keydown', e => {
+      if (!lightbox.classList.contains('open')) return;
+      if (e.key === 'Escape') lightbox.classList.remove('open');
+      if (e.key === 'ArrowRight') lbNext.click();
+      if (e.key === 'ArrowLeft') lbPrev.click();
+    });
+
+    let swipeX = 0;
+    lightbox.addEventListener('touchstart', e => { swipeX = e.touches[0].clientX; }, { passive: true });
+    lightbox.addEventListener('touchend', e => {
+      const dx = swipeX - e.changedTouches[0].clientX;
+      if (Math.abs(dx) > 40) dx > 0 ? lbNext.click() : lbPrev.click();
+    }, { passive: true });
+  </script>
+</body>
+</html>

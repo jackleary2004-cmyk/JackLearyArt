@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JACK LEARY — POSTER ARCHIVES</title>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #00ff41;
+      --green-dim: #00b32c;
+      --green-dark: #003b00;
+      --black: #000;
+      --bg: #020a02;
+    }
+
+    html, body {
+      width: 100%;
+      background: var(--bg);
+      color: var(--green);
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px, transparent 3px,
+        rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 4px
+      );
+      pointer-events: none; z-index: 600;
+    }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: 42px;
+      border-bottom: 1px solid var(--green-dark);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1.4rem;
+      background: rgba(0,0,0,0.95);
+      z-index: 500;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 1rem; }
+    .topbar-back {
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      color: var(--green-dim);
+      text-decoration: none;
+      letter-spacing: 0.1em;
+      transition: color 0.2s;
+    }
+    .topbar-back:hover { color: var(--green); }
+    .topbar-title {
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      color: var(--green);
+      letter-spacing: 0.12em;
+    }
+    .topbar-right {
+      font-size: 10px;
+      color: var(--green-dark);
+      letter-spacing: 0.1em;
+    }
+
+    /* ── MASONRY GRID ── */
+    .masonry {
+      padding: 5rem 1.2rem 4rem;
+      columns: 2;
+      column-gap: 0.5rem;
+    }
+
+    @media (min-width: 540px) {
+      .masonry { columns: 3; }
+    }
+
+    @media (min-width: 900px) {
+      .masonry { columns: 4; }
+    }
+
+    @media (min-width: 1200px) {
+      .masonry { columns: 5; }
+    }
+
+    /* ── POSTER CARD ── */
+    .poster-card {
+      position: relative;
+      cursor: pointer;
+      border: 1px solid var(--green-dark);
+      overflow: hidden;
+      break-inside: avoid;
+      margin-bottom: 0.5rem;
+      display: block;
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+
+    .poster-card:hover {
+      border-color: var(--green-dim);
+      box-shadow: 0 0 16px rgba(0,255,65,0.08);
+    }
+
+    .poster-card img {
+      width: 100%;
+      height: auto;
+      display: block;
+      transition: filter 0.25s;
+    }
+
+    .poster-card:hover img {
+      filter: brightness(0.75);
+    }
+
+    /* Poster number label */
+    .poster-num {
+      position: absolute;
+      top: 6px; left: 8px;
+      font-size: 10px;
+      color: var(--green);
+      letter-spacing: 0.12em;
+      text-shadow: 0 0 6px rgba(0,0,0,0.9);
+      z-index: 2;
+    }
+
+    /* Expand hint */
+    .poster-hint {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s;
+      font-family: 'VT323', monospace;
+      font-size: 16px;
+      color: var(--green);
+      letter-spacing: 0.18em;
+      text-shadow: 0 0 8px var(--green);
+    }
+    .poster-card:hover .poster-hint { opacity: 1; }
+
+    /* ── LIGHTBOX ── */
+    .lightbox {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.97);
+      z-index: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .lightbox.open { opacity: 1; pointer-events: all; }
+
+    .lb-img {
+      max-width: 92vw;
+      max-height: 92vh;
+      object-fit: contain;
+      border: 1px solid var(--green-dim);
+      box-shadow: 0 0 60px rgba(0,255,65,0.1);
+      display: block;
+    }
+
+    .lb-close {
+      position: absolute;
+      top: 1rem; right: 1.4rem;
+      font-family: 'VT323', monospace;
+      font-size: 20px;
+      color: var(--green-dim);
+      cursor: pointer;
+      letter-spacing: 0.15em;
+      transition: color 0.2s;
+      z-index: 10;
+    }
+    .lb-close:hover { color: var(--green); }
+
+    .lb-nav {
+      position: absolute;
+      top: 50%; transform: translateY(-50%);
+      font-family: 'VT323', monospace;
+      font-size: 36px;
+      color: var(--green-dim);
+      cursor: pointer;
+      padding: 1rem;
+      transition: color 0.2s;
+      z-index: 10;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .lb-nav:hover { color: var(--green); text-shadow: 0 0 10px var(--green); }
+    .lb-nav.prev { left: 0.2rem; }
+    .lb-nav.next { right: 0.2rem; }
+
+    .lb-label {
+      position: absolute;
+      bottom: 1rem; left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      color: var(--green-dark);
+      letter-spacing: 0.15em;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <a class="topbar-back" href="work.html">← BACK</a>
+      <span class="topbar-title">POSTER ARCHIVES</span>
+    </div>
+    <div class="topbar-right">/DIR/PRINT — 17 FILES</div>
+  </div>
+
+  <div class="masonry" id="masonry"></div>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox">
+    <span class="lb-close" id="lbClose">[ CLOSE ]</span>
+    <span class="lb-nav prev" id="lbPrev">&#8592;</span>
+    <img class="lb-img" id="lbImg" src="" alt="">
+    <span class="lb-nav next" id="lbNext">&#8594;</span>
+    <div class="lb-label" id="lbLabel"></div>
+  </div>
+
+  <script>
+    const folder = 'images/Poster_Archives/';
+
+    // Shuffled order with correct extensions
+    const posters = [
+      { num: 7,  ext: 'jpg' },
+      { num: 13, ext: 'jpg' },
+      { num: 3,  ext: 'jpg' },
+      { num: 16, ext: 'png' },
+      { num: 1,  ext: 'jpg' },
+      { num: 11, ext: 'png' },
+      { num: 5,  ext: 'jpg' },
+      { num: 17, ext: 'png' },
+      { num: 9,  ext: 'png' },
+      { num: 2,  ext: 'jpg' },
+      { num: 14, ext: 'jpg' },
+      { num: 6,  ext: 'jpg' },
+      { num: 12, ext: 'png' },
+      { num: 4,  ext: 'jpg' },
+      { num: 10, ext: 'jpg' },
+      { num: 8,  ext: 'png' },
+      { num: 15, ext: 'png' },
+    ];
+
+    const masonry = document.getElementById('masonry');
+    const lightbox = document.getElementById('lightbox');
+    const lbImg = document.getElementById('lbImg');
+    const lbLabel = document.getElementById('lbLabel');
+    const lbPrev = document.getElementById('lbPrev');
+    const lbNext = document.getElementById('lbNext');
+    let lbCurrent = 0;
+
+    // Build masonry grid
+    posters.forEach((p, i) => {
+      const card = document.createElement('div');
+      card.className = 'poster-card';
+
+      const img = document.createElement('img');
+      img.src = folder + 'poster_' + p.num + '.' + p.ext;
+      img.alt = 'Poster ' + p.num;
+      img.loading = i < 6 ? 'eager' : 'lazy';
+
+      const num = document.createElement('span');
+      num.className = 'poster-num';
+      num.textContent = String(i + 1).padStart(2, '0');
+
+      const hint = document.createElement('div');
+      hint.className = 'poster-hint';
+      hint.textContent = '[ EXPAND ]';
+
+      card.appendChild(img);
+      card.appendChild(num);
+      card.appendChild(hint);
+
+      card.addEventListener('click', () => {
+        lbCurrent = i;
+        renderLb();
+        lightbox.classList.add('open');
+      });
+
+      masonry.appendChild(card);
+    });
+
+    function renderLb() {
+      const p = posters[lbCurrent];
+      lbImg.src = folder + 'poster_' + p.num + '.' + p.ext;
+      lbLabel.textContent = String(lbCurrent + 1).padStart(2,'0') + ' / ' + posters.length;
+    }
+
+    document.getElementById('lbClose').onclick = () => lightbox.classList.remove('open');
+
+    lbNext.onclick = () => {
+      lbCurrent = (lbCurrent + 1) % posters.length;
+      renderLb();
+    };
+
+    lbPrev.onclick = () => {
+      lbCurrent = (lbCurrent - 1 + posters.length) % posters.length;
+      renderLb();
+    };
+
+    document.addEventListener('keydown', e => {
+      if (!lightbox.classList.contains('open')) return;
+      if (e.key === 'Escape') lightbox.classList.remove('open');
+      if (e.key === 'ArrowRight') lbNext.click();
+      if (e.key === 'ArrowLeft') lbPrev.click();
+    });
+
+    let swipeX = 0;
+    lightbox.addEventListener('touchstart', e => { swipeX = e.touches[0].clientX; }, { passive: true });
+    lightbox.addEventListener('touchend', e => {
+      const dx = swipeX - e.changedTouches[0].clientX;
+      if (Math.abs(dx) > 40) dx > 0 ? lbNext.click() : lbPrev.click();
+    }, { passive: true });
+  </script>
+</body>
+</html>
