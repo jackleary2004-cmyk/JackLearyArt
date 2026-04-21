@@ -94,7 +94,7 @@
 
     .hero-desc {
       font-size: 10px;
-      color: var(--green-dark);
+      color: var(--green-dim);
       letter-spacing: 0.05em;
       line-height: 1.8;
       flex: 1;
@@ -410,6 +410,20 @@
     <div class="book-eyebrow">THE BOOKLET</div>
 
     <div class="viewer">
+      <div class="book-controls">
+        <div class="nav-row">
+          <button class="nav-btn" id="btnPrev" disabled>&#8592;</button>
+          <div class="view-tabs" id="viewTabs">
+            <button class="view-tab active" data-view="0">COVER</button>
+            <button class="view-tab" data-view="1">PG 1–2</button>
+            <button class="view-tab" data-view="2">PG 3–4</button>
+            <button class="view-tab" data-view="3">BACK</button>
+          </div>
+          <button class="nav-btn" id="btnNext">&#8594;</button>
+        </div>
+        <div class="view-label" id="viewLabel">COVER</div>
+      </div>
+
       <div class="book-stage" id="bookStage">
 
         <!-- View 0: Cover -->
@@ -454,20 +468,6 @@
           </div>
         </div>
 
-      </div>
-
-      <div class="book-controls">
-        <div class="nav-row">
-          <button class="nav-btn" id="btnPrev" disabled>&#8592;</button>
-          <div class="view-tabs" id="viewTabs">
-            <button class="view-tab active" data-view="0">COVER</button>
-            <button class="view-tab" data-view="1">PG 1–2</button>
-            <button class="view-tab" data-view="2">PG 3–4</button>
-            <button class="view-tab" data-view="3">BACK</button>
-          </div>
-          <button class="nav-btn" id="btnNext">&#8594;</button>
-        </div>
-        <div class="view-label" id="viewLabel">COVER</div>
       </div>
     </div>
   </div>

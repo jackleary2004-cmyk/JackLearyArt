@@ -331,6 +331,11 @@
       pointer-events: all;
     }
 
+    .contact-icons.touch-open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
     .contact-icon-btn {
       display: flex;
       flex-direction: column;
@@ -359,6 +364,25 @@
     }
 
     .contact-icon-btn:hover span { color: var(--green); text-shadow: 0 0 6px var(--green); }
+
+    @media (max-width: 600px) {
+      .contact-icons {
+        gap: 0.6rem;
+        flex-wrap: wrap;
+        padding: 0.5rem;
+        align-content: center;
+      }
+      .contact-icon-btn svg {
+        width: 24px;
+        height: 24px;
+      }
+      .contact-icon-btn span {
+        font-size: 11px;
+      }
+      .contact-icon-btn {
+        gap: 4px;
+      }
+    }
 
     @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
     @keyframes pulse {
@@ -689,6 +713,25 @@
     });
 
     function navigate(href) { window.location.href = href; }
+
+    // Touch toggle for contact cell on mobile
+    const contactCell = document.querySelector('.contact-cell');
+    const contactIcons = document.getElementById('contactIcons');
+    if (contactCell && contactIcons) {
+      contactCell.addEventListener('click', (e) => {
+        // Only handle touch/click toggle on mobile (no hover support)
+        if (window.matchMedia('(hover: none)').matches) {
+          e.stopPropagation();
+          contactIcons.classList.toggle('touch-open');
+        }
+      });
+      // Tapping outside closes it
+      document.addEventListener('click', (e) => {
+        if (!contactCell.contains(e.target)) {
+          contactIcons.classList.remove('touch-open');
+        }
+      });
+    }
 
     // Stagger entrance
     cells.forEach((cell, i) => {
