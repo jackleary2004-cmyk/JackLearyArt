@@ -309,81 +309,6 @@
       animation: pulse 2s infinite;
     }
 
-    /* ── CONTACT CELL ICONS ── */
-    .contact-icons {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 1.2rem;
-      background: rgba(0,0,0,0.88);
-      opacity: 0;
-      transition: opacity 0.25s ease;
-      z-index: 4;
-      pointer-events: none;
-      overflow: hidden;
-      padding: 0 0.5rem;
-    }
-
-    .contact-cell:hover .contact-icons {
-      opacity: 1;
-      pointer-events: all;
-    }
-
-    .contact-icons.touch-open {
-      opacity: 1;
-      pointer-events: all;
-    }
-
-    .contact-icon-btn {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      text-decoration: none;
-      cursor: pointer;
-      transition: transform 0.15s ease;
-      flex-shrink: 0;
-    }
-
-    .contact-icon-btn:hover { transform: scale(1.15); }
-
-    .contact-icon-btn svg {
-      image-rendering: pixelated;
-      filter: drop-shadow(0 0 8px #00ff41);
-      width: 36px;
-      height: 36px;
-    }
-
-    .contact-icon-btn span {
-      font-family: 'VT323', monospace;
-      font-size: 14px;
-      color: var(--green-dim);
-      letter-spacing: 0.12em;
-    }
-
-    .contact-icon-btn:hover span { color: var(--green); text-shadow: 0 0 6px var(--green); }
-
-    @media (max-width: 600px) {
-      .contact-icons {
-        gap: 0.6rem;
-        flex-wrap: wrap;
-        padding: 0.5rem;
-        align-content: center;
-      }
-      .contact-icon-btn svg {
-        width: 24px;
-        height: 24px;
-      }
-      .contact-icon-btn span {
-        font-size: 11px;
-      }
-      .contact-icon-btn {
-        gap: 4px;
-      }
-    }
-
     @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
     @keyframes pulse {
       0%, 100% { opacity: 1; box-shadow: 0 0 6px var(--green); }
@@ -503,62 +428,12 @@
       <div class="cell-bracket"></div>
     </div>
 
-    <div class="section-cell contact-cell" data-name="CONTACT & SOCIALS" data-tag="/DIR/COMM" data-href="" data-img="images/preview_images/contacts_social_preview.png">
+    <div class="section-cell" data-name="PUCK + CHUCK" data-tag="/DIR/BRAND" data-href="puck_and_chuck.html" data-img="images/preview_images/puck_and_chuck_preview.png">
       <div class="cell-img"></div>
       <div class="cell-content">
-        <span class="cell-tag">/DIR/COMM</span>
-        <span class="cell-name">CONTACT<br>& SOCIALS</span>
-        <div class="cell-meta"><span>LINKS</span><span>.URL</span></div>
-      </div>
-      <div class="contact-icons" id="contactIcons">
-        <a class="contact-icon-btn" href="mailto:jack.leary2004@gmail.com" title="Email">
-          <svg width="32" height="32" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="1" y="3" width="14" height="10" fill="#00ff41"/>
-            <rect x="2" y="4" width="12" height="8" fill="#020a02"/>
-            <rect x="2" y="4" width="1" height="1" fill="#00ff41"/>
-            <rect x="3" y="5" width="1" height="1" fill="#00ff41"/>
-            <rect x="4" y="6" width="1" height="1" fill="#00ff41"/>
-            <rect x="5" y="7" width="1" height="1" fill="#00ff41"/>
-            <rect x="6" y="8" width="1" height="1" fill="#00ff41"/>
-            <rect x="7" y="9" width="2" height="1" fill="#00ff41"/>
-            <rect x="9" y="8" width="1" height="1" fill="#00ff41"/>
-            <rect x="10" y="7" width="1" height="1" fill="#00ff41"/>
-            <rect x="11" y="6" width="1" height="1" fill="#00ff41"/>
-            <rect x="12" y="5" width="1" height="1" fill="#00ff41"/>
-            <rect x="13" y="4" width="1" height="1" fill="#00ff41"/>
-            <rect x="3" y="11" width="1" height="1" fill="#00ff41"/>
-            <rect x="12" y="11" width="1" height="1" fill="#00ff41"/>
-          </svg>
-          <span>MAIL</span>
-        </a>
-        <a class="contact-icon-btn" href="https://www.instagram.com/jacklearyart/" target="_blank" title="Instagram">
-          <svg width="32" height="32" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="2" y="2" width="12" height="12" fill="#00ff41"/>
-            <rect x="3" y="3" width="10" height="10" fill="#020a02"/>
-            <rect x="4" y="4" width="8" height="8" fill="#00ff41"/>
-            <rect x="5" y="5" width="6" height="6" fill="#020a02"/>
-            <rect x="6" y="6" width="4" height="4" fill="#00ff41"/>
-            <rect x="7" y="7" width="2" height="2" fill="#020a02"/>
-            <rect x="11" y="3" width="2" height="2" fill="#00ff41"/>
-            <rect x="12" y="4" width="1" height="1" fill="#020a02"/>
-          </svg>
-          <span>INSTAGRAM</span>
-        </a>
-        <a class="contact-icon-btn" href="https://www.behance.net/jackleary/projects" target="_blank" title="Behance">
-          <svg width="32" height="32" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="1" y="4" width="7" height="2" fill="#00ff41"/>
-            <rect x="1" y="7" width="7" height="2" fill="#00ff41"/>
-            <rect x="1" y="10" width="7" height="2" fill="#00ff41"/>
-            <rect x="1" y="4" width="2" height="8" fill="#00ff41"/>
-            <rect x="6" y="4" width="2" height="4" fill="#00ff41"/>
-            <rect x="6" y="7" width="2" height="5" fill="#00ff41"/>
-            <rect x="9" y="5" width="6" height="2" fill="#00ff41"/>
-            <rect x="9" y="9" width="6" height="2" fill="#00ff41"/>
-            <rect x="9" y="5" width="2" height="6" fill="#00ff41"/>
-            <rect x="13" y="7" width="2" height="2" fill="#00ff41"/>
-          </svg>
-          <span>BEHANCE</span>
-        </a>
+        <span class="cell-tag">/DIR/BRAND</span>
+        <span class="cell-name">PUCK +<br>CHUCK</span>
+        <div class="cell-meta"><span>14 FILES</span><span>.PNG .PDF</span></div>
       </div>
       <div class="cell-bracket"></div>
     </div>
@@ -622,7 +497,6 @@
           cellVideo.play().catch(() => {});
         }
 
-        if (cell.classList.contains('contact-cell')) return;
         clearTimeout(hoverTimer);
         hoverTimer = setTimeout(() => showExpand(cell), 350);
       });
@@ -642,8 +516,6 @@
         statusRight.textContent = 'HOVER A DIRECTORY TO PREVIEW';
       });
 
-      // Don't navigate or expand contact cell — it has its own icon overlay
-      if (cell.classList.contains('contact-cell')) return;
       cell.addEventListener('click', () => navigate(cell.dataset.href));
     });
 
@@ -713,25 +585,6 @@
     });
 
     function navigate(href) { window.location.href = href; }
-
-    // Touch toggle for contact cell on mobile
-    const contactCell = document.querySelector('.contact-cell');
-    const contactIcons = document.getElementById('contactIcons');
-    if (contactCell && contactIcons) {
-      contactCell.addEventListener('click', (e) => {
-        // Only handle touch/click toggle on mobile (no hover support)
-        if (window.matchMedia('(hover: none)').matches) {
-          e.stopPropagation();
-          contactIcons.classList.toggle('touch-open');
-        }
-      });
-      // Tapping outside closes it
-      document.addEventListener('click', (e) => {
-        if (!contactCell.contains(e.target)) {
-          contactIcons.classList.remove('touch-open');
-        }
-      });
-    }
 
     // Stagger entrance
     cells.forEach((cell, i) => {
