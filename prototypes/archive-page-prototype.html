@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jack Leary — Archive</title>
+<style>
+  /* League Mono / League Spartan — same real, self-hosted font files as
+     every other page on the site. */
+  @font-face {
+    font-family: "League Mono";
+    src: url("../src/fonts/league-mono/LeagueMono-Thin.woff2") format("woff2");
+    font-weight: 100;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "League Mono";
+    src: url("../src/fonts/league-mono/LeagueMono-Regular.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "League Mono";
+    src: url("../src/fonts/league-mono/LeagueMono-ExtraBold.woff2") format("woff2");
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "League Spartan";
+    src: url("../src/fonts/league-spartan/LeagueSpartan-ExtraBold.woff2") format("woff2");
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+  }
+</style>
+<style>
+  /*
+    PROTOTYPE NOTES:
+    - Archive page: a masonry grid of every poster in src/images/archive/
+      (17 total — the full set, migrated over from the old top-level
+      images/Poster_Archives/ folder so nothing is missing).
+    - Hover effect is the exact ripple pattern from surf-page-prototype.html:
+      pure transform (no real box resizing, so no cropping / reflow), the
+      hovered tile scales up, and nearby tiles get pushed away with a
+      distance-scaled delay so it radiates outward. Click opens the same
+      prev/next/close lightbox.
+    - Nav-level page (not a project under Work), so the back-link returns
+      to Home, and the accent is blue — matching the "Archive" nav link's
+      own hover-blue class on the home page.
+  */
+
+  * { border-radius: 0 !important; } /* sharp corners everywhere, per style guide */
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --white: #ffffff;
+    --black: #000000;
+    --red:   #eb1c1c;
+    --blue:  #48acf0;
+    --yellow:#f0e100;
+
+    --side-pad: clamp(24px, calc(-2.4px + 6.77vw), 100px);
+    --font-display: "League Spartan", "Helvetica Neue", Arial, sans-serif;
+    --font-body:    "League Mono", "Helvetica Neue", Arial, monospace;
+    --font-caption: "League Mono", "Helvetica Neue", Arial, monospace;
+  }
+
+  html, body {
+    background: var(--black);
+    color: var(--white);
+    font-family: var(--font-body);
+  }
+
+  a { color: inherit; }
+
+  /* ---------- HEADER ---------- */
+
+  .back-link {
+    position: fixed;
+    top: 20px;
+    left: var(--side-pad);
+    z-index: 20;
+    font-family: var(--font-caption);
+    font-weight: 100;
+    font-size: clamp(12px, 1.4vw, 15px);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: rgba(255,255,255,0.55);
+  }
+  .back-link:hover { color: var(--blue); }
+
+  .project-header {
+    padding: 7rem var(--side-pad) 3.5rem;
+    max-width: 760px;
+  }
+
+  .project-header h1 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: clamp(2.6rem, 7vw, 5.5rem);
+    line-height: 0.95;
+    letter-spacing: -0.01em;
+    margin-bottom: 1.5rem;
+  }
+
+  .project-header p.body-copy {
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: clamp(1rem, 1.5vw, 1.15rem);
+    line-height: 1.55;
+    color: rgba(255,255,255,0.8);
+    max-width: 620px;
+    margin-bottom: 1.1rem;
+  }
+
+  .project-header .caption {
+    font-family: var(--font-caption);
+    font-weight: 100;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+  }
+
+  /* ---------- GRID (column masonry, no cropping / no rounding gaps) ---- */
+
+  .archive-grid {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 0 var(--side-pad) 6rem;
+  }
+
+  .archive-col {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .archive-tile {
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+  }
+
+  .archive-tile img,
+  .archive-tile video {
+    width: 100%;
+    height: auto;
+    display: block;
+    pointer-events: none;
+  }
+
+  .archive-tile .type-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgba(10,10,10,0.6);
+    color: var(--white);
+    font-size: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+
+  .grid-loading {
+    padding: 2rem var(--side-pad);
+    font-family: var(--font-caption);
+    font-weight: 100;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+  }
+
+  /* ---------- LIGHTBOX ---------- */
+
+  #lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.96);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  #lightbox.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  #lightbox .stage {
+    max-width: 82vw;
+    max-height: 82vh;
+  }
+  #lightbox .stage img,
+  #lightbox .stage video {
+    max-width: 82vw;
+    max-height: 82vh;
+    display: block;
+  }
+
+  #lightbox .close-btn,
+  #lightbox .nav-btn {
+    position: absolute;
+    background: none;
+    border: none;
+    color: var(--white);
+    cursor: pointer;
+    font-family: var(--font-caption);
+  }
+
+  #lightbox .close-btn {
+    top: 24px;
+    right: var(--side-pad);
+    font-size: 28px;
+    line-height: 1;
+    font-weight: 100;
+  }
+  #lightbox .close-btn:hover { color: var(--yellow); }
+
+  #lightbox .nav-btn {
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 40px;
+    font-weight: 100;
+    padding: 0.5rem 1rem;
+  }
+  #lightbox .nav-btn:hover { color: var(--yellow); }
+  #lightbox .nav-prev { left: 12px; }
+  #lightbox .nav-next { right: 12px; }
+
+  #lightbox .index-label {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-caption);
+    font-weight: 100;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.6);
+  }
+
+  @media (max-width: 700px) {
+    .archive-grid { gap: 4px; }
+    .archive-col { gap: 4px; }
+  }
+</style>
+</head>
+<body>
+
+  <a class="back-link" href="home-v2-prototype.html">← Home</a>
+
+  <header class="project-header">
+    <h1>Archive</h1>
+    <p class="body-copy">
+      The full archive — posters and motion graphics, every piece in one place, in no particular order.
+    </p>
+    <div class="caption">Poster Design, Motion Graphics, Graphic Design</div>
+  </header>
+
+  <div class="grid-loading" id="gridLoading">loading 14 pieces…</div>
+  <div class="archive-grid" id="archiveGrid"></div>
+
+  <div id="lightbox">
+    <button class="nav-btn nav-prev" id="lbPrev" aria-label="Previous">&#8249;</button>
+    <div class="stage" id="lbStage"></div>
+    <button class="nav-btn nav-next" id="lbNext" aria-label="Next">&#8250;</button>
+    <button class="close-btn" id="lbClose" aria-label="Close">&times;</button>
+    <div class="index-label" id="lbIndex"></div>
+  </div>
+
+<script>
+(function () {
+  // ---- 11 posters + 3 motion graphics pieces, mixed together (poster_1–6
+  // were dropped — those were duplicates of the Hangul poster series, not
+  // part of this archive) ----
+  const BASE = "../src/images/archive/";
+  const FILES = [
+    "poster_7.jpg", "poster_8.png", "poster_9.png", "a_good_day.mp4",
+    "poster_10.jpg", "poster_11.png", "poster_12.png", "925.mp4",
+    "poster_13.jpg", "poster_14.jpg", "poster_15.png", "a_place_where_love_goes.mp4",
+    "poster_16.png", "poster_17.png",
+  ];
+  const isVideo = (f) => f.endsWith(".mp4");
+
+  const COLUMNS = 5;
+
+  const grid = document.getElementById("archiveGrid");
+  const gridLoading = document.getElementById("gridLoading");
+
+  // ---- Measure each file's real aspect ratio before laying anything out
+  function loadAspect(file) {
+    return new Promise((resolve) => {
+      if (isVideo(file)) {
+        const v = document.createElement("video");
+        v.preload = "metadata";
+        v.muted = true;
+        v.onloadedmetadata = () => resolve((v.videoWidth / v.videoHeight) || 1);
+        v.onerror = () => resolve(1);
+        v.src = BASE + file;
+      } else {
+        const im = new Image();
+        im.onload = () => resolve(im.naturalWidth / im.naturalHeight);
+        im.onerror = () => resolve(1);
+        im.src = BASE + file;
+      }
+    });
+  }
+
+  // ---- Ripple: a purely visual (transform-only) effect, identical to the
+  // surf page — layout/box sizes never change, so this can't reintroduce
+  // cropping or rounding gaps. ----
+  let allTiles = [];
+  let rippledTiles = [];
+
+  function clearRipple() {
+    rippledTiles.forEach((tile) => {
+      tile.style.transform = "";
+      tile.style.transitionDelay = "";
+      tile.style.zIndex = "";
+      tile.style.boxShadow = "";
+    });
+    rippledTiles = [];
+  }
+
+  function rippleFrom(sourceTile) {
+    clearRipple();
+
+    const srcRect = sourceTile.getBoundingClientRect();
+    const cx = srcRect.left + srcRect.width / 2;
+    const cy = srcRect.top + srcRect.height / 2;
+    const radius = srcRect.width * 3.6;
+    const maxPush = srcRect.width * 0.2;
+
+    sourceTile.style.transform = "scale(1.1)";
+    sourceTile.style.transitionDelay = "0ms";
+    sourceTile.style.zIndex = "5";
+    sourceTile.style.boxShadow = "0 16px 38px rgba(0,0,0,0.4)";
+    rippledTiles.push(sourceTile);
+
+    allTiles.forEach((tile) => {
+      if (tile === sourceTile) return;
+      const r = tile.getBoundingClientRect();
+      const tx = r.left + r.width / 2;
+      const ty = r.top + r.height / 2;
+      const dx = tx - cx, dy = ty - cy;
+      const dist = Math.hypot(dx, dy) || 1;
+      if (dist >= radius) return;
+
+      const strength = 0.15 + 0.85 * Math.cos((dist / radius) * (Math.PI / 2));
+      const push = maxPush * strength;
+      const nx = dx / dist, ny = dy / dist;
+
+      tile.style.transform = `translate(${(nx * push).toFixed(1)}px, ${(ny * push).toFixed(1)}px)`;
+      tile.style.transitionDelay = Math.round((dist / radius) * 90) + "ms";
+      rippledTiles.push(tile);
+    });
+  }
+
+  // ---- Build the masonry columns (after every image's aspect is known) --
+  Promise.all(FILES.map(loadAspect)).then((aspects) => {
+    gridLoading.remove();
+
+    const cols = [];
+    const colHeights = new Array(COLUMNS).fill(0);
+    for (let c = 0; c < COLUMNS; c++) {
+      const col = document.createElement("div");
+      col.className = "archive-col";
+      grid.appendChild(col);
+      cols.push(col);
+    }
+    const colWidth = cols[0].getBoundingClientRect().width;
+
+    FILES.forEach((file, i) => {
+      const aspect = aspects[i];
+      const itemHeight = colWidth / aspect;
+
+      let target = 0;
+      for (let c = 1; c < COLUMNS; c++) {
+        if (colHeights[c] < colHeights[target]) target = c;
+      }
+      colHeights[target] += itemHeight;
+
+      const tile = document.createElement("div");
+      tile.className = "archive-tile";
+
+      let videoEl = null;
+      if (isVideo(file)) {
+        tile.innerHTML =
+          `<video src="${BASE}${file}" muted loop playsinline preload="metadata"></video>` +
+          `<span class="type-badge">&#9654;</span>`;
+        videoEl = tile.querySelector("video");
+      } else {
+        tile.innerHTML = `<img src="${BASE}${file}" alt="Archive piece ${i + 1}" loading="lazy">`;
+      }
+
+      tile.addEventListener("mouseenter", () => {
+        if (videoEl) videoEl.play().catch(() => {});
+        rippleFrom(tile);
+      });
+      tile.addEventListener("mouseleave", () => {
+        if (videoEl) { videoEl.pause(); videoEl.currentTime = 0; }
+        clearRipple();
+      });
+      tile.addEventListener("click", () => openLightbox(i));
+
+      cols[target].appendChild(tile);
+      allTiles.push(tile);
+    });
+  });
+
+  // ---- Lightbox ---------------------------------------------------------
+  const lightbox = document.getElementById("lightbox");
+  const stage = document.getElementById("lbStage");
+  const indexLabel = document.getElementById("lbIndex");
+  let current = 0;
+
+  function renderStage() {
+    const file = FILES[current];
+    stage.innerHTML = isVideo(file)
+      ? `<video src="${BASE}${file}" controls></video>`
+      : `<img src="${BASE}${file}" alt="Archive piece ${current + 1}">`;
+    indexLabel.textContent = (current + 1) + " / " + FILES.length;
+  }
+
+  function openLightbox(i) {
+    current = i;
+    renderStage();
+    lightbox.classList.add("open");
+  }
+  function closeLightbox() {
+    lightbox.classList.remove("open");
+    stage.innerHTML = "";
+  }
+  function step(delta) {
+    current = (current + delta + FILES.length) % FILES.length;
+    renderStage();
+  }
+
+  document.getElementById("lbClose").addEventListener("click", closeLightbox);
+  document.getElementById("lbPrev").addEventListener("click", () => step(-1));
+  document.getElementById("lbNext").addEventListener("click", () => step(1));
+  lightbox.addEventListener("click", (e) => { if (e.target === lightbox) closeLightbox(); });
+
+  window.addEventListener("keydown", (e) => {
+    if (!lightbox.classList.contains("open")) return;
+    if (e.key === "Escape") closeLightbox();
+    if (e.key === "ArrowLeft") step(-1);
+    if (e.key === "ArrowRight") step(1);
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jack Leary — Over The Hump Initiative</title>
+<style>
+  /* League Mono — same real, self-hosted font files as the rest of the site. */
+  @font-face {
+    font-family: "League Mono";
+    src: url("/fonts/league-mono/LeagueMono-Thin.woff2") format("woff2");
+    font-weight: 100;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "League Mono";
+    src: url("/fonts/league-mono/LeagueMono-Regular.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "League Mono";
+    src: url("/fonts/league-mono/LeagueMono-ExtraBold.woff2") format("woff2");
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+  }
+  /* League Spartan — same header/display typeface as the rest of the site. */
+  @font-face {
+    font-family: "League Spartan";
+    src: url("/fonts/league-spartan/LeagueSpartan-ExtraBold.woff2") format("woff2");
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+  }
+</style>
+<style>
+  /*
+    PROTOTYPE NOTES (read me first):
+
+    OVER THE HUMP INITIATIVE — project detail page, same family as
+    surf-page-prototype.html / great-ideas-page-prototype.html (black bg,
+    white text, red/yellow/blue accents, sharp corners, League Spartan
+    display + League Mono body/caption).
+
+    Layout, top to bottom:
+    1. Full-width, centered "Over The Hump Initiative" header, sized in vw
+       with nowrap so it sits on one line spanning the page (falls back to
+       wrapping on mobile) — with the brand-identity blurb underneath.
+    2. A row of the 4 phone mockups, overlapped with a big negative margin
+       (see --phone-w / the .phone-mockup + .phone-mockup rule) because
+       each mockup PNG is a wide canvas with a lot of transparent space
+       around the actual phone graphic — overlapping tucks that dead
+       space under the neighboring mockup so the phones themselves read
+       as one tight row. Each one starts off-screen to the left and
+       slides in to its resting position only once you actually scroll to
+       it — a plain scroll-listener + getBoundingClientRect check, not
+       IntersectionObserver, specifically so it can never fire on page
+       load even if the row happens to start within the viewport (see
+       checkPhoneReveal() below). Staggered left-to-right via per-child
+       transition-delay so they arrive one after another, not all at once.
+    3. A uniform 3x3 gallery grid of the 9 OTH images (object-fit: cover,
+       a light crop) with the same ripple-hover + lightbox pattern as
+       surf-page-prototype.html — switched from a true-aspect masonry
+       because 9 images doesn't divide evenly across columns and left an
+       orphan tile floating alone; a fixed grid keeps it clean.
+  */
+
+  * { border-radius: 0 !important; } /* sharp corners everywhere, per style guide */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --white: #ffffff;
+    --black: #000000;
+    --red:   #eb1c1c;
+    --blue:  #48acf0;
+    --yellow:#f0e100;
+    --side-pad: clamp(24px, calc(-2.4px + 6.77vw), 100px);
+    --font-display: "League Spartan", "Helvetica Neue", Arial, sans-serif;
+    --font-body:    "League Mono", "Helvetica Neue", Arial, monospace;
+    --font-caption: "League Mono", "Helvetica Neue", Arial, monospace;
+  }
+
+  html, body {
+    background: var(--black);
+    color: var(--white);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  /* ---------- HEADER ---------- */
+
+  .back-link {
+    position: fixed;
+    top: 20px;
+    left: var(--side-pad);
+    z-index: 20;
+    font-family: var(--font-caption);
+    font-weight: 100;
+    font-size: clamp(12px, 1.4vw, 15px);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: rgba(255,255,255,0.55);
+    transition: color 0.3s ease;
+  }
+  .back-link:hover { color: var(--blue); }
+
+  .project-header {
+    padding: clamp(90px, 16vh, 160px) var(--side-pad) clamp(20px, 4vh, 40px);
+    margin: 0 auto;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  .project-header.in-view {
+    animation: spawnIn 0.7s ease forwards;
+  }
+
+  /* Sized in vw with nowrap so "OVER THE HUMP INITIATIVE" spans one line
+     across the full width of the page rather than wrapping to two —
+     fluid type instead of a fixed rem cap. Falls back to wrapping + a
+     normal fixed size on narrow/mobile screens where nowrap would force
+     an unreadably tiny size or horizontal overflow. */
+  .project-header h1 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    text-transform: uppercase;
+    white-space: nowrap;
+    font-size: 7.4vw;
+    line-height: 0.98;
+    letter-spacing: -0.01em;
+    margin-bottom: 1.1rem;
+  }
+
+  @media (max-width: 760px) {
+    .project-header h1 {
+      white-space: normal;
+      font-size: clamp(2.2rem, 9vw, 3rem);
+    }
+  }
+
+  .project-year {
+    font-family: var(--font-caption);
+    font-weight: 100;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 1.3rem;
+  }
+
+  .project-header p.body-copy {
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: clamp(1rem, 1.5vw, 1.15rem);
+    line-height: 1.6;
+    color: rgba(255,255,255,0.8);
+    max-width: 640px;
+    margin: 0 auto 1.1rem;
+  }
+
+  .project-header .caption {
+    font-family: var(--font-caption);
+    font-weight: 100;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+  }
+
+  @keyframes spawnIn {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---------- PHONE MOCKUP ROW ---------- */
+
+  /* Each source PNG was a wide 1920x1440 canvas with the actual phone
+     graphic sitting small and centered in a lot of transparent dead
+     space — the original overlap trick tucked that dead space away, but
+     it made hovering unreliable (a later phone's transparent margin
+     still physically sits on top and steals the hover from the phone
+     visible underneath it). Real fix: the mockups are now pre-cropped
+     to the phone's actual bounding box (oth_phone-mockup_N_cropped.png),
+     so each box IS the phone, they can just sit in a plain row with a
+     small gap, and hover works exactly per-phone with no stacking
+     ambiguity. Cropping also means the same box size shows much more
+     actual phone than before. */
+  .phone-row {
+    /* Bigger, and no longer tied to the gallery's side-pad — this row gets
+       its own much smaller margin so the phones can take up more of the
+       screen than the gallery below does. */
+    --phone-w: clamp(220px, 23vw, 400px);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: center;
+    gap: clamp(4px, 1vw, 16px);
+    padding: clamp(20px, 6vh, 70px) clamp(4px, 1vw, 16px) clamp(50px, 9vh, 110px);
+  }
+
+  .phone-mockup {
+    flex: 0 0 auto;
+    width: var(--phone-w);
+    opacity: 0;
+    transform: translateX(-160px);
+    transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.75s ease;
+  }
+
+  @media (max-width: 700px) {
+    .phone-row { --phone-w: min(40vw, 220px); }
+  }
+  .phone-row.in-view .phone-mockup {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .phone-row.in-view .phone-mockup:nth-child(1) { transition-delay: 0s; }
+  .phone-row.in-view .phone-mockup:nth-child(2) { transition-delay: 0.14s; }
+  .phone-row.in-view .phone-mockup:nth-child(3) { transition-delay: 0.28s; }
+  .phone-row.in-view .phone-mockup:nth-child(4) { transition-delay: 0.42s; }
+
+  .phone-mockup img {
+    width: 100%;
+    height: auto;
+    display: block;
+    /* Hover scale lives on the img, not the .phone-mockup container —
+       the container's own transform is already doing the scroll-in
+       slide, so scaling it too would fight that transition. Same 10%
+       scale as the gallery tiles / surf's ripple hover. */
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .phone-mockup:hover {
+    z-index: 5; /* pop above its neighbors so the 10% scale isn't clipped behind them */
+  }
+  .phone-mockup:hover img {
+    transform: scale(1.1);
+  }
+
+  /* ---------- GRID (uniform grid, cropped to a clean fit) --------------- */
+  /* A true-aspect masonry left one column short with 9 images across 5
+     columns (9 doesn't divide evenly), which read as a stray lone tile
+     floating in the middle instead of a clean block. Swapped for a plain
+     3x3 CSS grid with a fixed square aspect ratio per tile and
+     object-fit: cover — a small, deliberate crop on tiles that aren't
+     already square, in exchange for a grid with no gaps or orphans. */
+
+  .oth-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    /* extra 200px of breathing room on top of the standard side-pad, per
+       Jack's request to pull the gallery in narrower than full-bleed */
+    padding: 0 calc(var(--side-pad) + 200px) clamp(60px, 10vh, 120px);
+  }
+
+  .oth-tile {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+  }
+
+  .oth-tile img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    pointer-events: none;
+  }
+
+  @media (max-width: 900px) {
+    .oth-grid { padding: 0 var(--side-pad) clamp(60px, 10vh, 120px); }
+  }
+
+  @media (max-width: 560px) {
+    .oth-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .grid-loading {
+    padding: 2rem var(--side-pad);
+    font-family: var(--font-caption);
+    font-weight: 100;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+  }
+
+  /* ---------- LIGHTBOX ---------- */
+
+  #lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.96);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  #lightbox.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  #lightbox .stage {
+    max-width: 82vw;
+    max-height: 82vh;
+  }
+  #lightbox .stage img {
+    max-width: 82vw;
+    max-height: 82vh;
+    display: block;
+  }
+
+  #lightbox .close-btn,
+  #lightbox .nav-btn {
+    position: absolute;
+    background: none;
+    border: none;
+    color: var(--white);
+    cursor: pointer;
+    font-family: var(--font-caption);
+  }
+
+  #lightbox .close-btn {
+    top: 24px;
+    right: var(--side-pad);
+    font-size: 28px;
+    line-height: 1;
+    font-weight: 100;
+  }
+  #lightbox .close-btn:hover { color: var(--yellow); }
+
+  #lightbox .nav-btn {
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 40px;
+    font-weight: 100;
+    padding: 0.5rem 1rem;
+  }
+  #lightbox .nav-btn:hover { color: var(--yellow); }
+  #lightbox .nav-prev { left: 12px; }
+  #lightbox .nav-next { right: 12px; }
+
+  #lightbox .index-label {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-caption);
+    font-weight: 100;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.6);
+  }
+</style>
+</head>
+<body>
+
+  <a class="back-link" href="/work/">← Work</a>
+
+  <header class="project-header" id="projectHeader">
+    <h1>Over The Hump Initiative</h1>
+    <div class="project-year">(2024–2025)</div>
+    <p class="body-copy">
+      Developed brand identity for a student wellness organization focused
+      on mental health at the university level — creating a visual language
+      that felt safe, inclusive, and authentic to who students are.
+    </p>
+    <div class="caption">Brand Identity, Social Media Design</div>
+  </header>
+
+  <section class="phone-row" id="phoneRow">
+    <div class="phone-mockup"><img src="/images/over_the_hump/phone-mockups/oth_phone-mockup_1_cropped.png" alt="Over the Hump phone mockup 1" loading="lazy"></div>
+    <div class="phone-mockup"><img src="/images/over_the_hump/phone-mockups/oth_phone-mockup_2_cropped.png" alt="Over the Hump phone mockup 2" loading="lazy"></div>
+    <div class="phone-mockup"><img src="/images/over_the_hump/phone-mockups/oth_phone-mockup_3_cropped.png" alt="Over the Hump phone mockup 3" loading="lazy"></div>
+    <div class="phone-mockup"><img src="/images/over_the_hump/phone-mockups/oth_phone-mockup_4_cropped.png" alt="Over the Hump phone mockup 4" loading="lazy"></div>
+  </section>
+
+  <div class="grid-loading" id="gridLoading">loading gallery…</div>
+  <div class="oth-grid" id="othGrid"></div>
+
+  <div id="lightbox">
+    <button class="nav-btn nav-prev" id="lbPrev" aria-label="Previous">&#8249;</button>
+    <div class="stage" id="lbStage"></div>
+    <button class="nav-btn nav-next" id="lbNext" aria-label="Next">&#8250;</button>
+    <button class="close-btn" id="lbClose" aria-label="Close">&times;</button>
+    <div class="index-label" id="lbIndex"></div>
+  </div>
+
+<script>
+(function () {
+  // ---- The 9 gallery images, in order --------------------------------
+  const BASE = "/images/over_the_hump/";
+  const FILES = [
+    "over_the_hump_1.png",
+    "over_the_hump_2.jpg",
+    "over_the_hump_3.jpg",
+    "over_the_hump_4.jpg",
+    "over_the_hump_5.jpg",
+    "over_the_hump_6.jpg",
+    "over_the_hump_7.jpg",
+    "over_the_hump_8.jpg",
+    "over_the_hump_9.jpg",
+  ];
+
+  const grid = document.getElementById("othGrid");
+  const gridLoading = document.getElementById("gridLoading");
+
+  // ---- Ripple: a purely visual (transform-only) effect, same as Surf ----
+  let allTiles = [];
+  let rippledTiles = [];
+
+  function clearRipple() {
+    rippledTiles.forEach((tile) => {
+      tile.style.transform = "";
+      tile.style.transitionDelay = "";
+      tile.style.zIndex = "";
+      tile.style.boxShadow = "";
+    });
+    rippledTiles = [];
+  }
+
+  function rippleFrom(sourceTile) {
+    clearRipple();
+
+    const srcRect = sourceTile.getBoundingClientRect();
+    const cx = srcRect.left + srcRect.width / 2;
+    const cy = srcRect.top + srcRect.height / 2;
+    const radius = srcRect.width * 3.6;
+    const maxPush = srcRect.width * 0.2;
+
+    sourceTile.style.transform = "scale(1.1)";
+    sourceTile.style.transitionDelay = "0ms";
+    sourceTile.style.zIndex = "5";
+    sourceTile.style.boxShadow = "0 16px 38px rgba(0,0,0,0.4)";
+    rippledTiles.push(sourceTile);
+
+    allTiles.forEach((tile) => {
+      if (tile === sourceTile) return;
+      const r = tile.getBoundingClientRect();
+      const tx = r.left + r.width / 2;
+      const ty = r.top + r.height / 2;
+      const dx = tx - cx, dy = ty - cy;
+      const dist = Math.hypot(dx, dy) || 1;
+      if (dist >= radius) return;
+
+      const strength = 0.15 + 0.85 * Math.cos((dist / radius) * (Math.PI / 2));
+      const push = maxPush * strength;
+      const nx = dx / dist, ny = dy / dist;
+
+      tile.style.transform = `translate(${(nx * push).toFixed(1)}px, ${(ny * push).toFixed(1)}px)`;
+      tile.style.transitionDelay = Math.round((dist / radius) * 90) + "ms";
+      rippledTiles.push(tile);
+    });
+  }
+
+  // ---- Build the grid (uniform 3x3, cropped via CSS object-fit: cover) --
+  gridLoading.remove();
+
+  FILES.forEach((file, i) => {
+    const tile = document.createElement("div");
+    tile.className = "oth-tile";
+    tile.innerHTML = `<img src="${BASE}${file}" alt="Over the Hump image ${i + 1}" loading="lazy">`;
+
+    tile.addEventListener("mouseenter", () => rippleFrom(tile));
+    tile.addEventListener("mouseleave", () => clearRipple());
+    tile.addEventListener("click", () => openLightbox(i));
+
+    grid.appendChild(tile);
+    allTiles.push(tile);
+  });
+
+  // ---- Lightbox --------------------------------------------------------
+  const lightbox = document.getElementById("lightbox");
+  const stage = document.getElementById("lbStage");
+  const indexLabel = document.getElementById("lbIndex");
+  let current = 0;
+
+  function renderStage() {
+    const file = FILES[current];
+    stage.innerHTML = `<img src="${BASE}${file}" alt="Over the Hump image ${current + 1}">`;
+    indexLabel.textContent = (current + 1) + " / " + FILES.length;
+  }
+
+  function openLightbox(i) {
+    current = i;
+    renderStage();
+    lightbox.classList.add("open");
+  }
+  function closeLightbox() {
+    lightbox.classList.remove("open");
+    stage.innerHTML = "";
+  }
+  function step(delta) {
+    current = (current + delta + FILES.length) % FILES.length;
+    renderStage();
+  }
+
+  document.getElementById("lbClose").addEventListener("click", closeLightbox);
+  document.getElementById("lbPrev").addEventListener("click", () => step(-1));
+  document.getElementById("lbNext").addEventListener("click", () => step(1));
+  lightbox.addEventListener("click", (e) => { if (e.target === lightbox) closeLightbox(); });
+
+  window.addEventListener("keydown", (e) => {
+    if (!lightbox.classList.contains("open")) return;
+    if (e.key === "Escape") closeLightbox();
+    if (e.key === "ArrowLeft") step(-1);
+    if (e.key === "ArrowRight") step(1);
+  });
+
+  // ---- Scroll spawn-in reveal (header) -----------------------------------
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("in-view");
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.2 });
+
+  document.querySelectorAll("#projectHeader").forEach((el) => io.observe(el));
+
+  // ---- Phone row reveal — strictly scroll-triggered, never on load -------
+  // IntersectionObserver fires immediately if the target is already in the
+  // viewport at observe()-time, which is what made the phones "appear on
+  // load" instead of on scroll whenever the row happened to already be
+  // visible on page-load. Fix: don't check anything until the user has
+  // actually fired a scroll event, then do a plain getBoundingClientRect
+  // check ourselves. Nothing can reveal before a real scroll happens.
+  const phoneRow = document.getElementById("phoneRow");
+  function checkPhoneReveal() {
+    const rect = phoneRow.getBoundingClientRect();
+    if (rect.top < window.innerHeight * 0.85 && rect.bottom > 0) {
+      phoneRow.classList.add("in-view");
+      window.removeEventListener("scroll", checkPhoneReveal);
+    }
+  }
+  window.addEventListener("scroll", checkPhoneReveal, { passive: true });
+})();
+</script>
+</body>
+</html>

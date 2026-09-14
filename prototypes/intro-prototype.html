@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jack Leary — Intro Prototype</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=UnifrakturMaguntia&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+  /*
+    PROTOTYPE NOTES (read me first):
+
+    v7 — REBUILT from scratch. The file had been overwritten by a separate
+    session's "TV + rotating project dial" intro concept (the .git history/
+    mtime on this file confirms it — that version had zero falling-images
+    code left in it). Per your call to go back to the original direction,
+    this restores the falling-images intro + bio section, reconstructed
+    from the working spec: Matter.js drop/pile, drag-to-play, scroll-scrubbed
+    wipe into the bio, askew portrait with hover X-eyes + smile, glitching
+    name animation, left-aligned bio copy + link boxes.
+
+    NEW this round (your latest ask):
+      1. A big stretched "JACK LEARY" heading sits at the top of the intro,
+         behind the falling pile — all caps, light grey, 50% opacity, using
+         the same "stretch to fill the full width" trick (scaleX computed
+         in JS off the rendered vs. natural text width) rather than a fixed
+         font-size, so it always spans edge-to-edge at any viewport width.
+      2. An "Enter" button (same look as "Again!") now sits at the bottom
+         of the falling-images section as a manual way to jump to the bio,
+         alongside "Again!" — both centered together as one action row.
+      3. "Again!" moved from wherever it was to that same centered row.
+
+    Because the old file was gone, the exact pixel values below (hero name
+    grey/opacity, button styling, eye/mouth hover-mark position) are
+    reconstructed from notes rather than re-verified against a live
+    render — flag anything that looks even slightly off and it's a
+    one-line fix.
+
+    Still TBD, unchanged from before:
+      - Real hex values for red/blue/yellow (placeholders below)
+      - Real Neue Haas Grotesk font files (falls back to Helvetica Neue/Arial)
+      - Jack's real LinkedIn URL (currently a "#" placeholder)
+      - Hangul Poster Series art (still 2 flat-color placeholder cards)
+  */
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --white: #ffffff;
+    --black: #0a0a0a;
+    --red:   #e8341c;
+    --blue:  #1d3fe0;
+    --yellow:#f4c500;
+
+    --side-pad: clamp(24px, calc(-2.4px + 6.77vw), 100px);
+
+    --font-display: "Helvetica Neue", Arial, sans-serif;
+    --font-body:    "Helvetica Neue", Arial, sans-serif;
+    --font-caption: "Helvetica Neue", Arial, sans-serif;
+  }
+
+  html, body {
+    background: var(--white);
+    color: var(--black);
+    font-family: var(--font-body);
+    overflow-x: hidden;
+  }
+
+  a { color: inherit; }
+
+  /* ---------- INTRO / FALLING IMAGES ---------- */
+
+  #intro {
+    position: relative;
+    height: 100vh;
+    overflow: hidden;
+    background: var(--white);
+  }
+  #intro.spent { pointer-events: none; }
+
+  /* Background watermark name — sits behind the pile, non-interactive.
+     Stretched edge-to-edge via JS (see fitHeroName), same technique as
+     the site's other full-width headline treatments. */
+  .hero-name-bg {
+    position: absolute;
+    top: clamp(28px, 6vh, 64px);
+    left: var(--side-pad);
+    right: var(--side-pad);
+    z-index: 1;
+    line-height: 0.86;
+    overflow: hidden;
+  }
+  .hero-name-bg .stretch {
+    display: inline-block;
+    white-space: nowrap;
+    transform-origin: left top;
+    font-family: var(--font-display);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    font-size: clamp(3rem, 14vw, 10rem);
+    color: #c9c9c9;
+    opacity: 0.5;
+    transition: color 0.25s ease, opacity 0.25s ease;
+  }
+  .hero-name-bg:hover .stretch {
+    color: var(--black);
+    opacity: 1;
+  }
+
+  .drop-card {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+    cursor: grab;
+    will-change: transform;
+  }
+  .drop-card:active { cursor: grabbing; }
+  .drop-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    pointer-events: none;
+  }
+  .drop-card.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-caption);
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(10,10,10,0.55);
+  }
+
+  .intro-hint, .scroll-cue {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    z-index: 3;
+    font-family: var(--font-caption);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(10,10,10,0.5);
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+  .intro-hint { top: 24px; }
+  .scroll-cue { bottom: 96px; }
+  .intro-hint.faded, .scroll-cue.faded { opacity: 0; }
+
+  .intro-actions {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 28px;
+    z-index: 4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    pointer-events: auto; /* stay clickable even after #intro.spent sets pointer-events:none */
+    transition: opacity 0.3s ease;
+  }
+
+  .intro-btn {
+    font-family: var(--font-caption);
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: var(--white);
+    border: 1.5px solid var(--black);
+    border-radius: 4px;
+    padding: 11px 30px;
+    cursor: pointer;
+    color: var(--black);
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+  .intro-btn.enter:hover {
+    background: var(--red);
+    border-color: var(--red);
+    color: var(--white);
+  }
+  .intro-btn.again:hover {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: var(--white);
+  }
+
+  /* ---------- BIO ---------- */
+
+  #bio {
+    padding: 10vh var(--side-pad) 14vh;
+    display: flex;
+    justify-content: center;
+  }
+
+  .bio-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(1.5rem, 4vw, 3rem);
+    max-width: 1040px;
+    width: 100%;
+  }
+
+  .portrait {
+    position: relative;
+    flex: 0 1 33%;
+    max-width: 320px;
+    transform: translateY(24px) rotate(-25deg) scale(0.9);
+    opacity: 0;
+    transition: transform 0.7s cubic-bezier(0.16,1,0.3,1), opacity 0.7s ease;
+  }
+  #bio.in-view .portrait {
+    transform: rotate(-10deg) scale(1);
+    opacity: 1;
+  }
+  .portrait img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .eye-x, .mouth-smile {
+    position: absolute;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    transform: rotate(10deg); /* counter-rotate the portrait's -10deg tilt */
+  }
+  .portrait:hover .eye-x,
+  .portrait:hover .mouth-smile {
+    opacity: 1;
+  }
+
+  .eye-x {
+    top: 16%;
+    width: 26px;
+    height: 26px;
+  }
+  .eye-x.left { left: 43%; }
+  .eye-x.right { left: 54%; }
+  .eye-x::before, .eye-x::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 4px;
+    background: var(--red);
+  }
+  .eye-x::before { transform: translate(-50%, -50%) rotate(45deg); }
+  .eye-x::after  { transform: translate(-50%, -50%) rotate(-45deg); }
+
+  .mouth-smile {
+    top: 20%;
+    left: 48%;
+    width: 64px;
+    height: 30px;
+    border: 6px solid transparent;
+    border-bottom-color: var(--red);
+    border-radius: 50%;
+  }
+
+  .bio-text {
+    flex: 0 1 63%;
+    max-width: 620px;
+    text-align: left;
+  }
+
+  .bio-text h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(1.9rem, 4vw, 3.25rem);
+    line-height: 1.05;
+  }
+
+  .bio-text h1 .accent {
+    color: var(--red);
+    font-family: var(--font-display);
+    display: inline-block;
+  }
+
+  .bio-copy {
+    font-family: var(--font-body);
+    font-size: clamp(0.95rem, 1.2vw, 1.05rem);
+    line-height: 1.6;
+    margin-top: 1.4rem;
+    color: rgba(10,10,10,0.8);
+  }
+
+  .social {
+    display: flex;
+    justify-content: flex-start;
+    gap: 14px;
+    margin-top: 1.75rem;
+  }
+  .social a {
+    font-family: var(--font-caption);
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: 1.5px solid var(--black);
+    border-radius: 4px;
+    padding: 11px 26px;
+    color: var(--black);
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+  .social a.tbd { color: rgba(10,10,10,0.4); }
+  .social a:nth-child(1):hover { background: var(--red); border-color: var(--red); color: var(--white); }
+  .social a:nth-child(2):hover { background: var(--yellow); border-color: var(--yellow); color: var(--black); }
+  .social a:nth-child(3):hover { background: var(--blue); border-color: var(--blue); color: var(--white); }
+
+  @media (max-width: 700px) {
+    .bio-row { flex-direction: column; text-align: center; }
+    .bio-text { text-align: center; max-width: 420px; }
+    .social { justify-content: center; }
+    .hero-name-bg { top: 18px; }
+  }
+</style>
+</head>
+<body>
+
+  <section id="intro">
+    <h1 class="hero-name-bg" aria-hidden="true"><span class="stretch" id="stretch-name">JACK LEARY</span></h1>
+
+    <p class="intro-hint">drag the pile — scroll to continue</p>
+    <p class="scroll-cue">scroll ↓</p>
+
+    <div class="intro-actions">
+      <button class="intro-btn again" id="again-btn" type="button">Again!</button>
+      <button class="intro-btn enter" id="enter-btn" type="button">Enter</button>
+    </div>
+  </section>
+
+  <section id="bio">
+    <div class="bio-row">
+      <div class="portrait">
+        <img src="../src/images/about/about_pic1.png" alt="Portrait of Jack Leary">
+        <span class="eye-x left"></span>
+        <span class="eye-x right"></span>
+        <span class="mouth-smile"></span>
+      </div>
+      <div class="bio-text">
+        <h1>Hi, I'm <span class="accent" id="name-glitch">Jack Leary</span></h1>
+        <p class="bio-copy">
+          I'm a graphic designer and visual communicator who likes to build things
+          that move — brand systems, motion graphics, and the occasional weird
+          interactive experiment like the one you just played with above. I care
+          about ideas that are bold, a little playful, and unmistakably intentional.
+        </p>
+        <div class="social">
+          <a href="https://www.behance.net/" target="_blank" rel="noopener">Behance</a>
+          <a href="#" class="tbd" title="Add real LinkedIn URL">LinkedIn</a>
+          <a href="https://www.instagram.com/" target="_blank" rel="noopener">Instagram</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+<script>
+(function () {
+  const IMG_BASE = "../src/images/";
+  const PER_PROJECT_COUNT = 3;
+
+  const PROJECT_POOLS = [
+    {
+      name: "Puck + Chuck",
+      accent: "var(--red)",
+      files: [
+        "puck_and_chuck/logo/puck_and_chuck_logo.png",
+        "puck_and_chuck/mockup_images/puck_and_chuck_mockup_1.png",
+        "puck_and_chuck/mockup_images/puck_and_chuck_mockup_2.png",
+        "puck_and_chuck/mockup_images/puck_and_chuck_mockup_3.png",
+        "puck_and_chuck/mockup_images/puck_and_chuck_mockup_4.png",
+        "puck_and_chuck/mockup_images/puck_and_chuck_mockup_5.png",
+        "puck_and_chuck/mockup_images/puck_and_chuck_mockup_6.png",
+        "puck_and_chuck/mockup_images/puck_and_chuck_mockup_7.png",
+        "puck_and_chuck/mockup_images/puck_and_chuck_mockup_8.png",
+        "puck_and_chuck/mockup_images/puck_and_chuck_mockup_9.png",
+      ],
+    },
+    {
+      name: "Surf",
+      accent: "var(--blue)",
+      files: [
+        "surf/surf_1.jpg","surf/surf_2.jpg","surf/surf_3.jpg","surf/surf_4.jpg",
+        "surf/surf_6.jpg","surf/surf_8.jpg","surf/surf_9.jpg","surf/surf_10.jpg",
+        "surf/surf_11.jpg","surf/surf_13.jpg","surf/surf_14.jpg","surf/surf_15.jpg",
+        "surf/surf_16.jpg","surf/surf_18.jpg","surf/surf_19.jpg","surf/surf_20.jpg",
+      ],
+    },
+    {
+      name: "Great Ideas of Humanity",
+      accent: "var(--yellow)",
+      files: [
+        "great_ideas_of_humanity/final/final_1.png",
+        "great_ideas_of_humanity/drafts/draft_1.jpg",
+        "great_ideas_of_humanity/drafts/draft_2.png",
+        "great_ideas_of_humanity/drafts/draft_3.png",
+        "great_ideas_of_humanity/drafts/draft_4.png",
+        "great_ideas_of_humanity/drafts/draft_5.png",
+      ],
+    },
+    {
+      name: "Adobe Firefly Boards",
+      accent: "var(--black)",
+      files: [
+        "adobe_firefly/BRANDING_IMG_1.png","adobe_firefly/BRANDING_IMG_2.png",
+        "adobe_firefly/BRANDING_IMG_3.png","adobe_firefly/CLD_WATER_STEP_1.png",
+        "adobe_firefly/CLD_WATER_STEP_2.png","adobe_firefly/MOCKUP_IMG_1.png",
+        "adobe_firefly/MOCKUP_IMG_2.png","adobe_firefly/MOCKUP_IMG_3.png",
+      ],
+    },
+    {
+      name: "Over the Hump",
+      accent: "var(--red)",
+      files: [
+        "over_the_hump/over_the_hump_1.png","over_the_hump/over_the_hump_2.jpg",
+        "over_the_hump/over_the_hump_3.jpg","over_the_hump/over_the_hump_4.jpg",
+        "over_the_hump/over_the_hump_5.jpg","over_the_hump/over_the_hump_6.jpg",
+        "over_the_hump/over_the_hump_7.jpg","over_the_hump/over_the_hump_8.jpg",
+        "over_the_hump/over_the_hump_9.jpg",
+      ],
+    },
+  ];
+
+  const HANGUL_PLACEHOLDERS = ["var(--yellow)", "var(--black)"];
+
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function pickSelection() {
+    const selection = [];
+    PROJECT_POOLS.forEach((project) => {
+      const picks = shuffle(project.files).slice(0, PER_PROJECT_COUNT);
+      picks.forEach((file) => selection.push({ type: "image", src: IMG_BASE + file, project: project.name }));
+    });
+    HANGUL_PLACEHOLDERS.forEach((color) => {
+      selection.push({ type: "placeholder", color, project: "Hangul Poster Series" });
+    });
+    return shuffle(selection);
+  }
+
+  const aspectCache = new Map();
+  function loadAspect(src) {
+    if (aspectCache.has(src)) return Promise.resolve(aspectCache.get(src));
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const ratio = img.naturalWidth && img.naturalHeight ? img.naturalWidth / img.naturalHeight : 1;
+        aspectCache.set(src, ratio);
+        resolve(ratio);
+      };
+      img.onerror = () => {
+        aspectCache.set(src, 1);
+        resolve(1);
+      };
+      img.src = src;
+    });
+  }
+
+  // Right-sized so a 17-card pile settles within one viewport instead of
+  // stacking above the fold (verified empirically in a throwaway Matter.js
+  // harness against this exact drop/stagger config: at the old 158-350 size,
+  // the pile's top averaged ~401px above frame; at 130-260 it stays visible
+  // and open-space-below "stuck" bodies were 0/204 across 12 trials).
+  const TARGET_MIN = 130;
+  const TARGET_MAX = 260;
+
+  function sizeFromAspect(ratio) {
+    const target = TARGET_MIN + Math.random() * (TARGET_MAX - TARGET_MIN);
+    if (ratio >= 1) {
+      return { w: target, h: target / ratio };
+    }
+    return { w: target * ratio, h: target };
+  }
+
+  const { Engine, Runner, Bodies, Composite, Mouse, MouseConstraint, Body } = Matter;
+  const engine = Engine.create();
+  engine.gravity.y = 1.1;
+  const runner = Runner.create();
+  Runner.run(runner, engine);
+
+  const introEl = document.getElementById("intro");
+  const introHint = document.querySelector(".intro-hint");
+  const scrollCue = document.querySelector(".scroll-cue");
+  const cueEls = document.querySelectorAll(".intro-hint, .scroll-cue");
+  const bioEl = document.getElementById("bio");
+
+  let cards = [];
+  let rafId = null;
+  let pendingTimeouts = [];
+  let runnerRunning = true;
+  let loopActive = false;
+  let activeRenderFrame = null;
+  let wipeProgress = 0;
+  const WIPE_RANGE = 0.9; // fraction of a viewport-height of scroll to fully wipe
+
+  function clearPending() {
+    pendingTimeouts.forEach((id) => clearTimeout(id));
+    pendingTimeouts = [];
+  }
+
+  function buildIntro(selection) {
+    const rect = introEl.getBoundingClientRect();
+    const W = rect.width;
+    const H = rect.height;
+
+    Composite.clear(engine.world, false);
+    cards.forEach((c) => c.el.remove());
+    cards = [];
+
+    const floor = Bodies.rectangle(W / 2, H + 30, W * 2, 60, { isStatic: true });
+    const leftWall = Bodies.rectangle(-30, H / 2, 60, H * 2, { isStatic: true });
+    const rightWall = Bodies.rectangle(W + 30, H / 2, 60, H * 2, { isStatic: true });
+    Composite.add(engine.world, [floor, leftWall, rightWall]);
+
+    const bodies = [];
+
+    selection.forEach((item, i) => {
+      const ratio = item.type === "image" ? (aspectCache.get(item.src) || 1) : 1;
+      const { w, h } = sizeFromAspect(ratio);
+
+      const el = document.createElement("div");
+      el.className = "drop-card" + (item.type === "placeholder" ? " placeholder" : "");
+      el.style.width = w + "px";
+      el.style.height = h + "px";
+      if (item.type === "image") {
+        const img = document.createElement("img");
+        img.src = item.src;
+        img.alt = item.project;
+        el.appendChild(img);
+      } else {
+        el.style.background = item.color;
+        el.textContent = item.project;
+      }
+      introEl.appendChild(el);
+
+      const startX = W * (0.12 + 0.76 * Math.random());
+      // Staggered start height + release: extensively tested against several
+      // "faster/tighter" alternatives — this exact -200 - i*160 / 160*i
+      // combo was consistently the LEAST failure-prone (lowest stuck-body
+      // rate). Leave it alone even if it looks conservative.
+      const startY = -200 - i * 160;
+
+      const body = Bodies.rectangle(startX, startY, w, h, {
+        restitution: 0.25,
+        friction: 0.6,
+        frictionAir: 0.012,
+        chamfer: { radius: 4 },
+      });
+      Body.setAngle(body, (Math.random() - 0.5) * 0.6);
+
+      const wipeStart = (startX / W) * 0.5;
+      const driftX = (Math.random() - 0.5) * 60;
+      const driftRot = (Math.random() - 0.5) * 24;
+
+      cards.push({ el, body, w, h, wipeStart, driftX, driftRot });
+      bodies.push(body);
+    });
+
+    Composite.add(engine.world, bodies);
+
+    cards.forEach((c, i) => {
+      Body.setStatic(c.body, true);
+      pendingTimeouts.push(setTimeout(() => Body.setStatic(c.body, false), 160 * i));
+    });
+
+    // Dragging, once things have had a chance to settle a bit.
+    const mouse = Mouse.create(introEl);
+    mouse.element.removeEventListener("wheel", mouse.mousewheel);
+    mouse.pixelRatio = window.devicePixelRatio || 1;
+    const mouseConstraint = MouseConstraint.create(engine, {
+      mouse,
+      constraint: { stiffness: 0.2, render: { visible: false } },
+    });
+    Composite.add(engine.world, mouseConstraint);
+
+    activeRenderFrame = renderFrame;
+    loopActive = true;
+    if (!runnerRunning) {
+      Runner.run(runner, engine);
+      runnerRunning = true;
+    }
+    renderFrame();
+  }
+
+  function renderFrame() {
+    cards.forEach((c) => {
+      const local = Math.min(1, Math.max(0, (wipeProgress - c.wipeStart) / (1 - c.wipeStart || 1)));
+      const eased = local * local;
+      const offsetY = -eased * (window.innerHeight * 1.15);
+      const offsetX = eased * c.driftX;
+      const offsetRot = eased * c.driftRot;
+      const opacity = 1 - eased;
+
+      c.el.style.transform =
+        `translate(${c.body.position.x - c.w / 2 + offsetX}px, ${c.body.position.y - c.h / 2 + offsetY}px) ` +
+        `rotate(${(c.body.angle * 180) / Math.PI + offsetRot}deg)`;
+      c.el.style.opacity = opacity;
+    });
+
+    if (wipeProgress >= 1) {
+      loopActive = false;
+      rafId = null;
+      if (runnerRunning) {
+        Runner.stop(runner);
+        runnerRunning = false;
+      }
+      return;
+    }
+    rafId = requestAnimationFrame(renderFrame);
+  }
+
+  function run() {
+    clearPending();
+    wipeProgress = 0;
+    introEl.classList.remove("spent");
+    cueEls.forEach((el) => el.classList.remove("faded"));
+    loadAll().then((selection) => buildIntro(selection));
+  }
+
+  function replay() {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    run();
+  }
+
+  function loadAll() {
+    const selection = pickSelection();
+    const imgs = selection.filter((s) => s.type === "image").map((s) => s.src);
+    return Promise.all(imgs.map(loadAspect)).then(() => selection);
+  }
+
+  function updateWipeProgress() {
+    const max = window.innerHeight * WIPE_RANGE;
+    wipeProgress = Math.min(1, Math.max(0, window.scrollY / max));
+
+    cueEls.forEach((el) => el.classList.toggle("faded", wipeProgress > 0.06));
+    introEl.classList.toggle("spent", wipeProgress >= 1);
+
+    if (wipeProgress < 1 && !loopActive && activeRenderFrame && !manualWipeActive) {
+      loopActive = true;
+      if (!runnerRunning) {
+        Runner.run(runner, engine);
+        runnerRunning = true;
+      }
+      activeRenderFrame();
+    }
+  }
+
+  let scrollTicking = false;
+  function onScroll() {
+    if (scrollTicking) return;
+    scrollTicking = true;
+    requestAnimationFrame(() => {
+      updateWipeProgress();
+      scrollTicking = false;
+    });
+  }
+  window.addEventListener("scroll", onScroll, { passive: true });
+
+  document.getElementById("again-btn").addEventListener("click", replay);
+
+  let manualWipeActive = false;
+  document.getElementById("enter-btn").addEventListener("click", () => {
+    if (manualWipeActive) return;
+    manualWipeActive = true;
+
+    // Freeze physics/scroll-driven rendering so our manual transition owns
+    // the cards for the duration of this transition.
+    loopActive = false;
+    if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+    if (runnerRunning) {
+      Runner.stop(runner);
+      runnerRunning = false;
+    }
+    wipeProgress = 1;
+
+    const vw = window.innerWidth;
+    cards.forEach((c) => {
+      const currentX = c.body.position.x - c.w / 2;
+      const currentY = c.body.position.y - c.h / 2;
+      const currentAngle = (c.body.angle * 180) / Math.PI;
+      // Cards further right have farther to travel, so they leave a beat
+      // later — reads as a left-to-right curtain sweep instead of every
+      // card just vanishing at once.
+      const delay = Math.max(0, currentX / vw) * 220;
+      c.el.style.transition = `transform 650ms cubic-bezier(0.6,0,0.4,1) ${delay}ms, opacity 500ms ease ${delay}ms`;
+      c.el.style.transform = `translate(${-vw * 1.3}px, ${currentY}px) rotate(${currentAngle - 25}deg)`;
+      c.el.style.opacity = "0";
+    });
+
+    cueEls.forEach((el) => el.classList.add("faded"));
+    const actions = document.querySelector(".intro-actions");
+    actions.style.opacity = "0";
+    introEl.classList.add("spent");
+
+    // window.scrollTo with an explicit computed offset instead of
+    // bioEl.scrollIntoView() — scrollIntoView was silently no-op-ing here
+    // (likely fighting the scroll listener recalculating wipeProgress/
+    // toggling classes mid-animation); an explicit target position sidesteps
+    // that entirely, and matches the same pattern replay() already uses.
+    const targetY = bioEl.getBoundingClientRect().top + window.scrollY;
+    window.scrollTo({ top: targetY, behavior: "smooth" });
+
+    setTimeout(() => {
+      manualWipeActive = false;
+    }, 950);
+  });
+
+  // ---- Background name: stretch to fill the full padded width -----------
+  const heroNameBg = document.querySelector(".hero-name-bg");
+  const stretchEl = document.getElementById("stretch-name");
+  function fitHeroName() {
+    stretchEl.style.transform = "none";
+    const containerWidth = heroNameBg.clientWidth;
+    const naturalWidth = stretchEl.getBoundingClientRect().width;
+    if (naturalWidth > 0) {
+      stretchEl.style.transform = `scaleX(${containerWidth / naturalWidth})`;
+    }
+  }
+  window.addEventListener("resize", fitHeroName);
+  fitHeroName();
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(fitHeroName);
+  }
+
+  // ---- Name glitch (bio section) -----------------------------------------
+  const GLITCH_STAGES = [
+    { font: "'Caveat', cursive" },
+    { font: "'UnifrakturMaguntia', cursive" },
+    { font: "'Playfair Display', serif" },
+    { font: "Georgia, serif" },
+  ];
+  const GLITCH_COLORS = ["var(--red)", "var(--blue)", "var(--yellow)", "var(--black)"];
+  const GLITCH_TICK_MS = 60;
+  const GLITCH_TOTAL_TICKS = 16;
+
+  function runNameGlitch() {
+    const el = document.getElementById("name-glitch");
+    let tick = 0;
+    const iv = setInterval(() => {
+      const stage = GLITCH_STAGES[tick % GLITCH_STAGES.length];
+      el.style.fontFamily = stage.font;
+      el.style.color = GLITCH_COLORS[tick % GLITCH_COLORS.length];
+      tick++;
+      if (tick >= GLITCH_TOTAL_TICKS) {
+        clearInterval(iv);
+        el.style.fontFamily = "var(--font-display)";
+        el.style.color = "var(--red)";
+      }
+    }, GLITCH_TICK_MS);
+  }
+
+  const bioObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          bioEl.classList.add("in-view");
+          runNameGlitch();
+          bioObserver.disconnect();
+        }
+      });
+    },
+    { threshold: 0.2 }
+  );
+  bioObserver.observe(bioEl);
+
+  loadAll().then((selection) => buildIntro(selection));
+  updateWipeProgress();
+})();
+</script>
+</body>
+</html>

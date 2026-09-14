@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jack Leary — Puck + Chuck</title>
+<style>
+  /* League Mono — same real, self-hosted font files as the rest of the site. */
+  @font-face {
+    font-family: "League Mono";
+    src: url("../src/fonts/league-mono/LeagueMono-Thin.woff2") format("woff2");
+    font-weight: 100;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "League Mono";
+    src: url("../src/fonts/league-mono/LeagueMono-Regular.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "League Mono";
+    src: url("../src/fonts/league-mono/LeagueMono-ExtraBold.woff2") format("woff2");
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+  }
+  /* League Spartan — same header/display typeface as the rest of the site. */
+  @font-face {
+    font-family: "League Spartan";
+    src: url("../src/fonts/league-spartan/LeagueSpartan-ExtraBold.woff2") format("woff2");
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+  }
+</style>
+<style>
+  /*
+    PROTOTYPE NOTES (read me first):
+
+    PUCK + CHUCK — project detail page, white background (like Hangul),
+    League Spartan display + League Mono body/caption like the rest of
+    the site. Visual reference Jack gave for the vibe of this page:
+    yoyoyo.ai — a small "● LABEL" eyebrow tag above an oversized,
+    centered statement paragraph, thin hairline dividers between
+    sections, single-row image strips, huge amounts of whitespace. This
+    page adapts that structure using Jack's own site system (League
+    Spartan/League Mono, sharp corners, red/yellow/blue accents) rather
+    than copying yoyoyo's own type/color choices directly.
+
+    Section order (top to bottom), all copy verbatim from Jack:
+      1. Full-width "Puck + Chuck" header, one line (same vw/nowrap
+         technique as the Over The Hump page).
+      2. The reel (PUCK+CHUCK_AD.mp4) — muted/loop, plays automatically
+         once scrolled into view (IntersectionObserver play()/pause()),
+         not on page load.
+      3. Brand statement paragraph.
+      4. Product images row (3 overhead shots).
+      5. "The Problem" — eyebrow + paragraph.
+      6. "The Solution" — eyebrow + paragraph.
+      7. Logo row (3 logos).
+      8. "Design Approach" — eyebrow + paragraph.
+      9. Puck images row (closed / open, 2 images).
+      10. "Brand Identity" — eyebrow + paragraph.
+      11. Branding images row (3 images, mixed aspect ratios — sized by
+          a shared height with width auto so nothing gets cropped,
+          since these are brand/packaging shots, not uniform photography).
+      12. Closing spec sheet: CATEGORY / DELIVERABLES / FILES / TAG.
+
+    Scroll effect: every section fades up AND scales from ~0.94 to 1 as
+    it enters (not just translateY) — "appears from below and scales to
+    full size" per the brief — via one shared .reveal / .reveal.in-view
+    class pair + IntersectionObserver, reused for every section so the
+    transitions all feel identical/seamless.
+
+    Hover effect: 3% scale-up (scale(1.03)), images only — not the
+    video, not text. Same img-only-hover approach as the Over The Hump
+    phone row (hover lives on the img so it never fights a parent's
+    own transform).
+  */
+
+  * { border-radius: 0 !important; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --white: #ffffff;
+    --black: #000000;
+    --red:   #eb1c1c;
+    --blue:  #48acf0;
+    --yellow:#f0e100;
+    --side-pad: clamp(24px, calc(-2.4px + 6.77vw), 100px);
+    --font-display: "League Spartan", "Helvetica Neue", Arial, sans-serif;
+    --font-body:    "League Mono", "Helvetica Neue", Arial, monospace;
+    --font-caption: "League Mono", "Helvetica Neue", Arial, monospace;
+  }
+
+  html, body {
+    background: var(--white);
+    color: var(--black);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  .back-link {
+    position: fixed;
+    top: 20px;
+    left: var(--side-pad);
+    z-index: 20;
+    font-family: var(--font-caption);
+    font-weight: 100;
+    font-size: clamp(12px, 1.4vw, 15px);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(0, 0, 0, 0.5);
+    transition: color 0.3s ease;
+  }
+  .back-link:hover { color: var(--blue); }
+
+  /* ---------- shared scroll-reveal: fade up + scale to full size ---------- */
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(46px) scale(0.94);
+    transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal.in-view {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  /* ---------- HEADER ---------- */
+
+  .project-header {
+    padding: clamp(90px, 16vh, 160px) var(--side-pad) clamp(50px, 9vh, 110px);
+    text-align: center;
+  }
+
+  .project-header h1 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    text-transform: uppercase;
+    white-space: nowrap;
+    font-size: 7.4vw;
+    line-height: 0.98;
+    letter-spacing: -0.01em;
+  }
+
+  .project-header .project-meta {
+    margin-top: clamp(14px, 2.2vh, 22px);
+    font-family: var(--font-caption);
+    font-weight: 100;
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(0, 0, 0, 0.45);
+  }
+
+  @media (max-width: 760px) {
+    .project-header h1 {
+      white-space: normal;
+      font-size: clamp(2.2rem, 9vw, 3rem);
+    }
+  }
+
+  /* ---------- REEL ---------- */
+
+  .reel-section {
+    padding: 0 var(--side-pad) clamp(60px, 10vh, 120px);
+  }
+
+  .reel-frame {
+    max-width: 1500px;
+    margin: 0 auto;
+    background: var(--black);
+  }
+
+  .reel-frame video {
+    width: 100%;
+    display: block;
+  }
+
+  /* ---------- STATEMENT SECTIONS (eyebrow + big centered paragraph) ---- */
+
+  .statement {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: clamp(50px, 9vh, 100px) var(--side-pad);
+    text-align: center;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    font-family: var(--font-caption);
+    font-weight: 400;
+    font-size: clamp(11px, 1vw, 13px);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(0, 0, 0, 0.5);
+    margin-bottom: clamp(18px, 3vh, 30px);
+  }
+
+  .eyebrow::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    background: var(--blue);
+    display: inline-block;
+    flex: none;
+  }
+
+  .statement p {
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: clamp(1.15rem, 2.2vw, 1.7rem);
+    line-height: 1.5;
+    color: var(--black);
+  }
+
+  .statement p + p {
+    margin-top: 1.2em;
+  }
+
+  /* first statement (brand copy) has no eyebrow — sits right under the
+     header, slightly wider line-height for a manifesto feel */
+  .statement.intro p {
+    font-size: clamp(1.2rem, 2.4vw, 1.85rem);
+    line-height: 1.55;
+  }
+
+  /* ---------- HAIRLINE DIVIDER ---------- */
+
+  .hr {
+    max-width: 1500px;
+    margin: 0 auto;
+    border: none;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  /* ---------- IMAGE ROWS ---------- */
+
+  .row-section {
+    padding: clamp(50px, 9vh, 100px) var(--side-pad);
+  }
+
+  /* equal-width square rows: product shots, puck open/closed */
+  .row-equal {
+    display: flex;
+    gap: clamp(6px, 1vw, 16px);
+    max-width: 1500px;
+    margin: 0 auto;
+  }
+
+  .row-equal .cell {
+    flex: 1 1 0;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background: #f4f4f2;
+  }
+
+  .row-equal .cell img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* natural-aspect rows: logos, branding shots — sized by a shared
+     height, width auto, nothing cropped or force-squared */
+  .row-natural {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: clamp(16px, 3vw, 48px);
+    max-width: 1500px;
+    margin: 0 auto;
+  }
+
+  .row-natural img {
+    height: clamp(110px, 16vw, 230px);
+    width: auto;
+    display: block;
+  }
+
+  /* branding row: forced onto one line, spanning the full page width, all
+     three images sharing the exact same height (a "justified row" — width
+     per image set by JS from its real aspect ratio, so nothing is cropped
+     and the row still lands flush with both edges). */
+  .row-natural.branding {
+    flex-wrap: nowrap;
+    max-width: none;
+    align-items: flex-start;
+  }
+
+  .row-natural.branding img {
+    width: auto;
+    height: auto;
+    min-width: 0;
+  }
+
+  /* Hover scale — images only, lives on the img itself so it never
+     fights a parent's own reveal transform. Same technique as the Over
+     The Hump phone row, just a smaller 3% bump per this page's brief. */
+  .row-equal .cell img,
+  .row-natural img {
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .row-equal .cell img:hover,
+  .row-natural img:hover {
+    transform: scale(1.03);
+  }
+
+  /* ---------- CLOSING SPEC SHEET ---------- */
+
+  .spec-sheet {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: clamp(60px, 10vh, 120px) var(--side-pad) clamp(90px, 14vh, 160px);
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(24px, 4vh, 44px) clamp(20px, 4vw, 60px);
+  }
+
+  .spec-sheet dt {
+    font-family: var(--font-caption);
+    font-weight: 400;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(0, 0, 0, 0.45);
+    margin-bottom: 0.5em;
+  }
+
+  .spec-sheet dd {
+    font-family: var(--font-caption);
+    font-weight: 100;
+    font-size: clamp(13px, 1.2vw, 15px);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--black);
+  }
+
+  @media (max-width: 560px) {
+    .row-equal { flex-wrap: wrap; }
+    .row-equal .cell { flex: 1 1 40%; }
+    .spec-sheet { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+  <a class="back-link" href="work-page-prototype.html">← Work</a>
+
+  <header class="project-header reveal" id="secHeader">
+    <h1>Puck + Chuck</h1>
+    <div class="project-meta">2026 — Brand Identity</div>
+  </header>
+
+  <section class="reel-section reveal" id="secReel">
+    <div class="reel-frame">
+      <video id="reelVideo" src="../src/images/puck_and_chuck/reel/puck-and-chuck-ad.mp4" muted loop playsinline preload="metadata"></video>
+    </div>
+  </section>
+
+  <section class="statement intro reveal" id="secIntro">
+    <p>Puck + Chuck is a surf-culture brand built around a magnetic key stash disguised as a surf wax puck. It blends into a beach bag or surf kit so it doesn't draw attention like a traditional lockbox, with the option to magnetically attach to the underside of a car.</p>
+  </section>
+
+  <hr class="hr">
+
+  <section class="row-section reveal" id="secProduct">
+    <div class="row-equal">
+      <div class="cell"><img src="../src/images/puck_and_chuck/product-imgs_overhead/product-1.png" alt="Puck + Chuck overhead product shot, colorway 1" loading="lazy"></div>
+      <div class="cell"><img src="../src/images/puck_and_chuck/product-imgs_overhead/product-2.png" alt="Puck + Chuck overhead product shot, colorway 2" loading="lazy"></div>
+      <div class="cell"><img src="../src/images/puck_and_chuck/product-imgs_overhead/product-3.png" alt="Puck + Chuck overhead product shot, colorway 3" loading="lazy"></div>
+    </div>
+  </section>
+
+  <section class="statement reveal" id="secProblem">
+    <div class="eyebrow">The Problem</div>
+    <p>Vehicle theft targeting surfers is a documented, ongoing pattern — most surfers are currently betting on luck. There is no existing product that is both discreet and purpose-built for key security in a surf context.</p>
+  </section>
+
+  <section class="statement reveal" id="secSolution">
+    <div class="eyebrow">The Solution</div>
+    <p>A two-piece plastic container molded to match the shape, size, and feel of a standard surf wax puck, indistinguishable from the real thing. Its magnetic top allows it to attach hidden under a vehicle as a secondary option.</p>
+  </section>
+
+  <hr class="hr">
+
+  <section class="row-section reveal" id="secLogos">
+    <div class="row-natural">
+      <img src="../src/images/puck_and_chuck/logo-imgs/logo-1.png" alt="Puck + Chuck logo, mark 1" loading="lazy">
+      <img src="../src/images/puck_and_chuck/logo-imgs/logo-2.png" alt="Puck + Chuck logo, mark 2" loading="lazy">
+      <img src="../src/images/puck_and_chuck/logo-imgs/logo-3.png" alt="Puck + Chuck logo, mark 3" loading="lazy">
+    </div>
+  </section>
+
+  <section class="statement reveal" id="secApproach">
+    <div class="eyebrow">Design Approach</div>
+    <p>The project followed a human-centered design process, with the designer drawing on personal experience as a surfer to identify the gap and prototype around the concept of security through disguise. User feedback was collected and was strongly positive.</p>
+  </section>
+
+  <hr class="hr">
+
+  <section class="row-section reveal" id="secPuck">
+    <div class="row-equal" style="max-width: 900px;">
+      <div class="cell"><img src="../src/images/puck_and_chuck/puck-imgs/closed-puck.png" alt="Puck + Chuck, closed" loading="lazy"></div>
+      <div class="cell"><img src="../src/images/puck_and_chuck/puck-imgs/open-puck.png" alt="Puck + Chuck, open" loading="lazy"></div>
+    </div>
+  </section>
+
+  <section class="statement reveal" id="secBrand">
+    <div class="eyebrow">Brand Identity</div>
+    <p>The brand draws on the visual language of vintage surf culture — bold chunky lettering, high-contrast color palettes across multiple colorways, and kraft box packaging that reads as authentic surf product. The goal is for Puck + Chuck to look like something you'd find in a board shop, not a security aisle.</p>
+  </section>
+
+  <section class="row-section reveal" id="secBranding">
+    <div class="row-natural branding">
+      <img src="../src/images/puck_and_chuck/branding-imgs/branding-img-1.png" alt="Puck + Chuck branding, packaging 1" loading="lazy">
+      <img src="../src/images/puck_and_chuck/branding-imgs/branding-img-2.png" alt="Puck + Chuck branding, packaging 2" loading="lazy">
+      <img src="../src/images/puck_and_chuck/branding-imgs/branding-img-3.png" alt="Puck + Chuck branding, packaging 3" loading="lazy">
+    </div>
+  </section>
+
+  <hr class="hr">
+
+  <dl class="spec-sheet reveal" id="secSpec">
+    <div>
+      <dt>Category</dt>
+      <dd>Brand Identity / Packaging Design</dd>
+    </div>
+    <div>
+      <dt>Deliverables</dt>
+      <dd>Logo · Packaging · Brand System</dd>
+    </div>
+    <div>
+      <dt>Files</dt>
+      <dd>14 Files · .PNG .PDF .AI</dd>
+    </div>
+    <div>
+      <dt>Tag</dt>
+      <dd>/dir/brand/puck_and_chuck</dd>
+    </div>
+  </dl>
+
+<script>
+  // ---- Reel: play only once scrolled into view, pause when it leaves ----
+  // Plain scroll-driven check (not IntersectionObserver) so it never
+  // autoplays just because it happens to already be visible on page load —
+  // same fix used for the OTH phone-mockup reveal.
+  const reelVideo = document.getElementById("reelVideo");
+  let reelHasScrolled = false;
+  function checkReelVisibility() {
+    const r = reelVideo.getBoundingClientRect();
+    const visibleRatio = Math.max(0, Math.min(r.bottom, window.innerHeight) - Math.max(r.top, 0)) / r.height;
+    if (reelHasScrolled && visibleRatio >= 0.4) {
+      reelVideo.play().catch(() => {});
+    } else {
+      reelVideo.pause();
+    }
+  }
+  window.addEventListener("scroll", () => {
+    reelHasScrolled = true;
+    checkReelVisibility();
+  }, { passive: true });
+  checkReelVisibility();
+
+  // ---- Branding row: justified layout so all 3 images share one exact
+  // height and the row still spans edge-to-edge with no cropping. Width
+  // per image is set from its real aspect ratio once it's loaded. ----
+  (function () {
+    const row = document.querySelector("#secBranding .row-natural.branding");
+    if (!row) return;
+    const imgs = [...row.querySelectorAll("img")];
+
+    function layout() {
+      const gap = parseFloat(getComputedStyle(row).gap) || 0;
+      const containerWidth = row.getBoundingClientRect().width;
+      const aspects = imgs.map((img) => img.naturalWidth / img.naturalHeight);
+      const sumAspect = aspects.reduce((a, b) => a + b, 0);
+      const totalGap = gap * (imgs.length - 1);
+      const height = (containerWidth - totalGap) / sumAspect;
+      imgs.forEach((img, i) => {
+        img.style.height = height + "px";
+        img.style.width = (height * aspects[i]) + "px";
+      });
+    }
+
+    Promise.all(
+      imgs.map((img) =>
+        img.complete && img.naturalWidth
+          ? Promise.resolve()
+          : new Promise((res) => { img.onload = res; img.onerror = res; })
+      )
+    ).then(layout);
+
+    window.addEventListener("resize", layout);
+  })();
+
+  // ---- Shared scroll-reveal (fade up + scale to full size) ----
+  const revealIO = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("in-view");
+        revealIO.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15, rootMargin: "0px 0px -60px 0px" });
+
+  document.querySelectorAll(".reveal").forEach((el) => revealIO.observe(el));
+</script>
+</body>
+</html>

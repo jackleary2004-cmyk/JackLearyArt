@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jack Leary — Home Prototype v2</title>
+<style>
+  /* League Mono — real font files, copied from the LeagueMono-2.300 folder
+     into src/fonts/league-mono/ so the site is self-contained (no external
+     font service needed, unlike every other font this project has tried).
+     Open-source (OFL), so this one's fully resolved, not a placeholder. */
+  @font-face {
+    font-family: "League Mono";
+    src: url("../src/fonts/league-mono/LeagueMono-Thin.woff2") format("woff2");
+    font-weight: 100;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "League Mono";
+    src: url("../src/fonts/league-mono/LeagueMono-Regular.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "League Mono";
+    src: url("../src/fonts/league-mono/LeagueMono-ExtraBold.woff2") format("woff2");
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+  }
+  /* League Spartan — new header/display typeface, self-hosted the same
+     way as League Mono (real file, copied from the LeagueSpartan-2.220
+     folder into src/fonts/league-spartan/). Only ExtraBold is needed
+     since every header/title on the site uses weight 800. */
+  @font-face {
+    font-family: "League Spartan";
+    src: url("../src/fonts/league-spartan/LeagueSpartan-ExtraBold.woff2") format("woff2");
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+  }
+</style>
+<style>
+  /*
+    PROTOTYPE NOTES (read me first):
+
+    "New Website 2" — a full restart on visual direction per your new style
+    guide (black bg, sharp corners, red/yellow/blue accents). This is a NEW
+    file, separate from prototypes/intro-prototype.html (the falling-images
+    piece) — nothing there has been touched.
+
+    FONT — League Mono, real font files (OFL, self-hosted, not a
+    placeholder). Body/nav use Thin (100); the "JACK LEARY" heading uses
+    ExtraBold (800).
+
+    THIS ROUND'S CHANGES — bio text box + portrait video are gone
+    entirely (both were anchored to that box, so removing the text
+    orphaned the portrait too — say the word if you want the portrait
+    video living somewhere else and I'll re-home it). In their place:
+
+    - A one-line SUBHEADING under the name, styled exactly like the nav
+      links (same font weight/size/tracking) — copy is a placeholder
+      ("MULTIDISCIPLINARY DESIGNER — LOS ANGELES") pulled loosely from
+      the old bio text; swap it for whatever you want it to say.
+    - --side-pad cut in half (was clamp(24px,6vw,100px), now
+      clamp(12px,3vw,50px)) — nav/subheading sit closer to the edges.
+    - "JACK LEARY" no longer has the lava-lamp gradient hover at all —
+      plain white text now, dropped to 75% opacity, and it breaks out of
+      the side padding entirely to run flush edge-to-edge (the
+      left:50%/-50vw full-bleed trick, safe because html/body already
+      have overflow-x:hidden). The 5% hover scale-up is untouched.
+    - A new full-viewport PROJECT GALLERY sits behind everything as the
+      page's background: one project photo at a time, cover-fit, with a
+      dark scrim so nav/name/captions stay legible over any photo.
+      Scrolling (mouse wheel) steps through it one project at a time
+      instead of scrolling the page — page scroll is fully captured for
+      now since this is the only content on the page; once Work/Contact/
+      Archive sections exist below this'll need to hand scroll back over
+      once you run out of slides.
+
+    CAPTION LAYOUT (updated) — the bottom caption is now a mirror of the
+    top nav bar: a 3-column grid (year / title / focus) using the same
+    --side-pad on both edges, so YEAR sits under WORK's left edge and
+    FOCUS sits under ARCHIVE's right edge, with the title truly centered
+    between them (grid's 1fr/auto/1fr, not flex space-between, so an
+    uneven year/focus length can't throw the title off-center). Title
+    text is sized like body copy rather than the old giant display size,
+    still styled like the nav (thin weight, uppercase, tracked) so the
+    whole row reads as one family with the top nav. The title is now a
+    real link to that project's page — wired up for Surf and Great Ideas
+    of Humanity (pages already exist); the other four projects don't
+    have pages yet, so their links are inert "#" placeholders until
+    those pages exist.
+
+    PROJECT GALLERY DATA — see the PROJECTS array in the script below.
+    Each entry is { slug, title, year, focus, ext, count }. Images live
+    at src/images/preview/<slug>/01.<ext>, 02.<ext>, ... — built from
+    whatever was already sitting in src/images/project_preview/, one
+    per project so far. Title is a straight read of the project name;
+    YEAR and MAIN FOCUS are both placeholders ("20XX" / "Main focus —
+    TBD") since I don't have real copy for those yet — this is the part
+    we go through together, project by project. When you drop in more
+    preview images for a project, name them sequentially (02.<ext>,
+    03.<ext>, ...) inside that project's folder and just bump its
+    `count` in the array — no other code changes needed.
+  */
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --black:  #000000;
+    --white:  #ffffff;
+    --red:    #eb1c1c;
+    --yellow: #f0e100;
+    --blue:   #48acf0;
+
+    /* Halved from clamp(24px, 6vw, 100px) per latest request. */
+    --side-pad: clamp(12px, 3vw, 50px);
+    --font-header: "League Spartan", "Helvetica Neue", Arial, sans-serif;
+    --font-body:   "League Mono", "Helvetica Neue", Arial, monospace;
+  }
+
+  html, body {
+    background: var(--black);
+    color: var(--white);
+    font-family: var(--font-body);
+    font-weight: 100;
+    overflow-x: hidden;
+    height: 100%;
+  }
+
+  /* Sharp corners everywhere — no rounded edges anywhere in this design. */
+  * { border-radius: 0 !important; }
+
+  a { color: inherit; text-decoration: none; }
+
+  /* ---------- PROJECT GALLERY (full-bleed scroll background) ---------- */
+
+  .project-gallery {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    background: var(--black);
+  }
+
+  .project-gallery .slide {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+
+  .project-gallery .slide.active {
+    opacity: 1;
+  }
+
+  .gallery-scrim {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    pointer-events: none;
+  }
+
+  /* No more edge-to-edge spread — year / title / focus now sit together
+     as one centered cluster (still at vertical middle of the page), all
+     lined up at the same font-size/weight/tracking so they read as one
+     continuous line rather than three mismatched pieces. */
+  /* The whole cluster (year — title — focus) is now one link straight to
+     the project page. On hover it turns into a solid color-filled box in
+     the slide's assigned accent (red/blue/yellow) — sharp corners, per
+     the site's style guide, not a pill. */
+  .gallery-caption {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%) scale(1);
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    gap: clamp(10px, 1.4vw, 18px);
+    width: fit-content;
+    margin: 0 auto;
+    padding: clamp(10px, 1.6vh, 16px) clamp(20px, 3vw, 36px);
+    background-color: transparent;
+    transition: background-color 0.4s ease, transform 0.4s ease;
+  }
+
+  .gallery-year,
+  .gallery-focus,
+  .gallery-title-link,
+  .caption-dash {
+    font-family: var(--font-body);
+    font-weight: 100;
+    font-size: clamp(12px, 1.4vw, 15px);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    transition: color 0.4s ease, opacity 0.4s ease;
+  }
+
+  .gallery-year,
+  .gallery-focus,
+  .caption-dash {
+    opacity: 0.75;
+  }
+
+  .gallery-caption:hover {
+    transform: translateY(-50%) scale(1.05);
+  }
+  .gallery-caption.hover-red:hover   { background-color: var(--red); }
+  .gallery-caption.hover-yellow:hover { background-color: var(--yellow); }
+  .gallery-caption.hover-blue:hover  { background-color: var(--blue); }
+
+  .gallery-caption:hover .gallery-year,
+  .gallery-caption:hover .gallery-focus,
+  .gallery-caption:hover .gallery-title-link,
+  .gallery-caption:hover .caption-dash {
+    color: var(--black);
+    opacity: 1;
+  }
+
+  /* ---------- NAV ---------- */
+
+  .nav {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: clamp(20px, 4vh, 40px) var(--side-pad) 0;
+    z-index: 10;
+  }
+
+  .nav a {
+    font-family: var(--font-body);
+    font-weight: 100;
+    font-size: clamp(12px, 1.4vw, 15px);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    opacity: 0;
+    transform: translateY(-8px);
+    animation: navIn 0.6s ease forwards;
+    transition: color 0.4s ease, transform 0.4s ease;
+  }
+  .nav a:hover {
+    transform: translateY(-4px) scale(1.08);
+  }
+  .nav a:nth-child(1) { animation-delay: 0.45s; } /* WORK — appears last (rightmost fires first) */
+  .nav a:nth-child(2) { animation-delay: 0.225s; } /* CONTACT */
+  .nav a:nth-child(3) { animation-delay: 0s; }     /* ARCHIVE — appears first */
+
+  /* No longer scoped to .nav a — the gallery title links reuse these too. */
+  .hover-red:hover    { color: var(--red); }
+  .hover-yellow:hover { color: var(--yellow); }
+  .hover-blue:hover   { color: var(--blue); }
+
+  @keyframes navIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---------- HERO ---------- */
+
+  .hero {
+    position: relative;
+    z-index: 1; /* sits above .project-gallery (z-index: 0) */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end; /* name + subheading now anchor to the bottom of the page */
+    gap: clamp(1rem, 2.5vh, 1.5rem);
+    /* Bottom padding cut way down so the name sits lower, closer to the
+       very edge of the viewport. */
+    padding: 8vh var(--side-pad) clamp(8px, 1.5vh, 20px);
+    /* .hero has no clickable content of its own (name/subheading are
+       plain text), but its full-height flex box was sitting on top of
+       .gallery-caption (which lives underneath, inside the fixed
+       .project-gallery layer) and silently eating all its clicks/hovers.
+       Turning off pointer-events here lets clicks pass through to
+       whatever is actually underneath. */
+    pointer-events: none;
+  }
+
+  .hero-name {
+    /* No longer a full-bleed breakout — "JACK LEARY" now sits inside
+       .hero's own side padding just like everything else on the page
+       (nav, gallery caption), so its left/right edges line up exactly
+       with WORK and ARCHIVE instead of running flush to the viewport
+       edge and getting visually clipped there. fitHeroName() below
+       still scaleX's the name to fill this (now narrower) container
+       edge-to-edge, so it automatically stretches to the new width. */
+    width: 100%;
+    overflow: hidden;
+    line-height: 0.86;
+    text-align: center;
+    position: relative; /* so .subheading can center itself on top of the name */
+  }
+
+  .hero-name .stretch {
+    display: inline-block;
+    white-space: nowrap;
+    transform-origin: center top;
+    font-family: var(--font-header);
+    font-weight: 800; /* League Mono ExtraBold */
+    text-transform: uppercase;
+    /* Font size + tracking reverted back to the original — only opacity
+       stays down at 45% from that round. fitHeroName() below still
+       scaleX's the name to fill the container edge-to-edge; there's no
+       hover scale-up any more (removed per an earlier request). */
+    letter-spacing: -0.01em;
+    font-size: clamp(3.2rem, 15vw, 11.5rem);
+    color: var(--white);
+    opacity: 0.45;
+    cursor: default;
+  }
+
+  /* Now centered directly on top of the name (both axes) instead of
+     sitting on its own line below it. */
+  .subheading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    font-family: var(--font-body);
+    font-weight: 100;
+    font-size: clamp(12px, 1.4vw, 15px);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-align: center;
+    opacity: 0;
+    transform: translate(-50%, calc(-50% - 8px));
+    animation: subheadingIn 0.6s ease forwards;
+    animation-delay: 0.6s; /* after the name has settled in */
+  }
+
+  @keyframes subheadingIn {
+    from { opacity: 0; transform: translate(-50%, calc(-50% - 8px)); }
+    to   { opacity: 1; transform: translate(-50%, -50%); }
+  }
+
+  /* ---------- MOBILE ---------- */
+
+  @media (max-width: 700px) {
+    .hero-name .line { display: block; }
+    .nav { padding-top: 20px; }
+    .nav a { font-size: 11px; letter-spacing: 0.12em; }
+    .gallery-title { font-size: clamp(1.4rem, 7vw, 2.2rem); }
+  }
+
+  /* ---------- CONTACT OVERLAY (blue/red/yellow oval, drops from top) ---- */
+
+  .contact-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.72);
+    z-index: 200;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+  }
+  .contact-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .contact-oval {
+    position: fixed;
+    top: 8vh;
+    left: 50%;
+    width: min(56vw, 360px);
+    aspect-ratio: 4 / 3.3;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, var(--blue) 0%, var(--red) 52%, var(--yellow) 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(6px, 1vh, 10px);
+    text-align: center;
+    padding: 9% 12%;
+    transform: translate(-50%, -140%);
+    transition: transform 0.75s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 201;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+  }
+  .contact-overlay.open .contact-oval {
+    transform: translate(-50%, 0);
+  }
+
+  .contact-oval .contact-name {
+    font-family: var(--font-display);
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: clamp(1.3rem, 2.8vw, 2rem);
+    color: var(--black);
+    letter-spacing: -0.01em;
+    line-height: 1;
+  }
+
+  .contact-oval .contact-email {
+    font-family: var(--font-caption);
+    font-weight: 400;
+    font-size: clamp(12px, 1.3vw, 15px);
+    color: var(--black);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .contact-oval .contact-links {
+    display: flex;
+    gap: clamp(12px, 1.8vw, 24px);
+    margin-top: 2px;
+  }
+
+  .contact-oval .contact-links a {
+    font-family: var(--font-caption);
+    font-weight: 400;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--black);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+    padding-bottom: 2px;
+    transition: opacity 0.25s ease;
+  }
+  .contact-oval .contact-links a:hover {
+    opacity: 0.55;
+  }
+
+  .contact-close {
+    position: absolute;
+    top: 8%;
+    right: 14%;
+    background: none;
+    border: none;
+    font-family: var(--font-caption);
+    font-size: 22px;
+    font-weight: 100;
+    line-height: 1;
+    color: var(--black);
+    cursor: pointer;
+    opacity: 0.55;
+    transition: opacity 0.25s ease;
+  }
+  .contact-close:hover {
+    opacity: 1;
+  }
+
+  @media (max-width: 640px) {
+    .contact-oval {
+      width: min(76vw, 300px);
+      aspect-ratio: 1 / 1.15;
+      padding: 13% 11%;
+      top: 10vh;
+    }
+    .contact-oval .contact-links {
+      flex-direction: column;
+      gap: 8px;
+    }
+  }
+</style>
+</head>
+<body>
+
+  <section class="project-gallery" id="project-gallery">
+    <div id="gallery-slides"></div>
+    <div class="gallery-scrim"></div>
+    <a href="#" class="gallery-caption" id="gallery-caption">
+      <span class="gallery-year" id="gallery-year"></span>
+      <span class="caption-dash">—</span>
+      <span class="gallery-title-link" id="gallery-title-link"></span>
+      <span class="caption-dash">—</span>
+      <span class="gallery-focus" id="gallery-focus"></span>
+    </a>
+  </section>
+
+  <nav class="nav">
+    <a href="work-page-prototype.html" class="hover-red">Work</a>
+    <a href="#contact" class="hover-yellow">Contact</a>
+    <a href="archive-page-prototype.html" class="hover-blue">Archive</a>
+  </nav>
+
+  <header class="hero">
+    <h1 class="hero-name">
+      <span class="stretch" id="stretch-name">
+        <span class="line">JACK</span><span class="line" style="display:inline">&nbsp;LEARY</span>
+      </span>
+      <p class="subheading">Multidisciplinary Designer — Los Angeles</p>
+    </h1>
+  </header>
+
+<script>
+(function () {
+  // ---- Name: stretch to fill the full-bleed width -------------------------
+  // Same "measure natural width, scaleX up to container width" trick used
+  // elsewhere on the site. .hero-name is now 100vw (full-bleed breakout),
+  // so this automatically stretches the name edge-to-edge instead of just
+  // to the padded content width. On mobile the two <span class="line">
+  // words stack (see the media query) and each one gets measured/stretched
+  // independently.
+  const heroName = document.querySelector(".hero-name");
+  const stretchEl = document.getElementById("stretch-name");
+  const lineEls = stretchEl.querySelectorAll(".line");
+
+  function isMobile() {
+    return window.matchMedia("(max-width: 700px)").matches;
+  }
+
+  // Base scaleX from the stretch-to-fill trick — stored so the hover
+  // scale-up (5%) can be combined with it instead of overwriting it.
+  let desktopScaleX = 1;
+
+  function fitHeroName() {
+    const containerWidth = heroName.clientWidth;
+
+    if (isMobile()) {
+      stretchEl.style.transform = "none";
+      lineEls.forEach((line) => {
+        line.style.transform = "none";
+        line.style.transformOrigin = "center top";
+        const natural = line.getBoundingClientRect().width;
+        if (natural > 0) {
+          line.style.transform = `scaleX(${containerWidth / natural})`;
+        }
+      });
+    } else {
+      lineEls.forEach((line) => { line.style.transform = "none"; });
+      stretchEl.style.transform = "none";
+      const natural = stretchEl.getBoundingClientRect().width;
+      // No more hover scale-up, so no headroom to bake in — scale
+      // straight to the full container width.
+      desktopScaleX = natural > 0 ? containerWidth / natural : 1;
+      stretchEl.style.transform = `scaleX(${desktopScaleX})`;
+    }
+  }
+
+  window.addEventListener("resize", fitHeroName);
+  fitHeroName();
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(fitHeroName);
+  }
+
+  // ---- Project gallery: scroll-driven background slideshow ---------------
+  // PROJECTS is the thing to edit as we go through these together — title
+  // is a straight read of the project name, year/focus are both
+  // placeholders. `count` images are expected at
+  // src/images/preview/<slug>/01.<ext> .. 0<count>.<ext> — bump `count`
+  // once more numbered images are dropped in that folder.
+  // `page` is the project's own prototype page — "#" is a placeholder for
+  // projects that don't have one built yet. `hover` cycles through the
+  // three accent colors (same hover-red/yellow/blue classes the nav
+  // uses) so the title link picks up one of them on hover, same as WORK/
+  // CONTACT/ARCHIVE do.
+  const PROJECTS = [
+    { slug: "puck-and-chuck",           title: "Puck + Chuck",               year: "2026", focus: "Brand Identity", ext: "png", count: 2, page: "puck-and-chuck-page-prototype.html", hover: "hover-blue" },
+    { slug: "surf",                     title: "Surf",                       year: "2024", focus: "Editorial Presentation", ext: "jpg", count: 2, page: "surf-page-prototype.html",        hover: "hover-red" },
+    { slug: "hangul",                   title: "Hangul",                     year: "2026", focus: "Poster Design", ext: "png", count: 2, page: "hangul-page-prototype.html",     hover: "hover-red" },
+    { slug: "adobe-firefly",            title: "Adobe Firefly",              year: "2026", focus: "Brand Identity", ext: "png", count: 2, page: "adobe-firefly-page-prototype.html", hover: "hover-yellow" },
+    { slug: "over-the-hump",            title: "Over the Hump",              year: "2024-2025", focus: "Social Media Design", ext: "jpg", count: 2, page: "over-the-hump-page-prototype.html", hover: "hover-blue" },
+    { slug: "great-ideas-of-humanity",   title: "Great Ideas of Humanity",    year: "2025", focus: "Poster Design", ext: "png", count: 2, page: "great-ideas-page-prototype.html", hover: "hover-yellow" },
+  ];
+
+  // Flatten each project's numbered images into one ordered list of
+  // slides. Multiple images under one project stay grouped together and
+  // keep showing that same project's title/year/focus as you step through
+  // them, only changing caption once you cross into the next project.
+  const SLIDES = [];
+  PROJECTS.forEach((project) => {
+    for (let i = 1; i <= project.count; i++) {
+      const num = String(i).padStart(2, "0");
+      SLIDES.push({
+        image: `../src/images/preview/${project.slug}/${num}.${project.ext}`,
+        title: project.title,
+        year: project.year,
+        focus: project.focus,
+        page: project.page,
+        hover: project.hover,
+      });
+    }
+  });
+
+  const slidesContainer = document.getElementById("gallery-slides");
+  const captionLinkEl = document.getElementById("gallery-caption");
+  const yearEl = document.getElementById("gallery-year");
+  const titleLinkEl = document.getElementById("gallery-title-link");
+  const focusEl = document.getElementById("gallery-focus");
+
+  const slideEls = SLIDES.map((slide) => {
+    const div = document.createElement("div");
+    div.className = "slide";
+    div.style.backgroundImage = `url("${slide.image}")`;
+    slidesContainer.appendChild(div);
+    return div;
+  });
+
+  let current = 0;
+
+  function showSlide(index) {
+    slideEls.forEach((el, i) => el.classList.toggle("active", i === index));
+    const s = SLIDES[index];
+    yearEl.textContent = s.year;
+    titleLinkEl.textContent = s.title;
+    focusEl.textContent = s.focus;
+    captionLinkEl.href = s.page;
+    captionLinkEl.classList.remove("hover-red", "hover-yellow", "hover-blue");
+    captionLinkEl.classList.add(s.hover);
+  }
+
+  if (SLIDES.length > 0) {
+    showSlide(0);
+  }
+
+  // Scroll (wheel) steps one slide at a time, with a short cooldown so a
+  // single trackpad/wheel gesture doesn't blow through several slides at
+  // once — this is the whole page's scroll for now since there's nothing
+  // below it yet; once Work/Contact/Archive exist this'll need to release
+  // the scroll-jack once you run past the last slide.
+  let cooldown = false;
+  const COOLDOWN_MS = 700;
+
+  function step(direction) {
+    if (cooldown || SLIDES.length === 0) return;
+    // Wraps both directions now — scrolling past the last project (GIOH)
+    // loops back to the first (Puck + Chuck), and scrolling back past the
+    // first loops to the last, so it reads as one continuous loop instead
+    // of dead-ending at either end.
+    current = (current + direction + SLIDES.length) % SLIDES.length;
+    showSlide(current);
+    cooldown = true;
+    setTimeout(() => { cooldown = false; }, COOLDOWN_MS);
+  }
+
+  window.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    step(e.deltaY > 0 ? 1 : -1);
+  }, { passive: false });
+
+  // Touch swipe (mobile/trackpad-less testing) — up-swipe advances, same
+  // as scrolling down would.
+  let touchStartY = null;
+  window.addEventListener("touchstart", (e) => {
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+  window.addEventListener("touchend", (e) => {
+    if (touchStartY === null) return;
+    const deltaY = touchStartY - e.changedTouches[0].clientY;
+    if (Math.abs(deltaY) > 30) step(deltaY > 0 ? 1 : -1);
+    touchStartY = null;
+  }, { passive: true });
+
+  // Arrow keys — convenient while testing at a desk.
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowDown" || e.key === "ArrowRight") step(1);
+    if (e.key === "ArrowUp" || e.key === "ArrowLeft") step(-1);
+  });
+})();
+</script>
+
+  <div class="contact-overlay" id="contactOverlay">
+    <div class="contact-oval">
+      <button class="contact-close" id="contactClose" aria-label="Close">&times;</button>
+      <div class="contact-name">Jack Leary</div>
+      <a class="contact-email" href="mailto:jack.leary2004@gmail.com">jack.leary2004@gmail.com</a>
+      <div class="contact-links">
+        <a href="https://www.instagram.com/jacklearyart/" target="_blank" rel="noopener noreferrer">Instagram</a>
+        <a href="https://www.behance.net/jackleary3" target="_blank" rel="noopener noreferrer">Behance</a>
+        <a href="https://www.linkedin.com/in/jack-leary-art" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ---- Contact overlay: click the "Contact" nav link to drop the
+  // blue/red/yellow oval down from the top instead of navigating. ----
+  (function () {
+    const overlay = document.getElementById("contactOverlay");
+    const trigger = document.querySelector('a[href="#contact"]');
+    const closeBtn = document.getElementById("contactClose");
+    if (!overlay || !trigger || !closeBtn) return;
+
+    function openContact(e) {
+      if (e) e.preventDefault();
+      overlay.classList.add("open");
+    }
+    function closeContact() {
+      overlay.classList.remove("open");
+    }
+
+    trigger.addEventListener("click", openContact);
+    closeBtn.addEventListener("click", closeContact);
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) closeContact();
+    });
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeContact();
+    });
+  })();
+</script>
+</body>
+</html>

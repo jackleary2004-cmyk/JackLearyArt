@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jack Leary — Hangul Poster Series</title>
+<style>
+  /* League Mono — same real, self-hosted font files as the rest of the site. */
+  @font-face {
+    font-family: "League Mono";
+    src: url("/fonts/league-mono/LeagueMono-Thin.woff2") format("woff2");
+    font-weight: 100;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "League Mono";
+    src: url("/fonts/league-mono/LeagueMono-Regular.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "League Mono";
+    src: url("/fonts/league-mono/LeagueMono-ExtraBold.woff2") format("woff2");
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+  }
+  /* League Spartan — same header/display typeface as the rest of the site. */
+  @font-face {
+    font-family: "League Spartan";
+    src: url("/fonts/league-spartan/LeagueSpartan-ExtraBold.woff2") format("woff2");
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+  }
+</style>
+<style>
+  /*
+    PROTOTYPE NOTES (read me first):
+
+    HANGUL POSTER SERIES — project detail page, in the same family as
+    surf-page-prototype.html / great-ideas-page-prototype.html, but on a
+    WHITE background (those two are still black) per this round's request.
+
+    - Full-width "HANGUL POSTER SERIES" banner at the top.
+    - Below it, a two-column layout: left is the currently-active poster's
+      title / explanation / translation; right is a "messy pile" of all
+      the poster images, each given a small fixed rotation + offset so
+      they look tossed together rather than perfectly stacked.
+    - Click anywhere on the pile to advance to the next poster — the
+      current one lifts, straightens, and gets a stronger shadow (the
+      "active" card), the text on the left cross-fades to match, and it
+      loops back to the first poster after the last one, so clicking
+      never dead-ends.
+    - Sections spawn in on scroll (same IntersectionObserver pattern as
+      the rest of the site).
+    - A small "Full Size" button in the corner of the stage opens a
+      full-screen lightbox (same pattern as Surf/GIOH) with its own
+      prev/next through all 8 posters — its click handler stops
+      propagation so it never also triggers the pile's advance-on-click.
+      Closing the lightbox syncs the pile back to whatever poster you
+      last viewed there.
+
+    CONTENT — 8 poster images across 3 concepts found in
+    src/images/hangul/ (jack-in-korean ×2, korean-proverb ×4,
+    train-to-busan ×2). Final title/explanation/translation copy for
+    all 8 is filled in below, one object per poster in the POSTERS
+    array.
+  */
+
+  * { border-radius: 0 !important; box-sizing: border-box; }
+  * { margin: 0; padding: 0; }
+
+  :root {
+    --black: #000000;
+    --white: #ffffff;
+    --red: #eb1c1c;
+    --yellow: #f0e100;
+    --blue: #48acf0;
+    --side-pad: clamp(12px, 3vw, 50px);
+    --font-display: "League Spartan", "Helvetica Neue", Arial, sans-serif;
+    --font-body:    "League Mono", "Helvetica Neue", Arial, monospace;
+    --font-caption: "League Mono", "Helvetica Neue", Arial, monospace;
+  }
+
+  html, body {
+    background: var(--white);
+    color: var(--black);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  .back-link {
+    position: fixed;
+    top: 20px;
+    left: var(--side-pad);
+    z-index: 20;
+    font-family: var(--font-caption);
+    font-weight: 100;
+    font-size: clamp(12px, 1.4vw, 15px);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(0, 0, 0, 0.5);
+    transition: color 0.3s ease;
+  }
+  .back-link:hover { color: var(--blue); }
+
+  /* ---------- HEADER BANNER ---------- */
+
+  .series-header {
+    padding: clamp(90px, 16vh, 160px) var(--side-pad) clamp(20px, 4vh, 40px);
+    text-align: center;
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  .series-header.in-view {
+    animation: spawnIn 0.7s ease forwards;
+  }
+
+  .series-header h1 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    font-size: clamp(2.2rem, 7vw, 5rem);
+    line-height: 0.98;
+  }
+
+  .series-header p {
+    margin-top: clamp(10px, 1.6vh, 16px);
+    font-family: var(--font-caption);
+    font-weight: 100;
+    font-size: clamp(12px, 1.4vw, 15px);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--black);
+  }
+
+  @keyframes spawnIn {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---------- TWO-COLUMN CONTENT ---------- */
+
+  .series-content {
+    display: grid;
+    grid-template-columns: minmax(260px, 480px) 1fr;
+    gap: clamp(32px, 6vw, 90px);
+    align-items: center;
+    padding: clamp(20px, 4vh, 40px) var(--side-pad) clamp(80px, 12vh, 140px);
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .info-panel {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  .info-panel.in-view {
+    animation: spawnIn 0.7s ease forwards;
+    animation-delay: 0.1s;
+  }
+
+  .poster-fade {
+    transition: opacity 0.25s ease;
+  }
+  .poster-fade.fading {
+    opacity: 0;
+  }
+
+  .poster-index {
+    font-family: var(--font-caption);
+    font-weight: 100;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(0, 0, 0, 0.45);
+    margin-bottom: 0.9rem;
+  }
+
+  .poster-title {
+    font-family: var(--font-display);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    font-size: clamp(1.8rem, 3.4vw, 3rem);
+    line-height: 1.02;
+    margin-bottom: 1.3rem;
+  }
+
+  .poster-explanation {
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: clamp(0.95rem, 1.3vw, 1.05rem);
+    line-height: 1.6;
+    color: rgba(0, 0, 0, 0.75);
+    max-width: 46ch;
+    margin-bottom: 1.4rem;
+  }
+
+  .poster-translation {
+    border-left: 2px solid rgba(0, 0, 0, 0.15);
+    padding-left: 1rem;
+  }
+
+  .poster-translation .label {
+    display: block;
+    font-family: var(--font-caption);
+    font-weight: 100;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(0, 0, 0, 0.4);
+    margin-bottom: 0.4rem;
+  }
+
+  .poster-translation .line {
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-style: italic;
+    font-size: clamp(0.95rem, 1.3vw, 1.05rem);
+    color: rgba(0, 0, 0, 0.85);
+  }
+
+  .poster-translation[hidden] { display: none; }
+
+  /* ---------- PILE ---------- */
+
+  .pile-panel {
+    display: flex;
+    justify-content: center;
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  .pile-panel.in-view {
+    animation: spawnIn 0.7s ease forwards;
+    animation-delay: 0.2s;
+  }
+
+  .poster-stage {
+    position: relative;
+    width: min(88vw, 420px);
+    aspect-ratio: 3 / 4;
+    cursor: pointer;
+  }
+
+  .poster-card {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background: var(--white);
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.16);
+    filter: brightness(0.95);
+    transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 0.55s ease,
+                filter 0.4s ease;
+    transform: translate(var(--x), var(--y)) rotate(var(--rot));
+  }
+
+  .poster-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    pointer-events: none;
+  }
+
+  .poster-card.active {
+    transform: translate(0, -20px) rotate(0deg) scale(1.015);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+    filter: brightness(1);
+  }
+
+  .pile-hint {
+    position: absolute;
+    left: 50%;
+    bottom: -50px;
+    transform: translateX(-50%);
+    font-family: var(--font-caption);
+    font-weight: 100;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--black);
+    white-space: nowrap;
+  }
+
+  /* Sits above every .poster-card (highest of which is z-index 100) so
+     it's always clickable no matter which poster is on top. Its own
+     click handler stops propagation before it reaches the stage's
+     click-to-advance listener, so opening the gallery never also
+     cycles the pile. */
+  .expand-btn {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+    padding: 0.5em 0.8em;
+    background: rgba(255, 255, 255, 0.88);
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    font-family: var(--font-caption);
+    font-weight: 100;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--black);
+    cursor: pointer;
+    transition: color 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+  }
+  .expand-btn:hover {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: var(--white);
+  }
+  .expand-btn .icon {
+    font-size: 13px;
+    line-height: 1;
+  }
+
+  /* ---------- LIGHTBOX (full-size gallery view) ---------- */
+
+  #hangulLightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.94);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 300;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  #hangulLightbox.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  #hangulLightbox .lb-stage {
+    max-width: 80vw;
+    max-height: 76vh;
+  }
+  #hangulLightbox .lb-stage img {
+    max-width: 80vw;
+    max-height: 76vh;
+    display: block;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+  }
+
+  #hangulLightbox .lb-close,
+  #hangulLightbox .lb-nav {
+    position: absolute;
+    background: none;
+    border: none;
+    color: var(--white);
+    cursor: pointer;
+    font-family: var(--font-caption);
+  }
+
+  #hangulLightbox .lb-close {
+    top: 24px;
+    right: var(--side-pad);
+    font-size: 28px;
+    line-height: 1;
+    font-weight: 100;
+  }
+  #hangulLightbox .lb-close:hover { color: var(--yellow); }
+
+  #hangulLightbox .lb-nav {
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 40px;
+    font-weight: 100;
+    padding: 0.5rem 1rem;
+  }
+  #hangulLightbox .lb-nav:hover { color: var(--yellow); }
+  #hangulLightbox .lb-prev { left: 12px; }
+  #hangulLightbox .lb-next { right: 12px; }
+
+  #hangulLightbox .lb-caption {
+    position: absolute;
+    bottom: 26px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    width: min(80vw, 600px);
+  }
+  #hangulLightbox .lb-title {
+    font-family: var(--font-display);
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: clamp(1rem, 2vw, 1.3rem);
+    color: var(--white);
+    margin-bottom: 0.3rem;
+  }
+  #hangulLightbox .lb-index {
+    font-family: var(--font-caption);
+    font-weight: 100;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.55);
+  }
+
+  /* ---------- MOBILE ---------- */
+
+  @media (max-width: 860px) {
+    .series-content {
+      grid-template-columns: 1fr;
+      justify-items: center;
+      text-align: center;
+    }
+    .poster-translation {
+      text-align: left;
+      display: inline-block;
+    }
+    .poster-explanation { margin-left: auto; margin-right: auto; }
+    .poster-stage { margin-top: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+  <a class="back-link" href="/work/">← Work</a>
+
+  <header class="series-header">
+    <h1>Hangul Poster Series</h1>
+    <p>Typography &amp; Translation — 2026</p>
+  </header>
+
+  <main class="series-content">
+    <div class="info-panel">
+      <div class="poster-fade" id="posterFade">
+        <div class="poster-index" id="posterIndex"></div>
+        <h2 class="poster-title" id="posterTitle"></h2>
+        <p class="poster-explanation" id="posterExplanation"></p>
+        <div class="poster-translation" id="posterTranslation">
+          <span class="label">Translation</span>
+          <span class="line" id="posterTranslationLine"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="pile-panel">
+      <div class="poster-stage" id="posterStage">
+        <button class="expand-btn" id="expandBtn" type="button" aria-label="View full size">
+          <span class="icon">⤢</span> Full Size
+        </button>
+        <div class="pile-hint">Click the pile — next poster</div>
+      </div>
+    </div>
+  </main>
+
+  <div id="hangulLightbox">
+    <button class="lb-nav lb-prev" id="lbPrev" aria-label="Previous">&#8249;</button>
+    <div class="lb-stage" id="lbStage"></div>
+    <button class="lb-nav lb-next" id="lbNext" aria-label="Next">&#8250;</button>
+    <button class="lb-close" id="lbClose" aria-label="Close">&times;</button>
+    <div class="lb-caption">
+      <div class="lb-title" id="lbTitle"></div>
+      <div class="lb-index" id="lbIndex"></div>
+    </div>
+  </div>
+
+  <script>
+    // One entry per poster image. Working titles/copy for now — swap in
+    // the real title/explanation/translation for each as we go through
+    // them. `translation` is optional (omit or leave "" to hide that row,
+    // e.g. for the Train to Busan pieces, which aren't proverb translations).
+    const POSTERS = [
+      {
+        img: "/images/hangul/jack-in-korean_1.png",
+        title: "Jack in Korean 1",
+        explanation: "Jack Leary in Hangul, leaning into the grid/block system that Hangul uses to inspire a “break-the-grid” style poster. The poster also incorporates 3 words used to describe me (creativity // curiosity // outgoing).",
+        translation: "",
+      },
+      {
+        img: "/images/hangul/jack-in-korean_2.png",
+        title: "Jack in Korean 2",
+        explanation: "Jack Leary in Hangul; incorporating an abstract silhouette of myself. Overall style inspired by the neon signs seen all over Korea, at their many 24hr markets and stores.",
+        translation: "",
+      },
+      {
+        img: "/images/hangul/korean-proverb_1.png",
+        title: "A Dragon Rises From a Small Stream",
+        explanation: "Korean Proverb; signifies that success can come from anywhere, and often does come from the overlooked or places that are viewed as insignificant.",
+        translation: "개천에서 용 난다 — “A dragon rises from a small stream.”",
+      },
+      {
+        img: "/images/hangul/korean-proverb_2.png",
+        title: "Even a Tiger Comes When You Speak of Him",
+        explanation: "Korean Proverb; the Korean version of the English saying: “speak of the devil.” The tigers themselves are illustrated using layers of the proverb.",
+        translation: "호랑이도 제 말하면 온다 — “Even a tiger comes when you speak of him.”",
+      },
+      {
+        img: "/images/hangul/korean-proverb_3.png",
+        title: "A Single Word Can Pay Back a Debt of a Thousand Nyang",
+        explanation: "Korean Proverb; a proverb about the power of words, set in a stacked, full-bleed gradient composition.",
+        translation: "말 한마디에 천냥 빚도 갚는다 — “A single word can pay back a debt of a thousand nyang.”",
+      },
+      {
+        img: "/images/hangul/korean-proverb_4.png",
+        title: "Speak of the Devil",
+        explanation: "Korean Proverb; another version of the “Even a tiger comes when you speak of him” proverb; leaned more into the American parallel proverb.",
+        translation: "호랑이도 제 말하면 온다 — “Even a tiger comes when you speak of him.”",
+      },
+      {
+        img: "/images/hangul/train-to-busan_1.png",
+        title: "Train to Busan: Spread of Infection",
+        explanation: "Infographic based on the Korean zombie flic “Train to Busan,” illustrating the path and spread of infection throughout the movie, using the train stops as markers.",
+        translation: "",
+      },
+      {
+        img: "/images/hangul/train-to-busan_2.png",
+        title: "Train to Busan; Who Died?",
+        explanation: "2nd Infographic based on the Korean zombie movie “Train to Busan,” showing the order of characters who passed away, starting with the very first sign of infection: the deer.",
+        translation: "",
+      },
+    ];
+
+    // Fixed, hand-placed jitter per card so the pile always looks the
+    // same "tossed together" way — only the active card's position
+    // changes (via the .active class), not these base values.
+    const JITTER = [
+      { rot: -7,  x: "-14px", y: "8px"  },
+      { rot: 5,   x: "16px",  y: "-6px" },
+      { rot: -3,  x: "-8px",  y: "12px" },
+      { rot: 8,   x: "18px",  y: "4px"  },
+      { rot: -6,  x: "-16px", y: "-10px"},
+      { rot: 3,   x: "10px",  y: "10px" },
+      { rot: -9,  x: "-6px",  y: "-14px"},
+      { rot: 6,   x: "12px",  y: "-4px" },
+    ];
+
+    const stage = document.getElementById("posterStage");
+    const fadeEl = document.getElementById("posterFade");
+    const indexEl = document.getElementById("posterIndex");
+    const titleEl = document.getElementById("posterTitle");
+    const explanationEl = document.getElementById("posterExplanation");
+    const translationRow = document.getElementById("posterTranslation");
+    const translationLine = document.getElementById("posterTranslationLine");
+
+    const cards = POSTERS.map((p, i) => {
+      const card = document.createElement("div");
+      card.className = "poster-card";
+      const j = JITTER[i % JITTER.length];
+      card.style.setProperty("--rot", `${j.rot}deg`);
+      card.style.setProperty("--x", j.x);
+      card.style.setProperty("--y", j.y);
+      card.style.zIndex = i + 1;
+      card.innerHTML = `<img src="${p.img}" alt="${p.title}">`;
+      stage.appendChild(card);
+      return card;
+    });
+
+    let current = 0;
+
+    function renderInfo() {
+      const p = POSTERS[current];
+      indexEl.textContent = `${String(current + 1).padStart(2, "0")} / ${String(POSTERS.length).padStart(2, "0")}`;
+      titleEl.textContent = p.title;
+      explanationEl.textContent = p.explanation;
+      if (p.translation) {
+        translationRow.hidden = false;
+        translationLine.textContent = p.translation;
+      } else {
+        translationRow.hidden = true;
+      }
+    }
+
+    function renderStage() {
+      cards.forEach((card, i) => {
+        card.classList.toggle("active", i === current);
+        card.style.zIndex = i === current ? 100 : i + 1;
+      });
+    }
+
+    function setCurrent(i) {
+      // Cross-fade the text, swap the active card. Shared by the pile's
+      // click-to-advance and by the lightbox syncing back on close.
+      if (i === current) return;
+      fadeEl.classList.add("fading");
+      current = i;
+      renderStage();
+      setTimeout(() => {
+        renderInfo();
+        fadeEl.classList.remove("fading");
+      }, 220);
+    }
+
+    function goToNext() {
+      // Always advances and always wraps, so clicking through the pile
+      // never dead-ends.
+      setCurrent((current + 1) % POSTERS.length);
+    }
+
+    stage.addEventListener("click", goToNext);
+
+    renderInfo();
+    renderStage();
+
+    // ---------- Full-size gallery lightbox ----------
+    // A separate "expand" button (top-right of the stage, stacked above
+    // every poster card) opens a full-screen view of the current poster
+    // with its own prev/next — same lightbox pattern as the Surf and
+    // Great Ideas of Humanity pages. Its click handler stops propagation
+    // so it never also triggers the pile's advance-on-click. Browsing to
+    // a different poster inside the lightbox and then closing it syncs
+    // the pile/left panel to whatever was last shown, so you don't land
+    // back on a poster you'd already moved past.
+    const lightbox = document.getElementById("hangulLightbox");
+    const lbStage = document.getElementById("lbStage");
+    const lbTitleEl = document.getElementById("lbTitle");
+    const lbIndexEl = document.getElementById("lbIndex");
+    let lbIndex = 0;
+
+    function renderLightbox() {
+      const p = POSTERS[lbIndex];
+      lbStage.innerHTML = `<img src="${p.img}" alt="${p.title}">`;
+      lbTitleEl.textContent = p.title;
+      lbIndexEl.textContent = `${String(lbIndex + 1).padStart(2, "0")} / ${String(POSTERS.length).padStart(2, "0")}`;
+    }
+
+    function openLightbox(i) {
+      lbIndex = i;
+      renderLightbox();
+      lightbox.classList.add("open");
+    }
+
+    function closeLightbox() {
+      lightbox.classList.remove("open");
+      setCurrent(lbIndex);
+    }
+
+    function lbStep(direction) {
+      lbIndex = (lbIndex + direction + POSTERS.length) % POSTERS.length;
+      renderLightbox();
+    }
+
+    document.getElementById("expandBtn").addEventListener("click", (e) => {
+      e.stopPropagation(); // don't also fire the stage's click-to-advance
+      openLightbox(current);
+    });
+    document.getElementById("lbClose").addEventListener("click", closeLightbox);
+    document.getElementById("lbPrev").addEventListener("click", () => lbStep(-1));
+    document.getElementById("lbNext").addEventListener("click", () => lbStep(1));
+    lightbox.addEventListener("click", (e) => {
+      if (e.target === lightbox) closeLightbox();
+    });
+    window.addEventListener("keydown", (e) => {
+      if (!lightbox.classList.contains("open")) return;
+      if (e.key === "Escape") closeLightbox();
+      if (e.key === "ArrowLeft") lbStep(-1);
+      if (e.key === "ArrowRight") lbStep(1);
+    });
+
+    // ---------- Scroll spawn-in ----------
+    const revealTargets = document.querySelectorAll(".series-header, .info-panel, .pile-panel");
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("in-view");
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: "0px 0px -40px 0px" });
+    revealTargets.forEach((el) => io.observe(el));
+  </script>
+</body>
+</html>

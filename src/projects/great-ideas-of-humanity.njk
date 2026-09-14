@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jack Leary — Great Ideas of Humanity</title>
+<style>
+  /* League Mono — same real, self-hosted font files as home-v2-prototype.html
+     and surf-page-prototype.html. */
+  @font-face {
+    font-family: "League Mono";
+    src: url("/fonts/league-mono/LeagueMono-Thin.woff2") format("woff2");
+    font-weight: 100;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "League Mono";
+    src: url("/fonts/league-mono/LeagueMono-Regular.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "League Mono";
+    src: url("/fonts/league-mono/LeagueMono-ExtraBold.woff2") format("woff2");
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+  }
+  /* League Spartan — new header/display typeface, self-hosted the same
+     way as League Mono (real file, copied from the LeagueSpartan-2.220
+     folder into src/fonts/league-spartan/). Only ExtraBold is needed
+     since every header/title on the site uses weight 800. */
+  @font-face {
+    font-family: "League Spartan";
+    src: url("/fonts/league-spartan/LeagueSpartan-ExtraBold.woff2") format("woff2");
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+  }
+</style>
+<style>
+  /*
+    PROTOTYPE NOTES:
+    - UPDATED to the new site-wide style guide (black bg, stark white text,
+      red/yellow/blue accents, sharp corners everywhere, League Mono in
+      place of the old Neue Haas Grotesk placeholder), same pass as
+      surf-page-prototype.html. Colors, background, and type only —
+      nothing about the layout, the poster hover, the drafts' ripple
+      effect, or the shared poster+drafts lightbox sequence was touched.
+      Old font-weights that don't exist in League Mono's set (300, 200,
+      900) were mapped to the nearest real weight we have (100 Thin, 100
+      Thin, 800 ExtraBold respectively).
+    - v2 layout: left column is just the poster; right column stacks the
+      text block AND the drafts grid beneath it (not full-page-width
+      anymore, since it now lives inside the right column). Because that
+      column is narrower than the full page, the grid drops from 9 columns
+      to 4 — 9 would make each tile tiny at this width. Easy to tune.
+    - Poster gets a modest hover (slight scale + deeper shadow, cursor:
+      zoom-in) rather than the drafts' full 1.5x ripple pop — that pop was
+      sized for small grid thumbnails; doing the same thing to an
+      already-large hero image would blow it off the edge of the column.
+    - Clicking the poster OR any draft opens the same lightbox, and they
+      share one sequence (poster first, then all 11 drafts), so the
+      prev/next arrows move seamlessly from the poster into the drafts.
+  */
+
+  * { border-radius: 0 !important; } /* sharp corners everywhere, per style guide */
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --white: #ffffff;
+    --black: #000000;
+    --red:   #eb1c1c;
+    --blue:  #48acf0;
+    --yellow:#f0e100;
+
+    /* Fluid side margin — see intro-prototype.html for the full note.
+       390px -> 24px, 1512px (14" MacBook Pro logical width) -> 100px,
+       holds flat past that. Untouched by this pass — it's a layout value,
+       not part of the color/type style guide. */
+    --side-pad: clamp(24px, calc(-2.4px + 6.77vw), 100px);
+    --font-display: "League Spartan", "Helvetica Neue", Arial, sans-serif;
+    --font-body:    "League Mono", "Helvetica Neue", Arial, monospace;
+    --font-caption: "League Mono", "Helvetica Neue", Arial, monospace;
+  }
+
+  html, body {
+    background: var(--black);
+    color: var(--white);
+    font-family: var(--font-body);
+  }
+
+  a { color: inherit; }
+
+  /* ---------- HEADER ---------- */
+
+  .back-link {
+    position: fixed;
+    top: 20px;
+    left: var(--side-pad);
+    z-index: 20;
+    font-family: var(--font-caption);
+    font-weight: 100;
+    font-size: clamp(12px, 1.4vw, 15px);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: rgba(255,255,255,0.55);
+  }
+  .back-link:hover { color: var(--yellow); }
+
+  /* ---------- LAYOUT: poster (left) | text + drafts (right) ---------- */
+
+  .project-hero {
+    display: flex;
+    align-items: flex-start;
+    gap: 5vw;
+    padding: 7rem var(--side-pad) 5rem;
+  }
+
+  .poster {
+    flex: 0 1 42%;
+    max-width: 42%;
+    cursor: zoom-in;
+  }
+  .poster img {
+    display: block;
+    width: 100%;
+    height: auto; /* natural aspect, never cropped */
+    box-shadow: 0 18px 40px rgba(0,0,0,0.16);
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+  }
+  .poster:hover img {
+    transform: scale(1.03);
+    box-shadow: 0 26px 55px rgba(0,0,0,0.22);
+  }
+
+  .right-col {
+    flex: 1 1 420px;
+    max-width: 560px;
+  }
+
+  .right-col h1 {
+    font-family: var(--font-display);
+    font-weight: 800; /* League Mono's heaviest real weight (ExtraBold) — was a synthetic 900 */
+    text-transform: uppercase;
+    font-size: clamp(2.2rem, 4.6vw, 3.6rem);
+    line-height: 0.98;
+    letter-spacing: -0.01em;
+    margin-bottom: 0.6rem;
+  }
+
+  .right-col .subheading {
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 1.6rem;
+  }
+
+  .right-col .body-copy {
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: clamp(1rem, 1.4vw, 1.1rem);
+    line-height: 1.6;
+    color: rgba(255,255,255,0.85);
+    margin-bottom: 1.4rem;
+  }
+
+  .right-col .caption {
+    font-family: var(--font-caption);
+    font-weight: 100;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 1.8rem;
+  }
+
+  /* Small caption-sized year line, sitting right under the title. */
+  .project-year {
+    font-family: var(--font-caption);
+    font-weight: 100;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 0.6rem;
+  }
+
+  .right-col .exhibition-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-caption);
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--white);
+    border-bottom: 1.5px solid var(--yellow);
+    padding-bottom: 4px;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+  .right-col .exhibition-link:hover {
+    color: var(--yellow);
+    border-color: var(--white);
+  }
+  .right-col .exhibition-link .arrow { font-size: 14px; }
+
+  @media (max-width: 860px) {
+    .project-hero { flex-direction: column; }
+    .poster { max-width: 100%; }
+    .right-col { max-width: 100%; }
+  }
+
+  /* ---------- DRAFTS GRID (nested in the right column now) ---------- */
+
+  .drafts-label {
+    margin-top: 2.5rem;
+    padding-bottom: 1rem;
+    font-family: var(--font-caption);
+    font-weight: 100;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+  }
+
+  .surf-grid {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .surf-col {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .surf-tile {
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+  }
+
+  .surf-tile img {
+    width: 100%;
+    height: auto;
+    display: block;
+    pointer-events: none;
+  }
+
+  .grid-loading {
+    padding: 1rem 0;
+    font-family: var(--font-caption);
+    font-weight: 100;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+  }
+
+  /* ---------- SLIDESHOW / LIGHTBOX ---------- */
+
+  #lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.96);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  #lightbox.open { opacity: 1; pointer-events: all; }
+
+  #lightbox .stage { max-width: 82vw; max-height: 82vh; }
+  #lightbox .stage img { max-width: 82vw; max-height: 82vh; display: block; }
+
+  #lightbox .close-btn,
+  #lightbox .nav-btn {
+    position: absolute;
+    background: none;
+    border: none;
+    color: var(--white);
+    cursor: pointer;
+    font-family: var(--font-caption);
+  }
+  #lightbox .close-btn {
+    top: 24px; right: var(--side-pad);
+    font-size: 28px; line-height: 1; font-weight: 100;
+  }
+  #lightbox .close-btn:hover { color: var(--yellow); }
+  #lightbox .nav-btn {
+    top: 50%; transform: translateY(-50%);
+    font-size: 40px; font-weight: 100; padding: 0.5rem 1rem;
+  }
+  #lightbox .nav-btn:hover { color: var(--yellow); }
+  #lightbox .nav-prev { left: 12px; }
+  #lightbox .nav-next { right: 12px; }
+  #lightbox .index-label {
+    position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+    font-family: var(--font-caption); font-weight: 100; font-size: 12px;
+    letter-spacing: 0.1em; color: rgba(255,255,255,0.6);
+  }
+</style>
+</head>
+<body>
+
+  <a class="back-link" href="/work/">← Work</a>
+
+  <section class="project-hero">
+    <div class="poster" id="posterTile">
+      <img src="/images/great_ideas_of_humanity/final/final_1.png" alt="Great Ideas of Humanity — final poster">
+    </div>
+    <div class="right-col">
+      <div class="info">
+        <h1>Great Ideas of Humanity</h1>
+        <div class="project-year">(2025)</div>
+        <div class="subheading">Poster Project</div>
+        <p class="body-copy">
+          Designed a poster as part of a larger exhibition started by the Chicago
+          Museum of Design’s Great Ideas of Humanity exhibition. The poster
+          features a quote by Michel Foucault, discussing themes of power and
+          the consequences of action.
+        </p>
+        <div class="caption">Graphic Design, InDesign, Photoshop, Illustrator, Typography, Hand-Drawn, Museum Exhibition</div>
+        <a class="exhibition-link" href="https://greatideasofhumanity.com/jack-leary-on-michel-foucault/" target="_blank" rel="noopener">
+          View Exhibition Link <span class="arrow">↗</span>
+        </a>
+      </div>
+
+      <div class="drafts-label">Drafts</div>
+      <div class="grid-loading" id="gridLoading">loading drafts…</div>
+      <div class="surf-grid" id="surfGrid"></div>
+    </div>
+  </section>
+
+  <div id="lightbox">
+    <button class="nav-btn nav-prev" id="lbPrev" aria-label="Previous">&#8249;</button>
+    <div class="stage" id="lbStage"></div>
+    <button class="nav-btn nav-next" id="lbNext" aria-label="Next">&#8250;</button>
+    <button class="close-btn" id="lbClose" aria-label="Close">&times;</button>
+    <div class="index-label" id="lbIndex"></div>
+  </div>
+
+<script>
+(function () {
+  // ---- Poster + drafts share ONE lightbox sequence: [poster, ...drafts] --
+  const POSTER_SRC = "/images/great_ideas_of_humanity/final/final_1.png";
+  const DRAFT_BASE = "/images/great_ideas_of_humanity/drafts/";
+  const DRAFT_FILES = [
+    "draft_1.jpg","draft_2.png","draft_3.png","draft_4.png","draft_5.png",
+    "draft_6.png","draft_7.png","draft_8.png","draft_9.png","draft_10.png","draft_11.png",
+  ];
+  const SEQUENCE = [POSTER_SRC, ...DRAFT_FILES.map(f => DRAFT_BASE + f)];
+  const ALT = (i) => i === 0
+    ? "Great Ideas of Humanity — final poster"
+    : `Great Ideas of Humanity draft ${i}`;
+
+  const COLUMNS = 4; // narrower right-column grid — 9 would make tiles too small here
+
+  const grid = document.getElementById("surfGrid");
+  const gridLoading = document.getElementById("gridLoading");
+
+  function loadAspect(src) {
+    return new Promise((resolve) => {
+      const im = new Image();
+      im.onload = () => resolve(im.naturalWidth / im.naturalHeight);
+      im.onerror = () => resolve(1);
+      im.src = src;
+    });
+  }
+
+  // ---- Ripple: transform-only, instant, no layout change (see Surf page) -
+  let allTiles = [];
+  let rippledTiles = [];
+
+  function clearRipple() {
+    rippledTiles.forEach((tile) => {
+      tile.style.transform = "";
+      tile.style.transitionDelay = "";
+      tile.style.zIndex = "";
+      tile.style.boxShadow = "";
+    });
+    rippledTiles = [];
+  }
+
+  function rippleFrom(sourceTile) {
+    clearRipple();
+    const srcRect = sourceTile.getBoundingClientRect();
+    const cx = srcRect.left + srcRect.width / 2;
+    const cy = srcRect.top + srcRect.height / 2;
+    const radius = srcRect.width * 3.6;
+    const maxPush = srcRect.width * 0.2;
+
+    sourceTile.style.transform = "scale(1.5)";
+    sourceTile.style.transitionDelay = "0ms";
+    sourceTile.style.zIndex = "5";
+    sourceTile.style.boxShadow = "0 16px 38px rgba(0,0,0,0.4)";
+    rippledTiles.push(sourceTile);
+
+    allTiles.forEach((tile) => {
+      if (tile === sourceTile) return;
+      const r = tile.getBoundingClientRect();
+      const tx = r.left + r.width / 2, ty = r.top + r.height / 2;
+      const dx = tx - cx, dy = ty - cy;
+      const dist = Math.hypot(dx, dy) || 1;
+      if (dist >= radius) return;
+
+      const strength = 0.15 + 0.85 * Math.cos((dist / radius) * (Math.PI / 2));
+      const push = maxPush * strength;
+      const nx = dx / dist, ny = dy / dist;
+
+      tile.style.transform = `translate(${(nx * push).toFixed(1)}px, ${(ny * push).toFixed(1)}px)`;
+      tile.style.transitionDelay = Math.round((dist / radius) * 90) + "ms";
+      rippledTiles.push(tile);
+    });
+  }
+
+  // ---- Build masonry columns for the drafts (SEQUENCE indices 1..11) ----
+  Promise.all(DRAFT_FILES.map(f => loadAspect(DRAFT_BASE + f))).then((aspects) => {
+    gridLoading.remove();
+
+    const cols = [];
+    const colHeights = new Array(COLUMNS).fill(0);
+    for (let c = 0; c < COLUMNS; c++) {
+      const col = document.createElement("div");
+      col.className = "surf-col";
+      grid.appendChild(col);
+      cols.push(col);
+    }
+    const colWidth = cols[0].getBoundingClientRect().width;
+
+    DRAFT_FILES.forEach((file, i) => {
+      const aspect = aspects[i];
+      const itemHeight = colWidth / aspect;
+
+      let target = 0;
+      for (let c = 1; c < COLUMNS; c++) {
+        if (colHeights[c] < colHeights[target]) target = c;
+      }
+      colHeights[target] += itemHeight;
+
+      const tile = document.createElement("div");
+      tile.className = "surf-tile";
+      tile.innerHTML = `<img src="${DRAFT_BASE}${file}" alt="${ALT(i + 1)}" loading="lazy">`;
+
+      tile.addEventListener("mouseenter", () => rippleFrom(tile));
+      tile.addEventListener("mouseleave", () => clearRipple());
+      tile.addEventListener("click", () => openLightbox(i + 1)); // +1: index 0 is the poster
+
+      cols[target].appendChild(tile);
+      allTiles.push(tile);
+    });
+  });
+
+  // ---- Poster: click opens the same lightbox, at sequence index 0 -------
+  document.getElementById("posterTile").addEventListener("click", () => openLightbox(0));
+
+  // ---- Lightbox --------------------------------------------------------
+  const lightbox = document.getElementById("lightbox");
+  const stage = document.getElementById("lbStage");
+  const indexLabel = document.getElementById("lbIndex");
+  let current = 0;
+
+  function renderStage() {
+    stage.innerHTML = `<img src="${SEQUENCE[current]}" alt="${ALT(current)}">`;
+    indexLabel.textContent = (current + 1) + " / " + SEQUENCE.length;
+  }
+  function openLightbox(i) { current = i; renderStage(); lightbox.classList.add("open"); }
+  function closeLightbox() { lightbox.classList.remove("open"); stage.innerHTML = ""; }
+  function step(delta) { current = (current + delta + SEQUENCE.length) % SEQUENCE.length; renderStage(); }
+
+  document.getElementById("lbClose").addEventListener("click", closeLightbox);
+  document.getElementById("lbPrev").addEventListener("click", () => step(-1));
+  document.getElementById("lbNext").addEventListener("click", () => step(1));
+  lightbox.addEventListener("click", (e) => { if (e.target === lightbox) closeLightbox(); });
+
+  window.addEventListener("keydown", (e) => {
+    if (!lightbox.classList.contains("open")) return;
+    if (e.key === "Escape") closeLightbox();
+    if (e.key === "ArrowLeft") step(-1);
+    if (e.key === "ArrowRight") step(1);
+  });
+})();
+</script>
+</body>
+</html>

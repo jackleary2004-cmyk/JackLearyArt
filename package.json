@@ -1,0 +1,24 @@
+{
+  "name": "jack-leary-portfolio",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "eleventy --serve",
+    "build": "eleventy"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jackleary2004-cmyk/JackLearyArt.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jackleary2004-cmyk/JackLearyArt/issues"
+  },
+  "homepage": "https://github.com/jackleary2004-cmyk/JackLearyArt#readme",
+  "devDependencies": {
+    "@11ty/eleventy": "^3.1.6"
+  }
+}

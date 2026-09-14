@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jack Leary — Work Prototype</title>
+<style>
+  /* League Mono — real font files, same self-hosted set as the home page. */
+  @font-face {
+    font-family: "League Mono";
+    src: url("/fonts/league-mono/LeagueMono-Thin.woff2") format("woff2");
+    font-weight: 100;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "League Mono";
+    src: url("/fonts/league-mono/LeagueMono-Regular.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "League Mono";
+    src: url("/fonts/league-mono/LeagueMono-ExtraBold.woff2") format("woff2");
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+  }
+  /* League Spartan — new header/display typeface, self-hosted the same
+     way as League Mono (real file, copied from the LeagueSpartan-2.220
+     folder into src/fonts/league-spartan/). Only ExtraBold is needed
+     since every header/title on the site uses weight 800. */
+  @font-face {
+    font-family: "League Spartan";
+    src: url("/fonts/league-spartan/LeagueSpartan-ExtraBold.woff2") format("woff2");
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+  }
+</style>
+<style>
+  /*
+    PROTOTYPE NOTES (read me first):
+
+    WORK / PROJECT-SELECTION PAGE — linked from the home page's nav
+    "WORK" link. Same PROJECTS data/order as home-v2-prototype.html (six
+    projects).
+
+    - Nav is identical to the home page.
+    - UPDATED this round: swapped the old asymmetric bento-box layout
+      (named grid-areas, mixed tile sizes, one big feature tile) for a
+      plain uniform grid — 3 equal columns x 2 rows on desktop, 1 column
+      on mobile, every tile the same aspect ratio. Tiles just auto-flow
+      into the grid in PROJECTS order now, so there's no more per-tile
+      grid-area bookkeeping to keep in sync when the order changes.
+    - Each tile is a background image (project's first preview image)
+      with a flat, constant scrim for legibility (not the old
+      bottom-heavy gradient, since text now sits centered rather than
+      pinned to the bottom). The title sits centered over the image in
+      plain BODY-TEXT styling (var(--font-body), normal weight/case —
+      not the bold uppercase display font the header/hero use). Year
+      sits above the title, focus below — both hidden until hover.
+      Title/year/focus are plain white (each project's hover-red/
+      hover-yellow/hover-blue class is still on the tile for the nav's
+      color convention, it's just not applied to this text anymore).
+    - Hover behavior — scale-up removed this round: hovering a tile no
+      longer grows it. All that happens now is (a) every OTHER tile
+      dims (brightness down) while the pointer is anywhere over the
+      grid, and (b) the hovered tile's year + focus lines fade/slide in
+      around its title. Pure CSS, no JS needed for the hover effect
+      itself.
+    - Tiles spawn in on scroll (IntersectionObserver), same as before.
+    - Tiles without a real detail page yet (page: "#") still render and
+      still animate/hover — they just don't go anywhere on click.
+
+    Swap in real project pages as they get built; nothing else here
+    should need to change.
+  */
+
+  :root {
+    --black: #000000;
+    --white: #ffffff;
+    --red: #eb1c1c;
+    --yellow: #f0e100;
+    --blue: #48acf0;
+    --side-pad: clamp(12px, 3vw, 50px);
+    --font-header: "League Spartan", "Helvetica Neue", Arial, sans-serif;
+    --font-body: "League Mono", "Helvetica Neue", Arial, monospace;
+  }
+
+  * { border-radius: 0 !important; box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--white);
+    color: var(--black);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  /* ---------- NAV (identical to home page) ---------- */
+
+  .nav {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: clamp(20px, 4vh, 40px) var(--side-pad) 0;
+    z-index: 10;
+  }
+
+  .nav a {
+    font-family: var(--font-body);
+    font-weight: 100;
+    font-size: clamp(12px, 1.4vw, 15px);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    opacity: 0;
+    transform: translateY(-8px);
+    animation: navIn 0.6s ease forwards;
+    transition: color 0.4s ease, transform 0.4s ease;
+  }
+  .nav a:hover {
+    transform: translateY(-4px) scale(1.08);
+  }
+  .nav a:nth-child(1) { animation-delay: 0.45s; }
+  .nav a:nth-child(2) { animation-delay: 0.225s; }
+  .nav a:nth-child(3) { animation-delay: 0s; }
+
+  .hover-red:hover    { color: var(--red); }
+  .hover-yellow:hover { color: var(--yellow); }
+  .hover-blue:hover   { color: var(--blue); }
+
+  @keyframes navIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---------- HEADER ---------- */
+
+  .work-header {
+    padding: clamp(110px, 22vh, 200px) var(--side-pad) clamp(24px, 5vh, 56px);
+  }
+
+  .work-header p {
+    margin: clamp(10px, 1.6vh, 16px) 0 0;
+    font-weight: 100;
+    font-size: clamp(12px, 1.4vw, 15px);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    opacity: 0;
+    color: var(--black);
+    animation: headerIn 0.7s ease forwards;
+    animation-delay: 0.15s;
+  }
+
+  @keyframes headerIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---------- GRID ---------- */
+
+  .work-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(6px, 0.9vw, 14px);
+    padding: 0 var(--side-pad) clamp(60px, 12vh, 140px);
+  }
+
+  .grid-wrap {
+    opacity: 0;
+    transform: translateY(24px);
+    aspect-ratio: 4 / 5;
+    min-width: 0;
+    min-height: 0;
+  }
+  .grid-wrap.in-view {
+    animation: wrapIn 0.7s ease forwards;
+  }
+  .grid-wrap:nth-child(1) { animation-delay: 0s; }
+  .grid-wrap:nth-child(2) { animation-delay: 0.08s; }
+  .grid-wrap:nth-child(3) { animation-delay: 0.16s; }
+  .grid-wrap:nth-child(4) { animation-delay: 0.24s; }
+  .grid-wrap:nth-child(5) { animation-delay: 0.32s; }
+  .grid-wrap:nth-child(6) { animation-delay: 0.4s; }
+
+  @keyframes wrapIn {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* No hover scale anymore — the tile itself no longer needs to own a
+     `transform` at all, just the darken-on-hover filter. */
+  .grid-tile {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    cursor: pointer;
+    transition: filter 0.45s ease;
+  }
+
+  /* Darken every tile except the one being hovered. Uses :has() rather
+     than a plain .work-grid:hover so this only fires when the pointer is
+     actually over a tile — .work-grid's own hoverable box includes its
+     side/bottom padding and the gaps between tiles, and hovering *there*
+     (e.g. the empty space below the last row) used to trigger
+     :hover on the whole grid with no tile excluded, darkening all six
+     at once for no visible reason. */
+  .work-grid:has(.grid-tile:hover) .grid-tile:not(:hover) {
+    filter: brightness(0.35);
+  }
+
+  .tile-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* Flat, constant scrim (not the old bottom-heavy gradient) — the title
+     is centered over the whole image now instead of pinned to the
+     bottom, so it needs even legibility everywhere, not just at the
+     bottom edge. */
+  .tile-scrim {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.34);
+    pointer-events: none;
+  }
+
+  .tile-index {
+    position: absolute;
+    top: clamp(10px, 1.4vw, 18px);
+    left: clamp(10px, 1.4vw, 18px);
+    font-weight: 100;
+    font-size: clamp(10px, 0.85vw, 12px);
+    letter-spacing: 0.1em;
+    color: var(--white);
+    opacity: 0.5;
+  }
+
+  .tile-content {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: clamp(6px, 0.9vw, 10px);
+    padding: clamp(14px, 2vw, 26px);
+  }
+
+  /* Title in plain body-text styling — the site's bold uppercase display
+     font (League Spartan) is reserved for real headers, not these
+     project-preview labels. */
+  .tile-title {
+    font-family: var(--font-body);
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: normal;
+    font-size: clamp(1rem, 1.8vw, 1.4rem);
+    line-height: 1.3;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.55);
+  }
+
+  .tile-year,
+  .tile-focus {
+    font-weight: 100;
+    font-size: clamp(12px, 1.1vw, 15px);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.55);
+    opacity: 0;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+  }
+  .tile-year   { transform: translateY(8px); }
+  .tile-focus  { transform: translateY(-8px); }
+
+  .grid-tile:hover .tile-year,
+  .grid-tile:hover .tile-focus {
+    opacity: 0.9;
+    transform: translateY(0);
+  }
+
+  .tile-title,
+  .tile-year,
+  .tile-focus {
+    color: var(--white);
+  }
+
+  /* ---------- MOBILE ---------- */
+
+  @media (max-width: 700px) {
+    .nav { padding-top: 20px; }
+    .nav a { font-size: 11px; letter-spacing: 0.12em; }
+
+    .work-grid { grid-template-columns: 1fr; }
+    .grid-wrap { aspect-ratio: 4 / 3; }
+  }
+
+  /* ---------- CONTACT OVERLAY (blue/red/yellow oval, drops from top) ---- */
+
+  .contact-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.72);
+    z-index: 200;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+  }
+  .contact-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .contact-oval {
+    position: fixed;
+    top: 8vh;
+    left: 50%;
+    width: min(56vw, 360px);
+    aspect-ratio: 4 / 3.3;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, var(--blue) 0%, var(--red) 52%, var(--yellow) 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(6px, 1vh, 10px);
+    text-align: center;
+    padding: 9% 12%;
+    transform: translate(-50%, -140%);
+    transition: transform 0.75s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 201;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+  }
+  .contact-overlay.open .contact-oval {
+    transform: translate(-50%, 0);
+  }
+
+  .contact-oval .contact-name {
+    font-family: var(--font-display);
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: clamp(1.3rem, 2.8vw, 2rem);
+    color: var(--black);
+    letter-spacing: -0.01em;
+    line-height: 1;
+  }
+
+  .contact-oval .contact-email {
+    font-family: var(--font-caption);
+    font-weight: 400;
+    font-size: clamp(12px, 1.3vw, 15px);
+    color: var(--black);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .contact-oval .contact-links {
+    display: flex;
+    gap: clamp(12px, 1.8vw, 24px);
+    margin-top: 2px;
+  }
+
+  .contact-oval .contact-links a {
+    font-family: var(--font-caption);
+    font-weight: 400;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--black);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+    padding-bottom: 2px;
+    transition: opacity 0.25s ease;
+  }
+  .contact-oval .contact-links a:hover {
+    opacity: 0.55;
+  }
+
+  .contact-close {
+    position: absolute;
+    top: 8%;
+    right: 14%;
+    background: none;
+    border: none;
+    font-family: var(--font-caption);
+    font-size: 22px;
+    font-weight: 100;
+    line-height: 1;
+    color: var(--black);
+    cursor: pointer;
+    opacity: 0.55;
+    transition: opacity 0.25s ease;
+  }
+  .contact-close:hover {
+    opacity: 1;
+  }
+
+  @media (max-width: 640px) {
+    .contact-oval {
+      width: min(76vw, 300px);
+      aspect-ratio: 1 / 1.15;
+      padding: 13% 11%;
+      top: 10vh;
+    }
+    .contact-oval .contact-links {
+      flex-direction: column;
+      gap: 8px;
+    }
+  }
+</style>
+</head>
+<body>
+
+  <nav class="nav">
+    <a href="/" class="hover-red">Home</a>
+    <a href="#contact" class="hover-yellow">Contact</a>
+    <a href="/archive/" class="hover-blue">Archive</a>
+  </nav>
+
+  <header class="work-header">
+    <p>Selected Projects — 2024–2026</p>
+  </header>
+
+  <main class="work-grid" id="workGrid"></main>
+
+  <script>
+    // Same project data as home-v2-prototype.html — keep these two lists
+    // in sync by hand until this gets pulled into a real 11ty data file.
+    const PROJECTS = [
+      { slug: "puck-and-chuck",          title: "Puck + Chuck",             year: "2026",      focus: "Brand Identity",          ext: "png", page: "/projects/puck-and-chuck/", hover: "hover-blue" },
+      { slug: "surf",                    title: "Surf",                     year: "2024",      focus: "Editorial Presentation",  ext: "jpg", page: "/projects/surf/",         hover: "hover-red" },
+      { slug: "hangul",                  title: "Hangul",                   year: "2026",      focus: "Poster Design",           ext: "png", page: "/projects/hangul/",       hover: "hover-yellow" },
+      { slug: "great-ideas-of-humanity", title: "Great Ideas of Humanity",  year: "2025",      focus: "Poster Design",           ext: "png", page: "/projects/great-ideas-of-humanity/",  hover: "hover-blue" },
+      { slug: "over-the-hump",           title: "Over the Hump",            year: "2024-2025", focus: "Social Media Design",     ext: "jpg", page: "/projects/over-the-hump/", hover: "hover-blue" },
+      { slug: "adobe-firefly",           title: "Adobe Firefly",            year: "2026",      focus: "Brand Identity",          ext: "png", page: "/projects/adobe-firefly/", hover: "hover-red" },
+    ];
+
+    const grid = document.getElementById("workGrid");
+
+    PROJECTS.forEach((p, i) => {
+      const wrap = document.createElement("div");
+      wrap.className = "grid-wrap";
+
+      const tile = document.createElement(p.page === "#" ? "div" : "a");
+      if (p.page !== "#") tile.href = p.page;
+      tile.className = `grid-tile ${p.hover}`;
+
+      tile.innerHTML = `
+        <img class="tile-bg" src="/images/preview/${p.slug}/01.${p.ext}" alt="${p.title}">
+        <div class="tile-scrim"></div>
+        <span class="tile-index">${String(i + 1).padStart(2, "0")}</span>
+        <div class="tile-content">
+          <span class="tile-year">${p.year}</span>
+          <span class="tile-title">${p.title}</span>
+          <span class="tile-focus">${p.focus}</span>
+        </div>
+      `;
+
+      wrap.appendChild(tile);
+      grid.appendChild(wrap);
+    });
+
+    // ---------- Scroll spawn-in ----------
+    const wraps = document.querySelectorAll(".grid-wrap");
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("in-view");
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: "0px 0px -40px 0px" });
+    wraps.forEach((wrap) => io.observe(wrap));
+  </script>
+
+  <div class="contact-overlay" id="contactOverlay">
+    <div class="contact-oval">
+      <button class="contact-close" id="contactClose" aria-label="Close">&times;</button>
+      <div class="contact-name">Jack Leary</div>
+      <a class="contact-email" href="mailto:jack.leary2004@gmail.com">jack.leary2004@gmail.com</a>
+      <div class="contact-links">
+        <a href="https://www.instagram.com/jacklearyart/" target="_blank" rel="noopener noreferrer">Instagram</a>
+        <a href="https://www.behance.net/jackleary3" target="_blank" rel="noopener noreferrer">Behance</a>
+        <a href="https://www.linkedin.com/in/jack-leary-art" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---- Contact overlay: click the "Contact" nav link to drop the
+    // blue/red/yellow oval down from the top instead of navigating. ----
+    (function () {
+      const overlay = document.getElementById("contactOverlay");
+      const trigger = document.querySelector('a[href="#contact"]');
+      const closeBtn = document.getElementById("contactClose");
+      if (!overlay || !trigger || !closeBtn) return;
+
+      function openContact(e) {
+        if (e) e.preventDefault();
+        overlay.classList.add("open");
+      }
+      function closeContact() {
+        overlay.classList.remove("open");
+      }
+
+      trigger.addEventListener("click", openContact);
+      closeBtn.addEventListener("click", closeContact);
+      overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) closeContact();
+      });
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeContact();
+      });
+    })();
+  </script>
+</body>
+</html>
