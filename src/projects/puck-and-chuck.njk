@@ -324,13 +324,24 @@ topBarTheme: light
     transform: scale(1.03);
   }
 
+  /* Puck open/closed renders have a stray thin black border baked into
+     the source PNGs themselves (not a CSS artifact) — permanently
+     zoomed in just enough to push it past the cell's clipped edge,
+     then the same +3% hover bump layers on top of that baseline. */
+  #secPuck .row-equal .cell img {
+    transform: scale(1.04);
+  }
+  #secPuck .row-equal .cell img:hover {
+    transform: scale(1.0712);
+  }
+
   /* Logo row: bigger than the shared .row-natural default, with its own
      larger 5% hover bump (ID selector wins over the general rule above). */
   #secLogos .row-natural img {
     height: clamp(160px, 22vw, 320px);
   }
   #secLogos .row-natural img:hover {
-    transform: scale(1.05);
+    transform: scale(1.03);
   }
 
   /* ---------- CLOSING SPEC SHEET ---------- */
