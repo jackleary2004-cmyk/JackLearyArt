@@ -1,3 +1,7 @@
+---
+topBarSection: home
+topBarTheme: dark
+---
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -226,131 +230,15 @@
 
   /* ---------- NAV ---------- */
 
-  .nav {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: clamp(20px, 4vh, 40px) var(--side-pad) 0;
-    z-index: 10;
-  }
-
-  .nav a {
-    font-family: var(--font-body);
-    font-weight: 100;
-    font-size: clamp(12px, 1.4vw, 15px);
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    opacity: 0;
-    transform: translateY(-8px);
-    animation: navIn 0.6s ease forwards;
-    transition: color 0.4s ease, transform 0.4s ease;
-  }
-  .nav a:hover {
-    transform: translateY(-4px) scale(1.08);
-  }
-  .nav a:nth-child(1) { animation-delay: 0.45s; } /* WORK — appears last (rightmost fires first) */
-  .nav a:nth-child(2) { animation-delay: 0.225s; } /* CONTACT */
-  .nav a:nth-child(3) { animation-delay: 0s; }     /* ARCHIVE — appears first */
-
-  /* No longer scoped to .nav a — the gallery title links reuse these too. */
+  /* Hover-color utility classes — reused by the gallery caption/title
+     links and by the shared top-bar nav (src/_includes/top-bar.njk). */
   .hover-red:hover    { color: var(--red); }
   .hover-yellow:hover { color: var(--yellow); }
   .hover-blue:hover   { color: var(--blue); }
 
-  @keyframes navIn {
-    from { opacity: 0; transform: translateY(-8px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  /* ---------- HERO ---------- */
-
-  .hero {
-    position: relative;
-    z-index: 1; /* sits above .project-gallery (z-index: 0) */
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-end; /* name + subheading now anchor to the bottom of the page */
-    gap: clamp(1rem, 2.5vh, 1.5rem);
-    /* Bottom padding cut way down so the name sits lower, closer to the
-       very edge of the viewport. */
-    padding: 8vh var(--side-pad) clamp(8px, 1.5vh, 20px);
-    /* .hero has no clickable content of its own (name/subheading are
-       plain text), but its full-height flex box was sitting on top of
-       .gallery-caption (which lives underneath, inside the fixed
-       .project-gallery layer) and silently eating all its clicks/hovers.
-       Turning off pointer-events here lets clicks pass through to
-       whatever is actually underneath. */
-    pointer-events: none;
-  }
-
-  .hero-name {
-    /* No longer a full-bleed breakout — "JACK LEARY" now sits inside
-       .hero's own side padding just like everything else on the page
-       (nav, gallery caption), so its left/right edges line up exactly
-       with WORK and ARCHIVE instead of running flush to the viewport
-       edge and getting visually clipped there. fitHeroName() below
-       still scaleX's the name to fill this (now narrower) container
-       edge-to-edge, so it automatically stretches to the new width. */
-    width: 100%;
-    overflow: hidden;
-    line-height: 0.86;
-    text-align: center;
-    position: relative; /* so .subheading can center itself on top of the name */
-  }
-
-  .hero-name .stretch {
-    display: inline-block;
-    white-space: nowrap;
-    transform-origin: center top;
-    font-family: var(--font-header);
-    font-weight: 800; /* League Mono ExtraBold */
-    text-transform: uppercase;
-    /* Font size + tracking reverted back to the original — only opacity
-       stays down at 45% from that round. fitHeroName() below still
-       scaleX's the name to fill the container edge-to-edge; there's no
-       hover scale-up any more (removed per an earlier request). */
-    letter-spacing: -0.01em;
-    font-size: clamp(3.2rem, 15vw, 11.5rem);
-    color: var(--white);
-    opacity: 0.45;
-    cursor: default;
-  }
-
-  /* Now centered directly on top of the name (both axes) instead of
-     sitting on its own line below it. */
-  .subheading {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    font-family: var(--font-body);
-    font-weight: 100;
-    font-size: clamp(12px, 1.4vw, 15px);
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    text-align: center;
-    opacity: 0;
-    transform: translate(-50%, calc(-50% - 8px));
-    animation: subheadingIn 0.6s ease forwards;
-    animation-delay: 0.6s; /* after the name has settled in */
-  }
-
-  @keyframes subheadingIn {
-    from { opacity: 0; transform: translate(-50%, calc(-50% - 8px)); }
-    to   { opacity: 1; transform: translate(-50%, -50%); }
-  }
-
   /* ---------- MOBILE ---------- */
 
   @media (max-width: 700px) {
-    .hero-name .line { display: block; }
-    .nav { padding-top: 20px; }
-    .nav a { font-size: 11px; letter-spacing: 0.12em; }
     .gallery-title { font-size: clamp(1.4rem, 7vw, 2.2rem); }
   }
 
@@ -481,72 +369,10 @@
     </a>
   </section>
 
-  <nav class="nav">
-    <a href="/work/" class="hover-red">Work</a>
-    <a href="#contact" class="hover-yellow">Contact</a>
-    <a href="/archive/" class="hover-blue">Archive</a>
-  </nav>
-
-  <header class="hero">
-    <h1 class="hero-name">
-      <span class="stretch" id="stretch-name">
-        <span class="line">JACK</span><span class="line" style="display:inline">&nbsp;LEARY</span>
-      </span>
-      <p class="subheading">Multidisciplinary Designer — Los Angeles</p>
-    </h1>
-  </header>
+  {% include "top-bar.njk" %}
 
 <script>
 (function () {
-  // ---- Name: stretch to fill the full-bleed width -------------------------
-  // Same "measure natural width, scaleX up to container width" trick used
-  // elsewhere on the site. .hero-name is now 100vw (full-bleed breakout),
-  // so this automatically stretches the name edge-to-edge instead of just
-  // to the padded content width. On mobile the two <span class="line">
-  // words stack (see the media query) and each one gets measured/stretched
-  // independently.
-  const heroName = document.querySelector(".hero-name");
-  const stretchEl = document.getElementById("stretch-name");
-  const lineEls = stretchEl.querySelectorAll(".line");
-
-  function isMobile() {
-    return window.matchMedia("(max-width: 700px)").matches;
-  }
-
-  // Base scaleX from the stretch-to-fill trick — stored so the hover
-  // scale-up (5%) can be combined with it instead of overwriting it.
-  let desktopScaleX = 1;
-
-  function fitHeroName() {
-    const containerWidth = heroName.clientWidth;
-
-    if (isMobile()) {
-      stretchEl.style.transform = "none";
-      lineEls.forEach((line) => {
-        line.style.transform = "none";
-        line.style.transformOrigin = "center top";
-        const natural = line.getBoundingClientRect().width;
-        if (natural > 0) {
-          line.style.transform = `scaleX(${containerWidth / natural})`;
-        }
-      });
-    } else {
-      lineEls.forEach((line) => { line.style.transform = "none"; });
-      stretchEl.style.transform = "none";
-      const natural = stretchEl.getBoundingClientRect().width;
-      // No more hover scale-up, so no headroom to bake in — scale
-      // straight to the full container width.
-      desktopScaleX = natural > 0 ? containerWidth / natural : 1;
-      stretchEl.style.transform = `scaleX(${desktopScaleX})`;
-    }
-  }
-
-  window.addEventListener("resize", fitHeroName);
-  fitHeroName();
-  if (document.fonts && document.fonts.ready) {
-    document.fonts.ready.then(fitHeroName);
-  }
-
   // ---- Project gallery: scroll-driven background slideshow ---------------
   // PROJECTS is the thing to edit as we go through these together — title
   // is a straight read of the project name, year/focus are both

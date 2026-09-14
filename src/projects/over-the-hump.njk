@@ -1,3 +1,6 @@
+---
+topBarTheme: dark
+---
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -96,7 +99,7 @@
 
   .back-link {
     position: fixed;
-    top: 20px;
+    top: clamp(78px, 14vh, 112px); /* clears the sticky top-bar */
     left: var(--side-pad);
     z-index: 20;
     font-family: var(--font-caption);
@@ -365,6 +368,8 @@
 </style>
 </head>
 <body>
+
+  {% include "top-bar.njk" %}
 
   <a class="back-link" href="/work/">← Work</a>
 
