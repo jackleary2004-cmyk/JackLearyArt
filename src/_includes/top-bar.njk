@@ -6,7 +6,9 @@
      a `top-bar--dark` modifier class added from each page's own
      `topBarTheme` front-matter value, so the bar always reads clearly
      against that page's background instead of sitting as a mismatched
-     white slab on the black-background pages. */
+     white slab on the black-background pages. Both rows (masthead and
+     nav) span the full page width edge-to-edge via space-between, same
+     side padding as everything else on the site (--side-pad). */
 
   .top-bar {
     position: sticky;
@@ -15,56 +17,78 @@
                      covers it when open; above ordinary page content. */
     display: flex;
     flex-direction: column;
-    align-items: center;
     gap: clamp(8px, 1.4vh, 14px);
     padding: clamp(12px, 2vh, 22px) var(--side-pad) clamp(10px, 1.6vh, 16px);
     background: var(--white);
     color: var(--black);
     border-bottom: 1px solid var(--black);
-    transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease;
+    transition: background-color 0.4s ease, color 0.4s ease,
+                border-color 0.4s ease, opacity 0.3s ease;
   }
   .top-bar.top-bar--dark {
     background: var(--black);
     color: var(--white);
     border-bottom-color: var(--white);
   }
+  /* Scroll-dimmed state — added once the page has scrolled past the top,
+     removed automatically on pages short enough that there's nothing to
+     scroll (scrollY never leaves 0). */
+  .top-bar.top-bar--scrolled {
+    opacity: 0.75;
+  }
 
-  .top-bar-masthead {
+  .top-bar-masthead,
+  .top-bar-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: clamp(10px, 2vw, 28px);
+  }
+
+  .top-bar-masthead span,
+  .top-bar-nav a {
     font-family: var(--font-body);
     font-weight: 100;
-    font-size: clamp(11px, 1.3vw, 14px);
+    font-size: clamp(10px, 1.15vw, 14px);
     letter-spacing: 0.16em;
     text-transform: uppercase;
+    white-space: nowrap;
     color: inherit;
     opacity: 0;
     transform: translateY(-6px);
     animation: topBarIn 0.6s ease forwards;
   }
 
-  .top-bar-nav {
-    display: flex;
-    align-items: center;
-    gap: clamp(22px, 3.6vw, 48px);
-  }
-
   .top-bar-nav a {
-    font-family: var(--font-body);
-    font-weight: 100;
     font-size: clamp(12px, 1.4vw, 15px);
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: inherit;
-    opacity: 0;
-    transform: translateY(-8px);
-    animation: topBarIn 0.6s ease forwards;
     transition: color 0.35s ease, transform 0.3s ease, opacity 0.3s ease;
   }
   .top-bar-nav a:hover {
     transform: translateY(-3px) scale(1.08);
+    font-weight: 800; /* League Mono ExtraBold — the only bold face loaded */
   }
   .top-bar-nav a.top-bar-contact:hover {
     opacity: 0.55;
   }
+
+  .top-bar-logo {
+    height: 1em;
+    width: auto;
+    display: block;
+    opacity: 0;
+    animation: topBarIn 0.6s ease forwards;
+  }
+  /* The mark is drawn solid black — invert it to white on the dark-theme
+     pages so it reads against the black bar instead of disappearing. */
+  .top-bar.top-bar--dark .top-bar-logo {
+    filter: invert(1);
+  }
+
+  .top-bar-masthead > *:nth-child(1) { animation-delay: 0.3s; }
+  .top-bar-masthead > *:nth-child(2) { animation-delay: 0.2s; }
+  .top-bar-masthead > *:nth-child(3) { animation-delay: 0.1s; }
+  .top-bar-masthead > *:nth-child(4) { animation-delay: 0s; }
   .top-bar-nav a:nth-child(1) { animation-delay: 0.3s; }
   .top-bar-nav a:nth-child(2) { animation-delay: 0.15s; }
   .top-bar-nav a:nth-child(3) { animation-delay: 0.05s; }
@@ -76,14 +100,24 @@
   }
 
   @media (max-width: 700px) {
-    .top-bar-masthead { font-size: 10px; letter-spacing: 0.1em; }
-    .top-bar-nav { gap: clamp(16px, 5vw, 28px); }
+    .top-bar-masthead,
+    .top-bar-nav {
+      flex-wrap: wrap;
+      row-gap: 6px;
+      gap: 10px;
+    }
+    .top-bar-masthead span { font-size: 9px; letter-spacing: 0.08em; }
     .top-bar-nav a { font-size: 11px; letter-spacing: 0.12em; }
   }
 </style>
 
-<div class="top-bar{% if topBarTheme == 'dark' %} top-bar--dark{% endif %}">
-  <div class="top-bar-masthead">Jack Leary // 2026 // Multidisciplinary Designer</div>
+<div class="top-bar{% if topBarTheme == 'dark' %} top-bar--dark{% endif %}" id="topBar">
+  <div class="top-bar-masthead">
+    <img class="top-bar-logo" src="/images/logo/logo.png" alt="Jack Leary logo">
+    <span>Jack Leary</span>
+    <span>2026</span>
+    <span>Multidisciplinary Designer</span>
+  </div>
   <nav class="top-bar-nav">
     {% if topBarSection != "home" %}<a href="/" class="hover-red">Home</a>{% endif %}
     {% if topBarSection != "work" %}<a href="/work/" class="hover-blue">Work</a>{% endif %}
@@ -91,3 +125,19 @@
     {% if topBarSection != "archive" %}<a href="/archive/" class="hover-yellow">Archive</a>{% endif %}
   </nav>
 </div>
+
+<script>
+  (function () {
+    var bar = document.getElementById("topBar");
+    if (!bar) return;
+    function onScroll() {
+      if (window.scrollY > 4) {
+        bar.classList.add("top-bar--scrolled");
+      } else {
+        bar.classList.remove("top-bar--scrolled");
+      }
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+  })();
+</script>
