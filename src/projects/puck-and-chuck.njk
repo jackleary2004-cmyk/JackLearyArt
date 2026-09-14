@@ -123,9 +123,9 @@ topBarTheme: light
     letter-spacing: 0.16em;
     text-transform: uppercase;
     color: rgba(0, 0, 0, 0.5);
-    transition: color 0.3s ease;
+    transition: color 0.3s ease, font-weight 0.1s ease;
   }
-  .back-link:hover { color: var(--blue); }
+  .back-link:hover { color: var(--blue); font-weight: 800; }
 
   /* ---------- shared scroll-reveal: fade up + scale to full size ---------- */
 
@@ -322,6 +322,15 @@ topBarTheme: light
   .row-equal .cell img:hover,
   .row-natural img:hover {
     transform: scale(1.03);
+  }
+
+  /* Logo row: bigger than the shared .row-natural default, with its own
+     larger 5% hover bump (ID selector wins over the general rule above). */
+  #secLogos .row-natural img {
+    height: clamp(160px, 22vw, 320px);
+  }
+  #secLogos .row-natural img:hover {
+    transform: scale(1.05);
   }
 
   /* ---------- CLOSING SPEC SHEET ---------- */
