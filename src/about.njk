@@ -1,0 +1,242 @@
+---
+topBarSection: about
+topBarTheme: light
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<title>Jack Leary — About</title>
+<style>
+  /* League Mono / League Spartan — same real, self-hosted font files as
+     every other page on the site. */
+  @font-face {
+    font-family: "League Mono";
+    src: url("/fonts/league-mono/LeagueMono-Thin.woff2") format("woff2");
+    font-weight: 100;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "League Mono";
+    src: url("/fonts/league-mono/LeagueMono-Regular.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "League Mono";
+    src: url("/fonts/league-mono/LeagueMono-ExtraBold.woff2") format("woff2");
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "League Spartan";
+    src: url("/fonts/league-spartan/LeagueSpartan-ExtraBold.woff2") format("woff2");
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+  }
+</style>
+<style>
+  * { border-radius: 0 !important; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --white: #ffffff;
+    --black: #000000;
+    --red:   #eb1c1c;
+    --blue:  #48acf0;
+    --yellow:#f0e100;
+
+    --side-pad: clamp(24px, calc(-2.4px + 6.77vw), 100px);
+    --font-display: "League Spartan", "Helvetica Neue", Arial, sans-serif;
+    --font-body:    "League Mono", "Helvetica Neue", Arial, monospace;
+    --font-caption: "League Mono", "Helvetica Neue", Arial, monospace;
+  }
+
+  html, body {
+    background: var(--white);
+    color: var(--black);
+    font-family: var(--font-body);
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  /* ---------- PAGE HEADER ---------- */
+
+  .about-header {
+    padding: clamp(50px, 9vh, 100px) var(--side-pad) clamp(30px, 5vh, 56px);
+    text-align: center;
+  }
+  .about-header h1 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    line-height: 1;
+    font-size: clamp(2.6rem, 9vw, 7.5rem);
+  }
+
+  /* ---------- INTRO: photo + bio, side by side ---------- */
+
+  .about-intro {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 var(--side-pad) clamp(60px, 10vh, 110px);
+    display: flex;
+    align-items: center;
+    gap: clamp(32px, 6vw, 90px);
+  }
+
+  .about-photo {
+    flex: 1 1 0;
+    max-width: 420px;
+  }
+  .about-photo img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .about-bio {
+    flex: 1.4 1 0;
+    font-size: clamp(1.05rem, 1.7vw, 1.3rem);
+    line-height: 1.65;
+  }
+  .about-bio p + p {
+    margin-top: 1.1em;
+  }
+
+  @media (max-width: 900px) {
+    .about-intro { flex-direction: column; }
+    .about-photo { max-width: 320px; width: 60%; }
+  }
+
+  /* ---------- SKILL BOXES ---------- */
+
+  .skills-grid {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 var(--side-pad) clamp(70px, 12vh, 130px);
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: clamp(14px, 2vw, 24px);
+  }
+
+  .skill-box {
+    border: 1px solid var(--black);
+    padding: clamp(20px, 2.6vw, 32px) clamp(18px, 2.2vw, 26px);
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease;
+  }
+  .skill-box:hover {
+    transform: scale(1.05);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.14);
+  }
+
+  .skill-box h2 {
+    font-family: var(--font-caption);
+    font-weight: 800;
+    font-size: clamp(11px, 1vw, 13px);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: clamp(14px, 2vh, 20px);
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+  }
+  .skill-box h2::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    background: var(--blue);
+    display: inline-block;
+    flex: none;
+  }
+
+  .skill-box ul {
+    list-style: none;
+  }
+  .skill-box li {
+    font-size: clamp(0.9rem, 1.15vw, 1rem);
+    line-height: 1.9;
+  }
+
+  @media (max-width: 900px) {
+    .skills-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 520px) {
+    .skills-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+  {% include "top-bar.njk" %}
+
+  <header class="about-header reveal">
+    <h1>Jack Leary</h1>
+  </header>
+
+  <section class="about-intro">
+    <div class="about-photo">
+      <img src="/images/about/about_pic1.png" alt="Portrait of Jack Leary">
+    </div>
+    <div class="about-bio">
+      <p>Jack Leary is a multidisciplinary designer finishing his BFA in Graphic Design at Loyola Marymount University. He grew up in Marin County, California — across the Golden Gate Bridge from SF. Jack is skilled in the full Adobe Suite, mainly working in brand design and poster design, with an eye for hand-drawn features and a clean grid system. Jack is currently diving deep into the potential of AI and how it might help designers in the future with workflow efficiency instead of replacing the designers themselves.</p>
+      <p>Outside of design, Jack is a freelance set designer, working on music videos and films. He also loves to surf or ski whenever he has a free moment. If he isn't staring at his computer, you can most likely find him trying to be outside with his friends and family.</p>
+    </div>
+  </section>
+
+  <section class="skills-grid">
+    <div class="skill-box">
+      <h2>Adobe</h2>
+      <ul>
+        <li>Acrobat</li>
+        <li>Photoshop</li>
+        <li>Illustrator</li>
+        <li>Indesign</li>
+        <li>After Effects</li>
+      </ul>
+    </div>
+    <div class="skill-box">
+      <h2>AI</h2>
+      <ul>
+        <li>Claude Code</li>
+        <li>Midjourney</li>
+        <li>Kling</li>
+        <li>Gemini / Nano Banana</li>
+        <li>ChatGPT</li>
+        <li>ComfyUI</li>
+      </ul>
+    </div>
+    <div class="skill-box">
+      <h2>Design</h2>
+      <ul>
+        <li>Branding</li>
+        <li>Illustration</li>
+        <li>Photography</li>
+        <li>Typography</li>
+        <li>Packaging Design</li>
+        <li>Motion Design</li>
+      </ul>
+    </div>
+    <div class="skill-box">
+      <h2>Other</h2>
+      <ul>
+        <li>Blender</li>
+        <li>Canva</li>
+        <li>Cargo</li>
+        <li>Figma</li>
+      </ul>
+    </div>
+  </section>
+
+</body>
+</html>
