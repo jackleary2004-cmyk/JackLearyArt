@@ -179,12 +179,6 @@ topBarTheme: light
     height: 100%;
     overflow: hidden;
     cursor: pointer;
-    transition: filter 0.45s ease;
-  }
-
-  /* Darken the tile being hovered (not the others). */
-  .grid-tile:hover {
-    filter: brightness(0.6);
   }
 
   .tile-bg {
@@ -194,6 +188,13 @@ topBarTheme: light
     height: 100%;
     object-fit: cover;
     display: block;
+    transition: filter 0.45s ease;
+  }
+
+  /* Darken only the background photo on hover (not the whole tile) so the
+     overlaid title/year/focus text stays fully legible and undimmed. */
+  .grid-tile:hover .tile-bg {
+    filter: brightness(0.6);
   }
 
   /* Flat, constant scrim (not the old bottom-heavy gradient) — the title
