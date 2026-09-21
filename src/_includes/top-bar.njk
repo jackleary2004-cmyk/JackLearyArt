@@ -115,7 +115,7 @@
      Lives here (not per-page) so the "Contact" nav link works the same
      way on every page that includes this partial — it used to be
      duplicated into index.njk and work.njk only, which meant clicking
-     Contact silently did nothing everywhere else (archive + all 6
+     Contact silently did nothing everywhere else (playground + all 6
      project pages). ---------------------------------------------------- */
 
   .contact-overlay {
@@ -241,7 +241,7 @@
     {% if topBarSection != "home" %}<a href="/" class="hover-red">Home</a>{% endif %}
     {% if topBarSection != "work" %}<a href="/work/" class="hover-blue">Work</a>{% endif %}
     <a href="#contact" class="top-bar-contact">Contact</a>
-    {% if topBarSection != "archive" %}<a href="/archive/" class="hover-yellow">Archive</a>{% endif %}
+    {% if topBarSection != "playground" %}<a href="/playground/" class="hover-yellow">Playground</a>{% endif %}
   </nav>
 </div>
 

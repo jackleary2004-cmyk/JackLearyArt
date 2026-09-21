@@ -182,15 +182,9 @@ topBarTheme: light
     transition: filter 0.45s ease;
   }
 
-  /* Darken every tile except the one being hovered. Uses :has() rather
-     than a plain .work-grid:hover so this only fires when the pointer is
-     actually over a tile — .work-grid's own hoverable box includes its
-     side/bottom padding and the gaps between tiles, and hovering *there*
-     (e.g. the empty space below the last row) used to trigger
-     :hover on the whole grid with no tile excluded, darkening all six
-     at once for no visible reason. */
-  .work-grid:has(.grid-tile:hover) .grid-tile:not(:hover) {
-    filter: brightness(0.35);
+  /* Darken the tile being hovered (not the others). */
+  .grid-tile:hover {
+    filter: brightness(0.6);
   }
 
   .tile-bg {

@@ -1,5 +1,5 @@
 ---
-topBarSection: archive
+topBarSection: playground
 topBarTheme: dark
 ---
 <!DOCTYPE html>
@@ -11,7 +11,7 @@ topBarTheme: dark
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<title>Jack Leary — Archive</title>
+<title>Jack Leary — Playground</title>
 <style>
   /* League Mono / League Spartan — same real, self-hosted font files as
      every other page on the site. */
@@ -47,7 +47,7 @@ topBarTheme: dark
 <style>
   /*
     PROTOTYPE NOTES:
-    - Archive page: a masonry grid of every poster in src/images/archive/
+    - Playground page: a masonry grid of every poster in src/images/playground/
       (17 total — the full set, migrated over from the old top-level
       images/Poster_Archives/ folder so nothing is missing).
     - Hover effect is the exact ripple pattern from surf-page-prototype.html:
@@ -56,8 +56,8 @@ topBarTheme: dark
       distance-scaled delay so it radiates outward. Click opens the same
       prev/next/close lightbox.
     - Nav-level page (not a project under Work), so the back-link returns
-      to Home, and the accent is blue — matching the "Archive" nav link's
-      own hover-blue class on the home page.
+      to Home, and the accent is yellow — matching the "Playground" nav
+      link's own hover-yellow class in the top bar.
   */
 
   * { border-radius: 0 !important; } /* sharp corners everywhere, per style guide */
@@ -139,14 +139,14 @@ topBarTheme: dark
 
   /* ---------- GRID (column masonry, no cropping / no rounding gaps) ---- */
 
-  .archive-grid {
+  .playground-grid {
     display: flex;
     align-items: flex-start;
     gap: 6px;
     padding: 0 var(--side-pad) 6rem;
   }
 
-  .archive-col {
+  .playground-col {
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -154,21 +154,21 @@ topBarTheme: dark
     min-width: 0;
   }
 
-  .archive-tile {
+  .playground-tile {
     position: relative;
     cursor: pointer;
     transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
   }
 
-  .archive-tile img,
-  .archive-tile video {
+  .playground-tile img,
+  .playground-tile video {
     width: 100%;
     height: auto;
     display: block;
     pointer-events: none;
   }
 
-  .archive-tile .type-badge {
+  .playground-tile .type-badge {
     position: absolute;
     top: 6px;
     right: 6px;
@@ -267,8 +267,8 @@ topBarTheme: dark
   }
 
   @media (max-width: 700px) {
-    .archive-grid { gap: 4px; }
-    .archive-col { gap: 4px; }
+    .playground-grid { gap: 4px; }
+    .playground-col { gap: 4px; }
   }
 </style>
 </head>
@@ -279,15 +279,15 @@ topBarTheme: dark
   <a class="back-link" href="/">← Home</a>
 
   <header class="project-header">
-    <h1>Archive</h1>
+    <h1>Playground</h1>
     <p class="body-copy">
-      The full archive — posters and motion graphics, every piece in one place, in no particular order.
+      The full playground — posters and motion graphics, every piece in one place, in no particular order.
     </p>
     <div class="caption">Poster Design, Motion Graphics, Graphic Design</div>
   </header>
 
   <div class="grid-loading" id="gridLoading">loading 14 pieces…</div>
-  <div class="archive-grid" id="archiveGrid"></div>
+  <div class="playground-grid" id="playgroundGrid"></div>
 
   <div id="lightbox">
     <button class="nav-btn nav-prev" id="lbPrev" aria-label="Previous">&#8249;</button>
@@ -301,8 +301,8 @@ topBarTheme: dark
 (function () {
   // ---- 11 posters + 3 motion graphics pieces, mixed together (poster_1–6
   // were dropped — those were duplicates of the Hangul poster series, not
-  // part of this archive) ----
-  const BASE = "/images/archive/";
+  // part of this playground) ----
+  const BASE = "/images/playground/";
   const FILES = [
     "poster_7.jpg", "poster_8.png", "poster_9.png", "a_good_day.mp4",
     "poster_10.jpg", "poster_11.png", "poster_12.png", "925.mp4",
@@ -313,7 +313,7 @@ topBarTheme: dark
 
   const COLUMNS = 5;
 
-  const grid = document.getElementById("archiveGrid");
+  const grid = document.getElementById("playgroundGrid");
   const gridLoading = document.getElementById("gridLoading");
 
   // ---- Measure each file's real aspect ratio before laying anything out
@@ -393,7 +393,7 @@ topBarTheme: dark
     const colHeights = new Array(COLUMNS).fill(0);
     for (let c = 0; c < COLUMNS; c++) {
       const col = document.createElement("div");
-      col.className = "archive-col";
+      col.className = "playground-col";
       grid.appendChild(col);
       cols.push(col);
     }
@@ -410,7 +410,7 @@ topBarTheme: dark
       colHeights[target] += itemHeight;
 
       const tile = document.createElement("div");
-      tile.className = "archive-tile";
+      tile.className = "playground-tile";
 
       let videoEl = null;
       if (isVideo(file)) {
@@ -419,7 +419,7 @@ topBarTheme: dark
           `<span class="type-badge">&#9654;</span>`;
         videoEl = tile.querySelector("video");
       } else {
-        tile.innerHTML = `<img src="${BASE}${file}" alt="Archive piece ${i + 1}" loading="lazy">`;
+        tile.innerHTML = `<img src="${BASE}${file}" alt="Playground piece ${i + 1}" loading="lazy">`;
       }
 
       tile.addEventListener("mouseenter", () => {
@@ -447,7 +447,7 @@ topBarTheme: dark
     const file = FILES[current];
     stage.innerHTML = isVideo(file)
       ? `<video src="${BASE}${file}" controls></video>`
-      : `<img src="${BASE}${file}" alt="Archive piece ${current + 1}">`;
+      : `<img src="${BASE}${file}" alt="Playground piece ${current + 1}">`;
     indexLabel.textContent = (current + 1) + " / " + FILES.length;
   }
 

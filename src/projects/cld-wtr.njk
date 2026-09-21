@@ -65,7 +65,7 @@ topBarTheme: dark
            cells. Hover reuses the surf-page ripple effect, but per
            Jack's "make the whole effect a tad more subtle" note, both
            the hover scale and the neighbor-push are dialed down from
-           the surf/archive versions.
+           the surf/playground versions.
         7. Closing spec sheet: CATEGORY / DELIVERABLES / FILES / TAG.
   */
 
@@ -273,7 +273,7 @@ topBarTheme: dark
   }
 
   /* ---------- MOCKUP GRID (column masonry, subtle ripple hover) ----------
-     Built the same way as the surf/archive galleries — shortest-column
+     Built the same way as the surf/playground galleries — shortest-column
      placement from each image's real aspect ratio — rather than a rigid
      grid, so it lays out cleanly regardless of exactly how many mockups
      are on disk (no cropping, no orphan tile in a half-empty row). */
@@ -537,7 +537,7 @@ topBarTheme: dark
   // ---- Mockup grid: every MOCKUP_IMG_*.png actually on disk (13, not the
   // full 15 — MOCKUP_IMG_6 and _7 are missing from the folder), laid out
   // as a 3-column masonry (shortest-column placement, real aspect ratios,
-  // same technique as the surf/archive galleries) so it stays clean with
+  // same technique as the surf/playground galleries) so it stays clean with
   // no cropping and no orphan tile regardless of the exact count. Hover
   // reuses the surf-page ripple effect but noticeably more subtle: smaller
   // center-tile scale and a gentler neighbor push. ----
@@ -574,8 +574,8 @@ topBarTheme: dark
     const srcRect = sourceTile.getBoundingClientRect();
     const cx = srcRect.left + srcRect.width / 2;
     const cy = srcRect.top + srcRect.height / 2;
-    const radius = srcRect.width * 3.0;   // slightly tighter reach than surf/archive
-    const maxPush = srcRect.width * 0.1;  // half the push of the archive/surf ripple
+    const radius = srcRect.width * 3.0;   // slightly tighter reach than surf/playground
+    const maxPush = srcRect.width * 0.1;  // half the push of the playground/surf ripple
 
     sourceTile.style.transform = "scale(1.04)"; // subtle, per Jack's note
     sourceTile.style.transitionDelay = "0ms";
