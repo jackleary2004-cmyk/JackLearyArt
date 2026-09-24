@@ -157,6 +157,7 @@ topBarTheme: dark
   .playground-tile {
     position: relative;
     cursor: pointer;
+    overflow: hidden;
     transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
   }
 
@@ -166,6 +167,31 @@ topBarTheme: dark
     height: auto;
     display: block;
     pointer-events: none;
+  }
+
+  /* White title bar, slides up from the bottom edge on hover. */
+  .tile-title-bar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--white);
+    padding: clamp(8px, 1vw, 12px) clamp(10px, 1.2vw, 14px);
+    transform: translateY(100%);
+    transition: transform 0.35s ease;
+    pointer-events: none;
+  }
+  .tile-title-bar span {
+    display: block;
+    font-family: var(--font-caption);
+    font-weight: 800;
+    font-size: clamp(10px, 1vw, 12px);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--black);
+  }
+  .playground-tile:hover .tile-title-bar {
+    transform: translateY(0);
   }
 
   .playground-tile .type-badge {
@@ -304,10 +330,20 @@ topBarTheme: dark
   // part of this playground) ----
   const BASE = "/images/playground/";
   const FILES = [
-    "poster_7.jpg", "poster_8.png", "poster_9.png", "a_good_day.mp4",
-    "poster_10.jpg", "poster_11.png", "poster_12.png", "925.mp4",
-    "poster_13.jpg", "poster_14.jpg", "poster_15.png", "a_place_where_love_goes.mp4",
-    "poster_16.png", "poster_17.png",
+    { file: "dancing_robot.jpg", title: "Dancing Robot" },
+    { file: "getting_it_done.png", title: "Getting It Done" },
+    { file: "black_out_2025.png", title: "Black Out 2025" },
+    { file: "a_good_day.mp4", title: "A Good Day" },
+    { file: "super_bowl_2025.jpg", title: "Super Bowl 2025" },
+    { file: "swagep.png", title: "SwagEp" },
+    { file: "strides_run_club_04_25.png", title: "Strides Run Club 04/25" },
+    { file: "925.mp4", title: "925" },
+    { file: "strides_run_club_02_25.jpg", title: "Strides Run Club 02/25" },
+    { file: "strides_run_club_05_25.jpg", title: "Strides Run Club 05/25" },
+    { file: "strides_run_club_03_25.png", title: "Strides Run Club 03/25" },
+    { file: "a_place_where_love_goes.mp4", title: "A Place Where Love Goes" },
+    { file: "flip_it.png", title: "Flip It!" },
+    { file: "and_what_about_it.png", title: "And What About It?" },
   ];
   const isVideo = (f) => f.endsWith(".mp4");
 
@@ -317,7 +353,8 @@ topBarTheme: dark
   const gridLoading = document.getElementById("gridLoading");
 
   // ---- Measure each file's real aspect ratio before laying anything out
-  function loadAspect(file) {
+  function loadAspect(item) {
+    const file = item.file;
     return new Promise((resolve) => {
       if (isVideo(file)) {
         const v = document.createElement("video");
@@ -358,9 +395,9 @@ topBarTheme: dark
     const cx = srcRect.left + srcRect.width / 2;
     const cy = srcRect.top + srcRect.height / 2;
     const radius = srcRect.width * 3.6;
-    const maxPush = srcRect.width * 0.2;
+    const maxPush = srcRect.width * 0.18; // shifting reduced 10% from the original 0.2
 
-    sourceTile.style.transform = "scale(1.1)";
+    sourceTile.style.transform = "scale(1.097)"; // scale effect reduced 3% from the original 1.1
     sourceTile.style.transitionDelay = "0ms";
     sourceTile.style.zIndex = "5";
     sourceTile.style.boxShadow = "0 16px 38px rgba(0,0,0,0.4)";
@@ -399,7 +436,8 @@ topBarTheme: dark
     }
     const colWidth = cols[0].getBoundingClientRect().width;
 
-    FILES.forEach((file, i) => {
+    FILES.forEach((item, i) => {
+      const file = item.file;
       const aspect = aspects[i];
       const itemHeight = colWidth / aspect;
 
@@ -412,14 +450,17 @@ topBarTheme: dark
       const tile = document.createElement("div");
       tile.className = "playground-tile";
 
+      const titleBarHtml = `<div class="tile-title-bar"><span>${item.title}</span></div>`;
+
       let videoEl = null;
       if (isVideo(file)) {
         tile.innerHTML =
           `<video src="${BASE}${file}" muted loop playsinline preload="metadata"></video>` +
-          `<span class="type-badge">&#9654;</span>`;
+          `<span class="type-badge">&#9654;</span>` +
+          titleBarHtml;
         videoEl = tile.querySelector("video");
       } else {
-        tile.innerHTML = `<img src="${BASE}${file}" alt="Playground piece ${i + 1}" loading="lazy">`;
+        tile.innerHTML = `<img src="${BASE}${file}" alt="${item.title}" loading="lazy">` + titleBarHtml;
       }
 
       tile.addEventListener("mouseenter", () => {
@@ -444,10 +485,11 @@ topBarTheme: dark
   let current = 0;
 
   function renderStage() {
-    const file = FILES[current];
+    const item = FILES[current];
+    const file = item.file;
     stage.innerHTML = isVideo(file)
       ? `<video src="${BASE}${file}" controls></video>`
-      : `<img src="${BASE}${file}" alt="Playground piece ${current + 1}">`;
+      : `<img src="${BASE}${file}" alt="${item.title}">`;
     indexLabel.textContent = (current + 1) + " / " + FILES.length;
   }
 
