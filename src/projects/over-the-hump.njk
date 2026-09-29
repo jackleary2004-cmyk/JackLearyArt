@@ -217,6 +217,7 @@ topBarTheme: dark
     opacity: 0;
     transform: translateX(-160px);
     transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.75s ease;
+    cursor: pointer; /* clicks into the phone-gallery 3D carousel */
   }
 
   @media (max-width: 700px) {
@@ -369,6 +370,109 @@ topBarTheme: dark
     letter-spacing: 0.1em;
     color: rgba(255,255,255,0.6);
   }
+
+  /* ---------- PHONE GALLERY (3D carousel) ---------- */
+  /* Clicking any phone in the phone-row opens this overlay: the 4 phones
+     sit arranged in a ring in 3D space (each card at a fixed rotateY +
+     translateZ), and the whole ring rotates as one unit so the selected
+     phone swings to face the camera front-and-center — a real 3D
+     carousel "shuffle," not a flat slideshow. */
+
+  #phoneGallery {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.96);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  #phoneGallery.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  #phoneGallery .carousel-stage {
+    position: relative;
+    width: min(80vw, 1000px);
+    height: min(64vh, 560px);
+    perspective: 1800px;
+  }
+
+  #phoneGallery .carousel-track {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  #phoneGallery .carousel-card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: clamp(150px, 18vw, 240px);
+    cursor: pointer;
+    transition: filter 0.5s ease;
+  }
+  #phoneGallery .carousel-card img {
+    width: 100%;
+    height: auto;
+    display: block;
+    box-shadow: 0 30px 70px rgba(0,0,0,0.55);
+    pointer-events: none;
+  }
+  #phoneGallery .carousel-card:not(.is-active) {
+    filter: brightness(0.45);
+  }
+  #phoneGallery .carousel-card.is-active {
+    filter: brightness(1);
+    cursor: default;
+  }
+
+  #phoneGallery .close-btn,
+  #phoneGallery .nav-btn {
+    position: absolute;
+    background: none;
+    border: none;
+    color: var(--white);
+    cursor: pointer;
+    font-family: var(--font-caption);
+    z-index: 2;
+  }
+  #phoneGallery .close-btn {
+    top: 24px;
+    right: var(--side-pad);
+    font-size: 28px;
+    line-height: 1;
+    font-weight: 100;
+  }
+  #phoneGallery .close-btn:hover { color: var(--yellow); }
+
+  #phoneGallery .nav-btn {
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 40px;
+    font-weight: 100;
+    padding: 0.5rem 1rem;
+  }
+  #phoneGallery .nav-btn:hover { color: var(--yellow); }
+  #phoneGallery .nav-prev { left: 12px; }
+  #phoneGallery .nav-next { right: 12px; }
+
+  #phoneGallery .index-label {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-caption);
+    font-weight: 100;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.6);
+  }
 </style>
 </head>
 <body>
@@ -404,6 +508,16 @@ topBarTheme: dark
     <button class="nav-btn nav-next" id="lbNext" aria-label="Next">&#8250;</button>
     <button class="close-btn" id="lbClose" aria-label="Close">&times;</button>
     <div class="index-label" id="lbIndex"></div>
+  </div>
+
+  <div id="phoneGallery">
+    <button class="nav-btn nav-prev" id="pgPrev" aria-label="Previous">&#8249;</button>
+    <div class="carousel-stage">
+      <div class="carousel-track" id="pgTrack"></div>
+    </div>
+    <button class="nav-btn nav-next" id="pgNext" aria-label="Next">&#8250;</button>
+    <button class="close-btn" id="pgClose" aria-label="Close">&times;</button>
+    <div class="index-label" id="pgIndex"></div>
   </div>
 
 <script>
@@ -520,7 +634,80 @@ topBarTheme: dark
   document.getElementById("lbNext").addEventListener("click", () => step(1));
   lightbox.addEventListener("click", (e) => { if (e.target === lightbox) closeLightbox(); });
 
+  // ---- Phone gallery: 3D carousel ---------------------------------------
+  // The 4 phone-row mockups, clicked open into this overlay instead of the
+  // plain grid lightbox above. Each card sits at a fixed angle around a
+  // ring (rotateY + translateZ, set once at build time); navigating just
+  // rotates the whole .carousel-track by -current * angleStep, which swings
+  // the selected phone to face the camera while the others swivel around
+  // behind it — a real 3D carousel, not a fading slideshow.
+  const PHONE_BASE = "/images/over_the_hump/phone-mockups/";
+  const PHONES = [
+    "oth_phone-mockup_1_cropped.png",
+    "oth_phone-mockup_2_cropped.png",
+    "oth_phone-mockup_3_cropped.png",
+    "oth_phone-mockup_4_cropped.png",
+  ];
+
+  const phoneGallery = document.getElementById("phoneGallery");
+  const pgTrack = document.getElementById("pgTrack");
+  const pgIndexLabel = document.getElementById("pgIndex");
+  // A fixed, shallow angle (independent of phone count) instead of an even
+  // 360/N split — at N=4 that would put each neighbor a full 90 degrees
+  // from center, rotated edge-on into an unreadable sliver. This keeps
+  // neighbors visibly tilted but still recognizable as phones sitting
+  // beside the active one.
+  const angleStep = 34;
+  const ringRadius = 380;
+  let pgCurrent = 0;
+  let pgCards = [];
+
+  PHONES.forEach((file, i) => {
+    const card = document.createElement("div");
+    card.className = "carousel-card";
+    card.style.transform =
+      `translate(-50%, -50%) rotateY(${i * angleStep}deg) translateZ(${ringRadius}px)`;
+    card.innerHTML = `<img src="${PHONE_BASE}${file}" alt="Over the Hump phone mockup ${i + 1}">`;
+    card.addEventListener("click", () => { pgCurrent = i; updateCarousel(); });
+    pgTrack.appendChild(card);
+    pgCards.push(card);
+  });
+
+  function updateCarousel() {
+    pgTrack.style.transform = `rotateY(${-pgCurrent * angleStep}deg)`;
+    pgCards.forEach((card, i) => card.classList.toggle("is-active", i === pgCurrent));
+    pgIndexLabel.textContent = (pgCurrent + 1) + " / " + PHONES.length;
+  }
+
+  function openPhoneGallery(i) {
+    pgCurrent = i;
+    updateCarousel();
+    phoneGallery.classList.add("open");
+  }
+  function closePhoneGallery() {
+    phoneGallery.classList.remove("open");
+  }
+  function pgStep(delta) {
+    pgCurrent = (pgCurrent + delta + PHONES.length) % PHONES.length;
+    updateCarousel();
+  }
+
+  document.querySelectorAll(".phone-mockup").forEach((el, i) => {
+    el.addEventListener("click", () => openPhoneGallery(i));
+  });
+
+  document.getElementById("pgClose").addEventListener("click", closePhoneGallery);
+  document.getElementById("pgPrev").addEventListener("click", () => pgStep(-1));
+  document.getElementById("pgNext").addEventListener("click", () => pgStep(1));
+  phoneGallery.addEventListener("click", (e) => { if (e.target === phoneGallery) closePhoneGallery(); });
+
   window.addEventListener("keydown", (e) => {
+    if (phoneGallery.classList.contains("open")) {
+      if (e.key === "Escape") closePhoneGallery();
+      if (e.key === "ArrowLeft") pgStep(-1);
+      if (e.key === "ArrowRight") pgStep(1);
+      return;
+    }
     if (!lightbox.classList.contains("open")) return;
     if (e.key === "Escape") closeLightbox();
     if (e.key === "ArrowLeft") step(-1);

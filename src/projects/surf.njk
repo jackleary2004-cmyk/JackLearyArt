@@ -295,6 +295,151 @@ topBarTheme: dark
     letter-spacing: 0.1em;
     color: rgba(255,255,255,0.6);
   }
+
+  /* Same overlay, scoped to its own ID so it can run independently of the
+     main deck's #lightbox (separate FILES set, separate open/close state). */
+  #monoLightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.96);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  #monoLightbox.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  #monoLightbox .stage {
+    max-width: 82vw;
+    max-height: 82vh;
+  }
+  #monoLightbox .stage img {
+    max-width: 82vw;
+    max-height: 82vh;
+    display: block;
+  }
+
+  #monoLightbox .close-btn,
+  #monoLightbox .nav-btn {
+    position: absolute;
+    background: none;
+    border: none;
+    color: var(--white);
+    cursor: pointer;
+    font-family: var(--font-caption);
+  }
+
+  #monoLightbox .close-btn {
+    top: 24px;
+    right: var(--side-pad);
+    font-size: 28px;
+    line-height: 1;
+    font-weight: 100;
+  }
+  #monoLightbox .close-btn:hover { color: var(--yellow); }
+
+  #monoLightbox .nav-btn {
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 40px;
+    font-weight: 100;
+    padding: 0.5rem 1rem;
+  }
+  #monoLightbox .nav-btn:hover { color: var(--yellow); }
+  #monoLightbox .nav-prev { left: 12px; }
+  #monoLightbox .nav-next { right: 12px; }
+
+  #monoLightbox .index-label {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-caption);
+    font-weight: 100;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.6);
+  }
+
+  /* ---------- SURF IN MONOCHROME (collapsible gallery-exhibition sub-section) ---------- */
+
+  .mono-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: var(--yellow);
+    color: var(--black);
+    cursor: pointer;
+    padding: clamp(16px, 2.6vh, 26px) var(--side-pad);
+    margin-top: clamp(30px, 5vh, 60px);
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .mono-bar-label,
+  .mono-bar-year {
+    font-family: var(--font-caption);
+    font-weight: 800;
+    font-size: clamp(11px, 1.2vw, 13px);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    flex: 1 1 0;
+  }
+  .mono-bar-year {
+    text-align: right;
+  }
+  .mono-bar-title {
+    font-family: var(--font-display);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    font-size: clamp(1.1rem, 2.4vw, 1.9rem);
+    text-align: center;
+    flex: 1 1 0;
+  }
+  .mono-bar-toggle {
+    position: absolute;
+    right: clamp(24px, 6vw, 100px);
+    font-family: var(--font-caption);
+    font-weight: 800;
+    font-size: 22px;
+    pointer-events: none;
+  }
+  .mono-bar {
+    position: relative;
+  }
+
+  .mono-panel {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .mono-gallery-row {
+    display: flex;
+    gap: 6px;
+    padding: clamp(24px, 4vh, 50px) var(--side-pad) clamp(20px, 3vh, 40px);
+  }
+  .mono-gallery-row .cell {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .mono-gallery-row .cell img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  @media (max-width: 700px) {
+    .mono-gallery-row { flex-direction: column; }
+    .mono-bar-toggle { right: var(--side-pad); }
+  }
 </style>
 </head>
 <body>
@@ -324,6 +469,39 @@ topBarTheme: dark
     <button class="nav-btn nav-next" id="lbNext" aria-label="Next">&#8250;</button>
     <button class="close-btn" id="lbClose" aria-label="Close">&times;</button>
     <div class="index-label" id="lbIndex"></div>
+  </div>
+
+  <!-- Surf in Monochrome: a gallery-exhibition feature, collapsed by default.
+       Bar reads Gallery Exhibition / Surf Monochrome / 2026; opening it
+       reveals 3 exhibition install photos, then the full 50-piece set in
+       a 10-column grid using the exact same masonry + ripple-hover +
+       lightbox pattern as the main deck above. -->
+  <div class="mono-bar" id="monoBar" role="button" tabindex="0" aria-expanded="false" aria-controls="monoPanel">
+    <span class="mono-bar-label">Gallery Exhibition</span>
+    <span class="mono-bar-title">Surf Monochrome</span>
+    <span class="mono-bar-year">2026</span>
+    <span class="mono-bar-toggle" id="monoBarToggle">+</span>
+  </div>
+
+  <div class="mono-panel" id="monoPanel">
+    <div id="monoPanelInner">
+      <div class="mono-gallery-row">
+        <div class="cell"><img src="/images/surf/surf-monochrome/gallery-imgs/img-1_surf-monochrome.png" alt="Surf Monochrome gallery exhibition, install photo 1" loading="lazy"></div>
+        <div class="cell"><img src="/images/surf/surf-monochrome/gallery-imgs/img-2_surf-monochrome.png" alt="Surf Monochrome gallery exhibition, install photo 2" loading="lazy"></div>
+        <div class="cell"><img src="/images/surf/surf-monochrome/gallery-imgs/img-3_surf-monochrome.png" alt="Surf Monochrome gallery exhibition, install photo 3" loading="lazy"></div>
+      </div>
+
+      <div class="grid-loading" id="monoGridLoading">loading 50 pieces…</div>
+      <div class="surf-grid" id="monoGrid"></div>
+    </div>
+  </div>
+
+  <div id="monoLightbox">
+    <button class="nav-btn nav-prev" id="mlbPrev" aria-label="Previous">&#8249;</button>
+    <div class="stage" id="mlbStage"></div>
+    <button class="nav-btn nav-next" id="mlbNext" aria-label="Next">&#8250;</button>
+    <button class="close-btn" id="mlbClose" aria-label="Close">&times;</button>
+    <div class="index-label" id="mlbIndex"></div>
   </div>
 
 <script>
@@ -523,6 +701,200 @@ topBarTheme: dark
     if (e.key === "ArrowLeft") step(-1);
     if (e.key === "ArrowRight") step(1);
   });
+})();
+
+(function () {
+  // ---- Surf in Monochrome: 50 pieces, 10-column masonry, same ripple +
+  // lightbox mechanism as the main deck above (own closure, own FILES,
+  // own lightbox — nothing shared with it). ----
+  const BASE = "/images/surf/surf-monochrome/work-imgs/";
+  const FILES = Array.from({ length: 50 }, (_, i) => `surf_monochrome_edited_${i + 1}.png`);
+
+  const COLUMNS = 10;
+
+  const grid = document.getElementById("monoGrid");
+  const gridLoading = document.getElementById("monoGridLoading");
+
+  function loadAspect(file) {
+    return new Promise((resolve) => {
+      const im = new Image();
+      im.onload = () => resolve(im.naturalWidth / im.naturalHeight);
+      im.onerror = () => resolve(1);
+      im.src = BASE + file;
+    });
+  }
+
+  // ---- Ripple: identical to the main deck's (same radius/push/scale) ----
+  let allTiles = [];
+  let rippledTiles = [];
+
+  function clearRipple() {
+    rippledTiles.forEach((tile) => {
+      tile.style.transform = "";
+      tile.style.transitionDelay = "";
+      tile.style.zIndex = "";
+      tile.style.boxShadow = "";
+    });
+    rippledTiles = [];
+  }
+
+  function rippleFrom(sourceTile) {
+    clearRipple();
+
+    const srcRect = sourceTile.getBoundingClientRect();
+    const cx = srcRect.left + srcRect.width / 2;
+    const cy = srcRect.top + srcRect.height / 2;
+    const radius = srcRect.width * 3.6;
+    const maxPush = srcRect.width * 0.2;
+
+    sourceTile.style.transform = "scale(1.5)";
+    sourceTile.style.transitionDelay = "0ms";
+    sourceTile.style.zIndex = "5";
+    sourceTile.style.boxShadow = "0 16px 38px rgba(0,0,0,0.4)";
+    rippledTiles.push(sourceTile);
+
+    allTiles.forEach((tile) => {
+      if (tile === sourceTile) return;
+      const r = tile.getBoundingClientRect();
+      const tx = r.left + r.width / 2;
+      const ty = r.top + r.height / 2;
+      const dx = tx - cx, dy = ty - cy;
+      const dist = Math.hypot(dx, dy) || 1;
+      if (dist >= radius) return;
+
+      const strength = 0.15 + 0.85 * Math.cos((dist / radius) * (Math.PI / 2));
+      const push = maxPush * strength;
+      const nx = dx / dist, ny = dy / dist;
+
+      tile.style.transform = `translate(${(nx * push).toFixed(1)}px, ${(ny * push).toFixed(1)}px)`;
+      tile.style.transitionDelay = Math.round((dist / radius) * 90) + "ms";
+      rippledTiles.push(tile);
+    });
+  }
+
+  // ---- Build the masonry columns (after every file's aspect is known) ---
+  Promise.all(FILES.map(loadAspect)).then((aspects) => {
+    gridLoading.remove();
+
+    const cols = [];
+    const colHeights = new Array(COLUMNS).fill(0);
+    for (let c = 0; c < COLUMNS; c++) {
+      const col = document.createElement("div");
+      col.className = "surf-col";
+      grid.appendChild(col);
+      cols.push(col);
+    }
+    const colWidth = cols[0].getBoundingClientRect().width;
+
+    FILES.forEach((file, i) => {
+      const aspect = aspects[i];
+      const itemHeight = colWidth / aspect;
+
+      let target = 0;
+      for (let c = 1; c < COLUMNS; c++) {
+        if (colHeights[c] < colHeights[target]) target = c;
+      }
+      colHeights[target] += itemHeight;
+
+      const tile = document.createElement("div");
+      tile.className = "surf-tile";
+      tile.innerHTML = `<img src="${BASE}${file}" alt="Surf Monochrome piece ${i + 1}" loading="lazy">`;
+
+      tile.addEventListener("mouseenter", () => rippleFrom(tile));
+      tile.addEventListener("mouseleave", () => clearRipple());
+      tile.addEventListener("click", () => openMonoLightbox(i));
+
+      cols[target].appendChild(tile);
+      allTiles.push(tile);
+    });
+
+    syncPanelHeight();
+  });
+
+  // ---- Lightbox (own instance) -------------------------------------
+  const monoLightbox = document.getElementById("monoLightbox");
+  const mlbStage = document.getElementById("mlbStage");
+  const mlbIndexLabel = document.getElementById("mlbIndex");
+  let mlbCurrent = 0;
+
+  function renderMlbStage() {
+    const file = FILES[mlbCurrent];
+    mlbStage.innerHTML = `<img src="${BASE}${file}" alt="Surf Monochrome piece ${mlbCurrent + 1}">`;
+    mlbIndexLabel.textContent = (mlbCurrent + 1) + " / " + FILES.length;
+  }
+  function openMonoLightbox(i) {
+    mlbCurrent = i;
+    renderMlbStage();
+    monoLightbox.classList.add("open");
+  }
+  function closeMonoLightbox() {
+    monoLightbox.classList.remove("open");
+    mlbStage.innerHTML = "";
+  }
+  function mlbStep(delta) {
+    mlbCurrent = (mlbCurrent + delta + FILES.length) % FILES.length;
+    renderMlbStage();
+  }
+
+  document.getElementById("mlbClose").addEventListener("click", closeMonoLightbox);
+  document.getElementById("mlbPrev").addEventListener("click", () => mlbStep(-1));
+  document.getElementById("mlbNext").addEventListener("click", () => mlbStep(1));
+  monoLightbox.addEventListener("click", (e) => { if (e.target === monoLightbox) closeMonoLightbox(); });
+
+  // ---- Collapsible bar -----------------------------------------------
+  const bar = document.getElementById("monoBar");
+  const barToggle = document.getElementById("monoBarToggle");
+  const panel = document.getElementById("monoPanel");
+  const panelInner = document.getElementById("monoPanelInner");
+
+  function syncPanelHeight() {
+    if (panel.classList.contains("open")) {
+      panel.style.maxHeight = panelInner.scrollHeight + "px";
+    }
+  }
+
+  function togglePanel() {
+    const opening = !panel.classList.contains("open");
+    if (opening) {
+      panel.classList.add("open");
+      bar.classList.add("open");
+      bar.setAttribute("aria-expanded", "true");
+      barToggle.textContent = "\u2212"; // minus sign
+      panel.style.maxHeight = panelInner.scrollHeight + "px";
+    } else {
+      // Lock in the current height first so collapsing actually animates
+      // instead of jumping (max-height was "none"-equivalent via a big
+      // pixel value, so this re-measures it before dropping to 0).
+      panel.style.maxHeight = panelInner.scrollHeight + "px";
+      requestAnimationFrame(() => { panel.style.maxHeight = "0px"; });
+      panel.classList.remove("open");
+      bar.classList.remove("open");
+      bar.setAttribute("aria-expanded", "false");
+      barToggle.textContent = "+";
+    }
+  }
+
+  bar.addEventListener("click", togglePanel);
+  bar.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      togglePanel();
+    }
+  });
+
+  window.addEventListener("keydown", (e) => {
+    if (!monoLightbox.classList.contains("open")) return;
+    if (e.key === "Escape") closeMonoLightbox();
+    if (e.key === "ArrowLeft") mlbStep(-1);
+    if (e.key === "ArrowRight") mlbStep(1);
+  });
+
+  // Keep the panel's max-height in sync as the grid/gallery-row images
+  // finish loading — their real height isn't known up front, which would
+  // otherwise clip the reveal or leave a gap underneath.
+  const ro = new ResizeObserver(() => syncPanelHeight());
+  ro.observe(panelInner);
+  window.addEventListener("resize", syncPanelHeight);
 })();
 </script>
 </body>
