@@ -393,6 +393,7 @@ topBarTheme: dark
   }
   .mono-bar-year {
     text-align: right;
+    padding-right: clamp(28px, 4vw, 40px);
   }
   .mono-bar-title {
     font-family: var(--font-display);
@@ -405,7 +406,9 @@ topBarTheme: dark
   }
   .mono-bar-toggle {
     position: absolute;
-    right: clamp(24px, 6vw, 100px);
+    top: 50%;
+    right: var(--side-pad);
+    transform: translateY(-50%);
     font-family: var(--font-caption);
     font-weight: 800;
     font-size: 22px;
@@ -438,7 +441,6 @@ topBarTheme: dark
 
   @media (max-width: 700px) {
     .mono-gallery-row { flex-direction: column; }
-    .mono-bar-toggle { right: var(--side-pad); }
   }
 </style>
 </head>
@@ -450,26 +452,7 @@ topBarTheme: dark
 
   <header class="project-header">
     <h1>Surf</h1>
-    <div class="project-year">(2024)</div>
-    <p class="body-copy">
-      Designed an original visual presentation built around a simple question:
-      “What does the word surf mean?” — and expanded it into a full deck.
-      This was a solo, one-weekend project tackling everything from layout
-      to typography, and telling a visual story throughout.
-    </p>
-    <div class="caption">Graphic Design, InDesign, Typography, Presentation</div>
   </header>
-
-  <div class="grid-loading" id="gridLoading">loading 74 slides…</div>
-  <div class="surf-grid" id="surfGrid"></div>
-
-  <div id="lightbox">
-    <button class="nav-btn nav-prev" id="lbPrev" aria-label="Previous">&#8249;</button>
-    <div class="stage" id="lbStage"></div>
-    <button class="nav-btn nav-next" id="lbNext" aria-label="Next">&#8250;</button>
-    <button class="close-btn" id="lbClose" aria-label="Close">&times;</button>
-    <div class="index-label" id="lbIndex"></div>
-  </div>
 
   <!-- Surf in Monochrome: a gallery-exhibition feature, collapsed by default.
        Bar reads Gallery Exhibition / Surf Monochrome / 2026; opening it
@@ -494,6 +477,17 @@ topBarTheme: dark
       <div class="grid-loading" id="monoGridLoading">loading 50 pieces…</div>
       <div class="surf-grid" id="monoGrid"></div>
     </div>
+  </div>
+
+  <div class="grid-loading" id="gridLoading">loading 74 slides…</div>
+  <div class="surf-grid" id="surfGrid"></div>
+
+  <div id="lightbox">
+    <button class="nav-btn nav-prev" id="lbPrev" aria-label="Previous">&#8249;</button>
+    <div class="stage" id="lbStage"></div>
+    <button class="nav-btn nav-next" id="lbNext" aria-label="Next">&#8250;</button>
+    <button class="close-btn" id="lbClose" aria-label="Close">&times;</button>
+    <div class="index-label" id="lbIndex"></div>
   </div>
 
   <div id="monoLightbox">
