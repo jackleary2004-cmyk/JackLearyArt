@@ -1,4 +1,5 @@
 ---
+topBarSection: work
 topBarTheme: dark
 ---
 <!DOCTYPE html>
@@ -10,7 +11,8 @@ topBarTheme: dark
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<title>Jack Leary — Over The Hump Initiative</title>
+<title>Over the Hump Initiative — Jack Leary</title>
+<meta name="description" content="Over the Hump Initiative: brand identity and social media design for a student wellness organization, by Jack Leary.">
 <style>
   /* League Mono — same real, self-hosted font files as the rest of the site. */
   @font-face {
@@ -115,7 +117,7 @@ topBarTheme: dark
     color: rgba(255,255,255,0.55);
     transition: color 0.3s ease, font-weight 0.1s ease;
   }
-  .back-link:hover { color: var(--blue); font-weight: 800; }
+  .back-link:hover { color: var(--blue); text-decoration: underline; text-underline-offset: 4px; }
 
   .project-header {
     padding: clamp(90px, 16vh, 160px) var(--side-pad) clamp(20px, 4vh, 40px);
@@ -157,7 +159,7 @@ topBarTheme: dark
     font-size: 12px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.45);
+    color: rgba(255, 255, 255, 0.6) /* was 0.4–0.45: raised to pass 4.5:1 on black */;
     margin-bottom: 1.3rem;
   }
 
@@ -177,7 +179,7 @@ topBarTheme: dark
     font-size: 12px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.45);
+    color: rgba(255, 255, 255, 0.6) /* was 0.4–0.45: raised to pass 4.5:1 on black */;
   }
 
   @keyframes spawnIn {
@@ -193,7 +195,7 @@ topBarTheme: dark
      it made hovering unreliable (a later phone's transparent margin
      still physically sits on top and steals the hover from the phone
      visible underneath it). Real fix: the mockups are now pre-cropped
-     to the phone's actual bounding box (oth_phone-mockup_N_cropped.png),
+     to the phone's actual bounding box (oth_phone-mockup_N_cropped.webp),
      so each box IS the phone, they can just sit in a plain row with a
      small gap, and hover works exactly per-phone with no stacking
      ambiguity. Cropping also means the same box size shows much more
@@ -297,7 +299,7 @@ topBarTheme: dark
     font-size: 12px;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.4);
+    color: rgba(255, 255, 255, 0.6) /* was 0.4–0.45: raised to pass 4.5:1 on black */;
   }
 
   /* ---------- LIGHTBOX ---------- */
@@ -493,10 +495,10 @@ topBarTheme: dark
   </header>
 
   <section class="phone-row" id="phoneRow">
-    <div class="phone-mockup"><img src="/images/over_the_hump/phone-mockups/oth_phone-mockup_1_cropped.png" alt="Over the Hump phone mockup 1" loading="lazy"></div>
-    <div class="phone-mockup"><img src="/images/over_the_hump/phone-mockups/oth_phone-mockup_2_cropped.png" alt="Over the Hump phone mockup 2" loading="lazy"></div>
-    <div class="phone-mockup"><img src="/images/over_the_hump/phone-mockups/oth_phone-mockup_3_cropped.png" alt="Over the Hump phone mockup 3" loading="lazy"></div>
-    <div class="phone-mockup"><img src="/images/over_the_hump/phone-mockups/oth_phone-mockup_4_cropped.png" alt="Over the Hump phone mockup 4" loading="lazy"></div>
+    <div class="phone-mockup"><img src="/images/over_the_hump/phone-mockups/oth_phone-mockup_1_cropped.webp" alt="Over the Hump phone mockup 1" loading="lazy"></div>
+    <div class="phone-mockup"><img src="/images/over_the_hump/phone-mockups/oth_phone-mockup_2_cropped.webp" alt="Over the Hump phone mockup 2" loading="lazy"></div>
+    <div class="phone-mockup"><img src="/images/over_the_hump/phone-mockups/oth_phone-mockup_3_cropped.webp" alt="Over the Hump phone mockup 3" loading="lazy"></div>
+    <div class="phone-mockup"><img src="/images/over_the_hump/phone-mockups/oth_phone-mockup_4_cropped.webp" alt="Over the Hump phone mockup 4" loading="lazy"></div>
   </section>
 
   <div class="grid-loading" id="gridLoading">loading gallery…</div>
@@ -525,15 +527,15 @@ topBarTheme: dark
   // ---- The 9 gallery images, in order --------------------------------
   const BASE = "/images/over_the_hump/";
   const FILES = [
-    "over_the_hump_1.png",
-    "over_the_hump_2.jpg",
-    "over_the_hump_3.jpg",
-    "over_the_hump_4.jpg",
-    "over_the_hump_5.jpg",
-    "over_the_hump_6.jpg",
-    "over_the_hump_7.jpg",
-    "over_the_hump_8.jpg",
-    "over_the_hump_9.jpg",
+    "over_the_hump_1.webp",
+    "over_the_hump_2.webp",
+    "over_the_hump_3.webp",
+    "over_the_hump_4.webp",
+    "over_the_hump_5.webp",
+    "over_the_hump_6.webp",
+    "over_the_hump_7.webp",
+    "over_the_hump_8.webp",
+    "over_the_hump_9.webp",
   ];
 
   const grid = document.getElementById("othGrid");
@@ -643,10 +645,10 @@ topBarTheme: dark
   // behind it — a real 3D carousel, not a fading slideshow.
   const PHONE_BASE = "/images/over_the_hump/phone-mockups/";
   const PHONES = [
-    "oth_phone-mockup_1_cropped.png",
-    "oth_phone-mockup_2_cropped.png",
-    "oth_phone-mockup_3_cropped.png",
-    "oth_phone-mockup_4_cropped.png",
+    "oth_phone-mockup_1_cropped.webp",
+    "oth_phone-mockup_2_cropped.webp",
+    "oth_phone-mockup_3_cropped.webp",
+    "oth_phone-mockup_4_cropped.webp",
   ];
 
   const phoneGallery = document.getElementById("phoneGallery");
@@ -722,7 +724,7 @@ topBarTheme: dark
         io.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.2 });
+  }, { threshold: 0 } /* reveal as soon as any part is on screen, so nothing sits blank */);
 
   document.querySelectorAll("#projectHeader").forEach((el) => io.observe(el));
 

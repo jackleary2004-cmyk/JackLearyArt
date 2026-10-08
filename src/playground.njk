@@ -11,7 +11,8 @@ topBarTheme: dark
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<title>Jack Leary — Playground</title>
+<title>Playground — Jack Leary</title>
+<meta name="description" content="Posters, flyers, and motion pieces by Jack Leary — personal and side projects outside the main case studies.">
 <style>
   /* League Mono / League Spartan — same real, self-hosted font files as
      every other page on the site. */
@@ -101,7 +102,7 @@ topBarTheme: dark
     color: rgba(255,255,255,0.55);
     transition: color 0.3s ease, font-weight 0.1s ease;
   }
-  .back-link:hover { color: var(--blue); font-weight: 800; }
+  .back-link:hover { color: var(--blue); text-decoration: underline; text-underline-offset: 4px; }
 
   .project-header {
     padding: 7rem var(--side-pad) 3.5rem;
@@ -134,7 +135,7 @@ topBarTheme: dark
     font-size: 12px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.45);
+    color: rgba(255, 255, 255, 0.6) /* was 0.4–0.45: raised to pass 4.5:1 on black */;
   }
 
   /* ---------- GRID (column masonry, no cropping / no rounding gaps) ---- */
@@ -217,7 +218,7 @@ topBarTheme: dark
     font-size: 12px;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.4);
+    color: rgba(255, 255, 255, 0.6) /* was 0.4–0.45: raised to pass 4.5:1 on black */;
   }
 
   /* ---------- LIGHTBOX ---------- */
@@ -326,20 +327,20 @@ topBarTheme: dark
   // part of this playground) ----
   const BASE = "/images/playground/";
   const FILES = [
-    { file: "dancing_robot.jpg", title: "Dancing Robot" },
-    { file: "getting_it_done.png", title: "Getting It Done" },
-    { file: "black_out_2025.png", title: "Black Out 2025" },
+    { ar: 0.75, file: "dancing_robot.webp", title: "Dancing Robot" },
+    { ar: 0.75, file: "getting_it_done.webp", title: "Getting It Done" },
+    { ar: 0.8, file: "black_out_2025.webp", title: "Black Out 2025" },
     { file: "a_good_day.mp4", title: "A Good Day" },
-    { file: "super_bowl_2025.jpg", title: "Super Bowl 2025" },
-    { file: "swagep.png", title: "SwagEp" },
-    { file: "strides_run_club_04_25.png", title: "Strides Run Club 04/25" },
+    { ar: 0.75, file: "super_bowl_2025.webp", title: "Super Bowl 2025" },
+    { ar: 0.75, file: "swagep.webp", title: "SwagEp" },
+    { ar: 0.8, file: "strides_run_club_04_25.webp", title: "Strides Run Club 04/25" },
     { file: "925.mp4", title: "925" },
-    { file: "strides_run_club_02_25.jpg", title: "Strides Run Club 02/25" },
-    { file: "strides_run_club_05_25.jpg", title: "Strides Run Club 05/25" },
-    { file: "strides_run_club_03_25.png", title: "Strides Run Club 03/25" },
+    { ar: 0.75, file: "strides_run_club_02_25.webp", title: "Strides Run Club 02/25" },
+    { ar: 0.8, file: "strides_run_club_05_25.webp", title: "Strides Run Club 05/25" },
+    { ar: 0.9, file: "strides_run_club_03_25.webp", title: "Strides Run Club 03/25" },
     { file: "a_place_where_love_goes.mp4", title: "A Place Where Love Goes" },
-    { file: "flip_it.png", title: "Flip It!" },
-    { file: "and_what_about_it.png", title: "And What About It?" },
+    { ar: 0.75, file: "flip_it.webp", title: "Flip It!" },
+    { ar: 0.75, file: "and_what_about_it.webp", title: "And What About It?" },
   ];
   const isVideo = (f) => f.endsWith(".mp4");
 
@@ -351,6 +352,10 @@ topBarTheme: dark
   // ---- Measure each file's real aspect ratio before laying anything out
   function loadAspect(item) {
     const file = item.file;
+    // Images carry their aspect ratio ("ar") in the list above, so the
+    // grid can be laid out right away instead of waiting for every full
+    // image to download. Only videos still need a metadata peek.
+    if (item.ar) return Promise.resolve(item.ar);
     return new Promise((resolve) => {
       if (isVideo(file)) {
         const v = document.createElement("video");

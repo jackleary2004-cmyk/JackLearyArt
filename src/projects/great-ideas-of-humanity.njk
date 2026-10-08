@@ -1,4 +1,5 @@
 ---
+topBarSection: work
 topBarTheme: dark
 ---
 <!DOCTYPE html>
@@ -10,7 +11,8 @@ topBarTheme: dark
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<title>Jack Leary — Great Ideas of Humanity</title>
+<title>Great Ideas of Humanity — Jack Leary</title>
+<meta name="description" content="Great Ideas of Humanity: a poster design project by Jack Leary.">
 <style>
   /* League Mono — same real, self-hosted font files as home-v2-prototype.html
      and surf-page-prototype.html. */
@@ -118,7 +120,7 @@ topBarTheme: dark
     color: rgba(255,255,255,0.55);
     transition: color 0.3s ease, font-weight 0.1s ease;
   }
-  .back-link:hover { color: var(--yellow); font-weight: 800; }
+  .back-link:hover { color: var(--yellow); text-decoration: underline; text-underline-offset: 4px; }
 
   /* ---------- LAYOUT: poster (left) | text + drafts (right) ---------- */
 
@@ -184,7 +186,7 @@ topBarTheme: dark
     font-size: 12px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.45);
+    color: rgba(255, 255, 255, 0.6) /* was 0.4–0.45: raised to pass 4.5:1 on black */;
     margin-bottom: 1.8rem;
   }
 
@@ -195,7 +197,7 @@ topBarTheme: dark
     font-size: 12px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.45);
+    color: rgba(255, 255, 255, 0.6) /* was 0.4–0.45: raised to pass 4.5:1 on black */;
     margin-bottom: 0.6rem;
   }
 
@@ -236,7 +238,7 @@ topBarTheme: dark
     font-size: 12px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.4);
+    color: rgba(255, 255, 255, 0.6) /* was 0.4–0.45: raised to pass 4.5:1 on black */;
   }
 
   .surf-grid {
@@ -273,7 +275,7 @@ topBarTheme: dark
     font-size: 12px;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.4);
+    color: rgba(255, 255, 255, 0.6) /* was 0.4–0.45: raised to pass 4.5:1 on black */;
   }
 
   /* ---------- SLIDESHOW / LIGHTBOX ---------- */
@@ -331,7 +333,7 @@ topBarTheme: dark
 
   <section class="project-hero">
     <div class="poster" id="posterTile">
-      <img src="/images/great_ideas_of_humanity/final/final_1.png" alt="Great Ideas of Humanity — final poster">
+      <img src="/images/great_ideas_of_humanity/final/final_1.webp" alt="Great Ideas of Humanity — final poster">
     </div>
     <div class="right-col">
       <div class="info">
@@ -367,11 +369,11 @@ topBarTheme: dark
 <script>
 (function () {
   // ---- Poster + drafts share ONE lightbox sequence: [poster, ...drafts] --
-  const POSTER_SRC = "/images/great_ideas_of_humanity/final/final_1.png";
+  const POSTER_SRC = "/images/great_ideas_of_humanity/final/final_1.webp";
   const DRAFT_BASE = "/images/great_ideas_of_humanity/drafts/";
   const DRAFT_FILES = [
-    "draft_1.jpg","draft_2.png","draft_3.png","draft_4.png","draft_5.png",
-    "draft_6.png","draft_7.png","draft_8.png","draft_9.png","draft_10.png","draft_11.png",
+    "draft_1.webp","draft_2.webp","draft_3.webp","draft_4.webp","draft_5.webp",
+    "draft_6.webp","draft_7.webp","draft_8.webp","draft_9.webp","draft_10.webp","draft_11.webp",
   ];
   const SEQUENCE = [POSTER_SRC, ...DRAFT_FILES.map(f => DRAFT_BASE + f)];
   const ALT = (i) => i === 0

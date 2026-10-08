@@ -1,5 +1,8 @@
 module.exports = function (eleventyConfig) {
-  eleventyConfig.addPassthroughCopy("src/images");
+  // Only web-ready files ship. The original PNG/JPG exports stay in
+  // src/images as source files; each has a .webp sibling (max 2400px)
+  // that the pages actually reference.
+  eleventyConfig.addPassthroughCopy("src/images/**/*.{webp,mp4,mov,webm,gif,svg}");
   eleventyConfig.addPassthroughCopy("src/fonts");
   eleventyConfig.addPassthroughCopy("src/css");
   eleventyConfig.addPassthroughCopy("src/js");

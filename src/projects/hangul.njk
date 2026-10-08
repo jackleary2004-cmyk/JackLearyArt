@@ -1,4 +1,5 @@
 ---
+topBarSection: work
 topBarTheme: light
 ---
 <!DOCTYPE html>
@@ -10,7 +11,8 @@ topBarTheme: light
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<title>Jack Leary — Hangul Poster Series</title>
+<title>Hangul Poster Series — Jack Leary</title>
+<meta name="description" content="Hangul Poster Series: typography and translation posters exploring the Korean alphabet, by Jack Leary.">
 <style>
   /* League Mono — same real, self-hosted font files as the rest of the site. */
   @font-face {
@@ -111,10 +113,10 @@ topBarTheme: light
     font-size: clamp(12px, 1.4vw, 15px);
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: rgba(0, 0, 0, 0.5);
+    color: rgba(0, 0, 0, 0.65) /* was 0.4–0.5: raised to pass 4.5:1 on white */;
     transition: color 0.3s ease, font-weight 0.1s ease;
   }
-  .back-link:hover { color: var(--blue); font-weight: 800; }
+  .back-link:hover { color: var(--blue); text-decoration: underline; text-underline-offset: 4px; }
 
   /* ---------- HEADER BANNER ---------- */
 
@@ -186,7 +188,7 @@ topBarTheme: light
     font-size: 12px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: rgba(0, 0, 0, 0.45);
+    color: rgba(0, 0, 0, 0.65) /* was 0.4–0.5: raised to pass 4.5:1 on white */;
     margin-bottom: 0.9rem;
   }
 
@@ -222,7 +224,7 @@ topBarTheme: light
     font-size: 11px;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: rgba(0, 0, 0, 0.4);
+    color: rgba(0, 0, 0, 0.65) /* was 0.4–0.5: raised to pass 4.5:1 on white */;
     margin-bottom: 0.4rem;
   }
 
@@ -485,49 +487,49 @@ topBarTheme: light
     // e.g. for the Train to Busan pieces, which aren't proverb translations).
     const POSTERS = [
       {
-        img: "/images/hangul/jack-in-korean_1.png",
+        img: "/images/hangul/jack-in-korean_1.webp",
         title: "Jack in Korean 1",
         explanation: "Jack Leary in Hangul, leaning into the grid/block system that Hangul uses to inspire a “break-the-grid” style poster. The poster also incorporates 3 words used to describe me (creativity // curiosity // outgoing).",
         translation: "",
       },
       {
-        img: "/images/hangul/jack-in-korean_2.png",
+        img: "/images/hangul/jack-in-korean_2.webp",
         title: "Jack in Korean 2",
         explanation: "Jack Leary in Hangul; incorporating an abstract silhouette of myself. Overall style inspired by the neon signs seen all over Korea, at their many 24hr markets and stores.",
         translation: "",
       },
       {
-        img: "/images/hangul/korean-proverb_1.png",
+        img: "/images/hangul/korean-proverb_1.webp",
         title: "A Dragon Rises From a Small Stream",
         explanation: "Korean Proverb; signifies that success can come from anywhere, and often does come from the overlooked or places that are viewed as insignificant.",
         translation: "개천에서 용 난다 — “A dragon rises from a small stream.”",
       },
       {
-        img: "/images/hangul/korean-proverb_2.png",
+        img: "/images/hangul/korean-proverb_2.webp",
         title: "Even a Tiger Comes When You Speak of Him",
         explanation: "Korean Proverb; the Korean version of the English saying: “speak of the devil.” The tigers themselves are illustrated using layers of the proverb.",
         translation: "호랑이도 제 말하면 온다 — “Even a tiger comes when you speak of him.”",
       },
       {
-        img: "/images/hangul/korean-proverb_3.png",
+        img: "/images/hangul/korean-proverb_3.webp",
         title: "A Single Word Can Pay Back a Debt of a Thousand Nyang",
         explanation: "Korean Proverb; a proverb about the power of words, set in a stacked, full-bleed gradient composition.",
         translation: "말 한마디에 천냥 빚도 갚는다 — “A single word can pay back a debt of a thousand nyang.”",
       },
       {
-        img: "/images/hangul/korean-proverb_4.png",
+        img: "/images/hangul/korean-proverb_4.webp",
         title: "Speak of the Devil",
         explanation: "Korean Proverb; another version of the “Even a tiger comes when you speak of him” proverb; leaned more into the American parallel proverb.",
         translation: "호랑이도 제 말하면 온다 — “Even a tiger comes when you speak of him.”",
       },
       {
-        img: "/images/hangul/train-to-busan_1.png",
+        img: "/images/hangul/train-to-busan_1.webp",
         title: "Train to Busan: Spread of Infection",
         explanation: "Infographic based on the Korean zombie flic “Train to Busan,” illustrating the path and spread of infection throughout the movie, using the train stops as markers.",
         translation: "",
       },
       {
-        img: "/images/hangul/train-to-busan_2.png",
+        img: "/images/hangul/train-to-busan_2.webp",
         title: "Train to Busan; Who Died?",
         explanation: "2nd Infographic based on the Korean zombie movie “Train to Busan,” showing the order of characters who passed away, starting with the very first sign of infection: the deer.",
         translation: "",
@@ -679,7 +681,7 @@ topBarTheme: light
           io.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.15, rootMargin: "0px 0px -40px 0px" });
+    }, { threshold: 0 } /* reveal as soon as any part is on screen, so nothing sits blank */);
     revealTargets.forEach((el) => io.observe(el));
   </script>
 </body>

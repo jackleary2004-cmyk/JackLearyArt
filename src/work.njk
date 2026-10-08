@@ -11,7 +11,8 @@ topBarTheme: light
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<title>Jack Leary — Work Prototype</title>
+<title>Work — Jack Leary</title>
+<meta name="description" content="Selected projects by Jack Leary, 2024–2026: brand identity, packaging, poster design, editorial presentation, and social media design.">
 <style>
   /* League Mono — real font files, same self-hosted set as the home page. */
   @font-face {
@@ -201,10 +202,16 @@ topBarTheme: light
      is centered over the whole image now instead of pinned to the
      bottom, so it needs even legibility everywhere, not just at the
      bottom edge. */
+  /* Soft dark fade behind the centered title: darkest right behind the
+     text, fading to clear toward the edges, so labels stay readable on
+     light artwork while most of the image keeps its real brightness. */
   .tile-scrim {
     position: absolute;
     inset: 0;
-    background: rgba(0, 0, 0, 0.34);
+    background: radial-gradient(ellipse 75% 42% at 50% 50%,
+                rgba(0, 0, 0, 0.5) 0%,
+                rgba(0, 0, 0, 0.28) 45%,
+                rgba(0, 0, 0, 0) 100%);
     pointer-events: none;
   }
 
@@ -292,12 +299,12 @@ topBarTheme: light
     // Same project data as home-v2-prototype.html — keep these two lists
     // in sync by hand until this gets pulled into a real 11ty data file.
     const PROJECTS = [
-      { slug: "puck-and-chuck",          title: "Puck + Chuck",             year: "2026",      focus: "Brand Identity",          ext: "png", page: "/projects/puck-and-chuck/", hover: "hover-blue" },
-      { slug: "surf",                    title: "Surf",                     year: "2024",      focus: "Editorial Presentation",  ext: "jpg", page: "/projects/surf/",         hover: "hover-red" },
-      { slug: "hangul",                  title: "Hangul",                   year: "2026",      focus: "Poster Design",           ext: "png", page: "/projects/hangul/",       hover: "hover-yellow" },
-      { slug: "great-ideas-of-humanity", title: "Great Ideas of Humanity",  year: "2025",      focus: "Poster Design",           ext: "png", page: "/projects/great-ideas-of-humanity/",  hover: "hover-blue" },
-      { slug: "over-the-hump",           title: "Over the Hump",            year: "2024-2025", focus: "Social Media Design",     ext: "jpg", page: "/projects/over-the-hump/", hover: "hover-blue" },
-      { slug: "cld-wtr",                 title: "CLD WTR",                  year: "2026",      focus: "Brand Identity",          ext: "png", page: "/projects/cld-wtr/", hover: "hover-red" },
+      { slug: "puck-and-chuck",          title: "Puck + Chuck",             year: "2026",      focus: "Brand Identity",          ext: "webp", page: "/projects/puck-and-chuck/", hover: "hover-blue" },
+      { slug: "surf",                    title: "Surf",                     year: "2024",      focus: "Editorial Presentation",  ext: "webp", page: "/projects/surf/",         hover: "hover-red" },
+      { slug: "hangul",                  title: "Hangul",                   year: "2026",      focus: "Poster Design",           ext: "webp", page: "/projects/hangul/",       hover: "hover-yellow" },
+      { slug: "great-ideas-of-humanity", title: "Great Ideas of Humanity",  year: "2025",      focus: "Poster Design",           ext: "webp", page: "/projects/great-ideas-of-humanity/",  hover: "hover-blue" },
+      { slug: "over-the-hump",           title: "Over the Hump",            year: "2024-2025", focus: "Social Media Design",     ext: "webp", page: "/projects/over-the-hump/", hover: "hover-blue" },
+      { slug: "cld-wtr",                 title: "CLD WTR",                  year: "2026",      focus: "Brand Identity",          ext: "webp", page: "/projects/cld-wtr/", hover: "hover-red" },
     ];
 
     const grid = document.getElementById("workGrid");
@@ -334,7 +341,7 @@ topBarTheme: light
           io.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.15, rootMargin: "0px 0px -40px 0px" });
+    }, { threshold: 0 } /* reveal as soon as any part is on screen, so nothing sits blank */);
     wraps.forEach((wrap) => io.observe(wrap));
   </script>
 
