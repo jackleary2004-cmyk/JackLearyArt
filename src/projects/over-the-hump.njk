@@ -453,6 +453,13 @@ topBarTheme: dark
   }
   #phoneGallery .close-btn:hover { color: var(--yellow); }
 
+  @media (max-width: 700px) {
+    /* Lower on phone, clear of the stacked mobile top-bar (nav wraps to
+       two rows there, ~93px tall) so it's not crowded against it and is
+       easier to actually tap. Desktop is untouched. */
+    #phoneGallery .close-btn { top: 110px; }
+  }
+
   #phoneGallery .nav-btn {
     top: 50%;
     transform: translateY(-50%);

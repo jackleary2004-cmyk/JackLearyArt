@@ -344,7 +344,14 @@ topBarTheme: dark
   ];
   const isVideo = (f) => f.endsWith(".mp4");
 
-  const COLUMNS = 5;
+  const COLUMNS_DESKTOP = 5;
+  function getColumnCount() {
+    // Jack asked specifically for 2 columns on phone here (not the 3 used
+    // on the surf grids) — Playground's tiles read better wider.
+    return window.innerWidth <= 700 ? 2 : COLUMNS_DESKTOP;
+  }
+  let currentColumns = null;
+  let cachedAspects = null;
 
   const grid = document.getElementById("playgroundGrid");
   const gridLoading = document.getElementById("gridLoading");
@@ -424,8 +431,12 @@ topBarTheme: dark
   }
 
   // ---- Build the masonry columns (after every image's aspect is known) --
-  Promise.all(FILES.map(loadAspect)).then((aspects) => {
-    gridLoading.remove();
+  function buildGrid(aspects) {
+    clearRipple();
+    grid.innerHTML = "";
+    allTiles = [];
+    currentColumns = getColumnCount();
+    const COLUMNS = currentColumns;
 
     const cols = [];
     const colHeights = new Array(COLUMNS).fill(0);
@@ -477,6 +488,21 @@ topBarTheme: dark
       cols[target].appendChild(tile);
       allTiles.push(tile);
     });
+  }
+
+  Promise.all(FILES.map(loadAspect)).then((aspects) => {
+    gridLoading.remove();
+    cachedAspects = aspects;
+    buildGrid(aspects);
+  });
+
+  let resizeTimer;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if (!cachedAspects || getColumnCount() === currentColumns) return;
+      buildGrid(cachedAspects);
+    }, 200);
   });
 
   // ---- Lightbox ---------------------------------------------------------

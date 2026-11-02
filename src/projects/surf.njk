@@ -123,7 +123,7 @@ topBarTheme: dark
   .back-link:hover { color: var(--blue); text-decoration: underline; text-underline-offset: 4px; }
 
   .project-header {
-    padding: 7rem var(--side-pad) 3.5rem;
+    padding: 7rem var(--side-pad) 1.25rem;
     max-width: 760px;
   }
 
@@ -380,7 +380,8 @@ topBarTheme: dark
     color: var(--black);
     cursor: pointer;
     padding: clamp(16px, 2.6vh, 26px) var(--side-pad);
-    margin-top: clamp(30px, 5vh, 60px);
+    margin-top: clamp(10px, 1.5vh, 24px);
+    margin-bottom: clamp(30px, 5vh, 60px); /* breathing room above the gallery below */
     -webkit-user-select: none;
     user-select: none;
   }
@@ -441,6 +442,14 @@ topBarTheme: dark
     display: block;
   }
 
+  /* Clear separation between the gallery-exhibition section (above) and
+     the regular surf deck (below), whether the panel is open or closed. */
+  .mono-section-divider {
+    height: 3px;
+    margin: clamp(20px, 3vh, 36px) var(--side-pad) 0;
+    background: var(--yellow);
+  }
+
   @media (max-width: 700px) {
     .mono-gallery-row { flex-direction: column; }
   }
@@ -481,6 +490,8 @@ topBarTheme: dark
     </div>
   </div>
 
+  <div class="mono-section-divider" aria-hidden="true"></div>
+
   <div class="grid-loading" id="gridLoading">loading 74 slides…</div>
   <div class="surf-grid" id="surfGrid"></div>
 
@@ -519,7 +530,12 @@ topBarTheme: dark
   ];
   const isVideo = (f) => f.endsWith(".mp4");
 
-  const COLUMNS = 9;
+  const COLUMNS_DESKTOP = 9;
+  function getColumnCount() {
+    return window.innerWidth <= 700 ? 3 : COLUMNS_DESKTOP;
+  }
+  let currentColumns = null;
+  let cachedAspects = null;
 
   const grid = document.getElementById("surfGrid");
   const gridLoading = document.getElementById("gridLoading");
@@ -605,8 +621,12 @@ topBarTheme: dark
   }
 
   // ---- Build the masonry columns (after every file's aspect is known) ---
-  Promise.all(FILES.map(loadAspect)).then((aspects) => {
-    gridLoading.remove();
+  function buildGrid(aspects) {
+    clearRipple();
+    grid.innerHTML = "";
+    allTiles = [];
+    currentColumns = getColumnCount();
+    const COLUMNS = currentColumns;
 
     // Build empty columns first so we can measure a real column's width
     const cols = [];
@@ -656,6 +676,23 @@ topBarTheme: dark
       cols[target].appendChild(tile);
       allTiles.push(tile);
     });
+  }
+
+  Promise.all(FILES.map(loadAspect)).then((aspects) => {
+    gridLoading.remove();
+    cachedAspects = aspects;
+    buildGrid(aspects);
+  });
+
+  // Rebuild with a different column count when crossing the phone
+  // breakpoint (resizing within the same bucket is a no-op).
+  let resizeTimer;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if (!cachedAspects || getColumnCount() === currentColumns) return;
+      buildGrid(cachedAspects);
+    }, 200);
   });
 
   // ---- Lightbox / slideshow ------------------------------------------
@@ -706,7 +743,12 @@ topBarTheme: dark
   const BASE = "/images/surf/surf-monochrome/work-imgs/";
   const FILES = Array.from({ length: 50 }, (_, i) => `surf_monochrome_edited_${i + 1}.webp`);
 
-  const COLUMNS = 10;
+  const COLUMNS_DESKTOP = 10;
+  function getColumnCount() {
+    return window.innerWidth <= 700 ? 3 : COLUMNS_DESKTOP;
+  }
+  let currentColumns = null;
+  let cachedAspects = null;
 
   const grid = document.getElementById("monoGrid");
   const gridLoading = document.getElementById("monoGridLoading");
@@ -769,8 +811,12 @@ topBarTheme: dark
   }
 
   // ---- Build the masonry columns (after every file's aspect is known) ---
-  Promise.all(FILES.map(loadAspect)).then((aspects) => {
-    gridLoading.remove();
+  function buildGrid(aspects) {
+    clearRipple();
+    grid.innerHTML = "";
+    allTiles = [];
+    currentColumns = getColumnCount();
+    const COLUMNS = currentColumns;
 
     const cols = [];
     const colHeights = new Array(COLUMNS).fill(0);
@@ -805,6 +851,21 @@ topBarTheme: dark
     });
 
     syncPanelHeight();
+  }
+
+  Promise.all(FILES.map(loadAspect)).then((aspects) => {
+    gridLoading.remove();
+    cachedAspects = aspects;
+    buildGrid(aspects);
+  });
+
+  let resizeTimer;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if (!cachedAspects || getColumnCount() === currentColumns) return;
+      buildGrid(cachedAspects);
+    }, 200);
   });
 
   // ---- Lightbox (own instance) -------------------------------------
