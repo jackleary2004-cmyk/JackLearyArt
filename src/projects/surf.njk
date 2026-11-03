@@ -442,14 +442,6 @@ topBarTheme: dark
     display: block;
   }
 
-  /* Clear separation between the gallery-exhibition section (above) and
-     the regular surf deck (below), whether the panel is open or closed. */
-  .mono-section-divider {
-    height: 3px;
-    margin: clamp(20px, 3vh, 36px) var(--side-pad) 0;
-    background: var(--yellow);
-  }
-
   @media (max-width: 700px) {
     .mono-gallery-row { flex-direction: column; }
   }
@@ -489,8 +481,6 @@ topBarTheme: dark
       <div class="surf-grid" id="monoGrid"></div>
     </div>
   </div>
-
-  <div class="mono-section-divider" aria-hidden="true"></div>
 
   <div class="grid-loading" id="gridLoading">loading 74 slides…</div>
   <div class="surf-grid" id="surfGrid"></div>

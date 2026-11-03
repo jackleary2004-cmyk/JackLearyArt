@@ -113,7 +113,11 @@
   .menu-panel {
     position: absolute;
     top: 0; left: 0; right: 0;
-    background: linear-gradient(135deg, var(--blue) 0%, var(--red) 52%, var(--yellow) 100%);
+    /* Noise grain layered over the gradient — same technique used on the
+       Contact oval and the home page background. */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch' result='t'/%3E%3CfeColorMatrix in='t' type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"), linear-gradient(135deg, var(--blue) 0%, var(--red) 52%, var(--yellow) 100%);
+    background-repeat: repeat, no-repeat;
+    background-size: 180px 180px, 100% 100%;
     color: var(--black);
     padding: 0 var(--side-pad) clamp(28px, 6vh, 56px);
     transform: translateY(-105%);
@@ -288,7 +292,9 @@
     width: min(56vw, 360px);
     aspect-ratio: 4 / 3.3;
     border-radius: 50% !important;
-    background: linear-gradient(135deg, var(--blue) 0%, var(--red) 52%, var(--yellow) 100%);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch' result='t'/%3E%3CfeColorMatrix in='t' type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"), linear-gradient(135deg, var(--blue) 0%, var(--red) 52%, var(--yellow) 100%);
+    background-repeat: repeat, no-repeat;
+    background-size: 180px 180px, 100% 100%;
     display: flex;
     flex-direction: column;
     align-items: center;

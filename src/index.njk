@@ -152,7 +152,14 @@ topBarTheme: dark
     inset: 0;
     z-index: 0;
     overflow: hidden;
-    background: var(--black);
+    /* Same red/yellow/blue gradient as the menu panel + Contact oval,
+       with the same noise grain layered over it. Shows through in the
+       gaps around/between the peeking slide cards. The top-bar itself
+       stays solid black (its own background, set by topBarTheme: dark
+       in this page's front matter) — untouched by this. */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch' result='t'/%3E%3CfeColorMatrix in='t' type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"), linear-gradient(135deg, var(--blue) 0%, var(--red) 52%, var(--yellow) 100%);
+    background-repeat: repeat, no-repeat;
+    background-size: 180px 180px, 100% 100%;
   }
 
   /* Peek carousel: images sit in a horizontal row at full brightness
@@ -335,38 +342,75 @@ topBarTheme: dark
   const focusEl = document.getElementById("gallery-focus");
 
   const galleryEl = document.getElementById("project-gallery");
-  const slideEls = SLIDES.map((slide, i) => {
-    const div = document.createElement("div");
-    div.className = "slide";
-    div.style.backgroundImage = `url("${slide.image}")`;
-    div.setAttribute("role", "img");
-    div.setAttribute("aria-label", slide.title);
-    // Clicking a peeking neighbour brings it to the center.
-    div.addEventListener("click", () => {
-      if (i !== current) { current = i; showSlide(current); }
-    });
-    slidesContainer.appendChild(div);
-    return div;
-  });
-  let current = 0;
 
-  // Center the active card; neighbours peek in from both sides.
-  function positionTrack() {
+  // ---- True infinite loop ---------------------------------------------
+  // The old version held exactly SLIDES.length real DOM cards and wrapped
+  // the *index* with modulo, but the *track* itself was still a finite
+  // strip — so at slide 1 there was nothing to peek at on the left (just
+  // empty background), and the wrap from last-to-first snapped the track
+  // instantly across the whole row. Both of those gave the carousel an
+  // obvious start and end even though the data already looped.
+  //
+  // Fix: render LOOPS duplicate copies of the slide list back to back, so
+  // there's always a real neighbour peeking on both sides no matter where
+  // you are. A single "virtual index" drives the track position and can
+  // grow or shrink without bound; the real slide it maps to is just
+  // virtualIndex mod SLIDES.length. Once virtualIndex drifts within one
+  // loop's distance of either end of the rendered strip, it gets silently
+  // recentred by a whole number of loops — invisible, because the slide
+  // at virtualIndex and at virtualIndex ± SLIDES.length is pixel-identical.
+  const LOOPS = 5;
+  const loopStartIndex = Math.floor(LOOPS / 2) * SLIDES.length; // start in the middle copy
+  let virtualIndex = loopStartIndex;
+
+  const slideEls = [];
+  for (let loop = 0; loop < LOOPS; loop++) {
+    SLIDES.forEach((slide, i) => {
+      const vi = loop * SLIDES.length + i;
+      const div = document.createElement("div");
+      div.className = "slide";
+      div.style.backgroundImage = `url("${slide.image}")`;
+      div.setAttribute("role", "img");
+      div.setAttribute("aria-label", slide.title);
+      // Clicking a peeking neighbour brings it to the center.
+      div.addEventListener("click", () => {
+        if (vi !== virtualIndex) { virtualIndex = vi; showSlide(); }
+      });
+      slidesContainer.appendChild(div);
+      slideEls.push(div);
+    });
+  }
+
+  function realIndex(vi) {
+    return ((vi % SLIDES.length) + SLIDES.length) % SLIDES.length;
+  }
+
+  // Center the active card; neighbours peek in from both sides. `instant`
+  // skips the CSS transition — used only for the invisible loop recentre,
+  // so that snap never reads as a jump.
+  function positionTrack(instant) {
     const bar = document.getElementById("topBar");
     if (bar) galleryEl.style.setProperty("--bar-h", bar.offsetHeight + "px");
     const first = slideEls[0];
     if (!first) return;
     const cardW = first.getBoundingClientRect().width;
     const gap = parseFloat(getComputedStyle(slidesContainer).columnGap) || 0;
-    const x = (window.innerWidth - cardW) / 2 - current * (cardW + gap);
-    slidesContainer.style.transform = `translateX(${x}px)`;
+    const x = (window.innerWidth - cardW) / 2 - virtualIndex * (cardW + gap);
+    if (instant) {
+      slidesContainer.style.transition = "none";
+      slidesContainer.style.transform = `translateX(${x}px)`;
+      void slidesContainer.offsetHeight; // force reflow before re-enabling the transition
+      slidesContainer.style.transition = "";
+    } else {
+      slidesContainer.style.transform = `translateX(${x}px)`;
+    }
   }
-  window.addEventListener("resize", positionTrack);
+  window.addEventListener("resize", () => positionTrack(true));
 
-  function showSlide(index) {
-    slideEls.forEach((el, i) => el.classList.toggle("active", i === index));
+  function showSlide() {
+    slideEls.forEach((el, i) => el.classList.toggle("active", i === virtualIndex));
     positionTrack();
-    const s = SLIDES[index];
+    const s = SLIDES[realIndex(virtualIndex)];
     yearEl.textContent = s.year;
     titleLinkEl.textContent = s.title;
     focusEl.textContent = s.focus;
@@ -376,7 +420,19 @@ topBarTheme: dark
   }
 
   if (SLIDES.length > 0) {
-    showSlide(0);
+    showSlide();
+  }
+
+  // Once we're within one loop's distance of either end of the rendered
+  // strip, jump back by whole loops to the equivalent spot in the middle
+  // copy — same slide, same visual position, just more room to keep
+  // going. Only ever called right after a step settles, never mid-motion.
+  function recenterIfNeeded() {
+    const total = slideEls.length;
+    if (virtualIndex < SLIDES.length || virtualIndex > total - SLIDES.length * 2) {
+      virtualIndex = loopStartIndex + realIndex(virtualIndex);
+      positionTrack(true);
+    }
   }
 
   // Scroll (wheel) steps one slide at a time, with a short cooldown so a
@@ -389,14 +445,16 @@ topBarTheme: dark
 
   function step(direction) {
     if (cooldown || SLIDES.length === 0) return;
-    // Wraps both directions now — scrolling past the last project (GIOH)
-    // loops back to the first (Puck + Chuck), and scrolling back past the
-    // first loops to the last, so it reads as one continuous loop instead
-    // of dead-ending at either end.
-    current = (current + direction + SLIDES.length) % SLIDES.length;
-    showSlide(current);
+    // Progresses in either direction with no dead end — see the "True
+    // infinite loop" block above for how virtualIndex never actually
+    // resets, it just quietly recentres once it has drifted far enough.
+    virtualIndex += direction;
+    showSlide();
     cooldown = true;
-    setTimeout(() => { cooldown = false; }, COOLDOWN_MS);
+    setTimeout(() => {
+      cooldown = false;
+      recenterIfNeeded();
+    }, COOLDOWN_MS);
   }
 
   window.addEventListener("wheel", (e) => {
