@@ -162,14 +162,16 @@ topBarTheme: dark
     background-size: 180px 180px, 100% 100%;
   }
 
-  /* Peek carousel: images sit in a horizontal row at full brightness
-     (no dark scrim). The active image is centered and smaller than the
+  /* Peek carousel: the active image is centered and smaller than the
      screen, so the edges of the next (and previous) image show at the
      sides — a hint that there's more. --bar-h is set from the real top-bar
-     height in the script below; the caption sits in the band underneath. */
+     height in the script below. No more reserved caption band underneath
+     the track — it now runs the full height between the top bar and the
+     bottom margin, so each image is noticeably bigger. Year/title/focus
+     live on the image itself now (see .slide-caption below), surfacing
+     only on hover (or, on touch devices, for whichever slide is active). */
   .project-gallery {
     --bar-h: 80px;
-    --cap-h: clamp(64px, 11vh, 96px);
     --card-w: min(74vw, 1280px);
     --card-gap: clamp(10px, 1.6vw, 24px);
   }
@@ -177,44 +179,69 @@ topBarTheme: dark
     position: absolute;
     left: 0;
     top: calc(var(--bar-h) + clamp(12px, 3vh, 32px));
-    bottom: var(--cap-h);
+    bottom: clamp(12px, 3vh, 32px);
     display: flex;
     gap: var(--card-gap);
     transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     will-change: transform;
   }
   .project-gallery .slide {
+    position: relative;
     flex: 0 0 var(--card-w);
     height: 100%;
-    background-size: cover;
-    background-position: center;
+    overflow: hidden;
     cursor: pointer;
   }
   .project-gallery .slide.active { cursor: default; }
 
-  /* No more edge-to-edge spread — year / title / focus now sit together
-     as one centered cluster (still at vertical middle of the page), all
-     lined up at the same font-size/weight/tracking so they read as one
-     continuous line rather than three mismatched pieces. */
-  /* The whole cluster (year — title — focus) is now one link straight to
-     the project page. On hover it turns into a solid color-filled box in
-     the slide's assigned accent (red/blue/yellow) — sharp corners, per
-     the site's style guide, not a pill. */
-  .gallery-caption {
+  .slide-bg {
     position: absolute;
-    left: 0;
-    right: 0;
-    bottom: calc(var(--cap-h) / 2);
-    transform: translateY(50%) scale(1);
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    transition: filter 0.45s ease;
+  }
+
+  /* Same darken-on-hover technique as the Work page grid tiles
+     (src/work.njk .tile-bg) — dim the photo itself, not the caption
+     sitting on top of it, so the title/year/focus stay legible once
+     they fade in. Touch devices can't hover, so the active slide gets a
+     lighter, permanent darken there instead. */
+  @media (hover: hover) and (pointer: fine) {
+    .slide:hover .slide-bg { filter: brightness(0.6); }
+  }
+  @media (hover: none), (pointer: coarse) {
+    .slide.active .slide-bg { filter: brightness(0.75); }
+  }
+
+  /* Year / title / focus now sit directly on the image they describe,
+     centered over it, hidden until you hover that specific slide. Touch
+     devices can't hover, so the active slide's caption stays visible
+     there instead (see the media queries below). The whole cluster is
+     one link straight to the project page; bringing a peeking slide to
+     center (handled in the script) takes priority over following that
+     link until the slide is actually centered. */
+  .slide-caption {
+    position: absolute;
+    inset: 0;
     display: flex;
+    flex-wrap: wrap;
+    align-items: center;
     justify-content: center;
-    align-items: baseline;
+    align-content: center;
     gap: clamp(10px, 1.4vw, 18px);
-    width: fit-content;
-    margin: 0 auto;
-    padding: clamp(10px, 1.6vh, 16px) clamp(20px, 3vw, 36px);
-    background-color: transparent;
-    transition: background-color 0.4s ease, transform 0.4s ease;
+    padding: clamp(14px, 2vw, 26px);
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .slide:hover .slide-caption { opacity: 1; pointer-events: auto; }
+  }
+  @media (hover: none), (pointer: coarse) {
+    .slide.active .slide-caption { opacity: 1; pointer-events: auto; }
   }
 
   .gallery-year,
@@ -226,28 +253,14 @@ topBarTheme: dark
     font-size: clamp(12px, 1.4vw, 15px);
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    transition: color 0.4s ease, opacity 0.4s ease;
+    color: var(--white);
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
   }
 
   .gallery-year,
   .gallery-focus,
   .caption-dash {
-    opacity: 0.75;
-  }
-
-  .gallery-caption:hover {
-    transform: translateY(50%) scale(1.05);
-  }
-  .gallery-caption.hover-red:hover   { background-color: var(--red); }
-  .gallery-caption.hover-yellow:hover { background-color: var(--yellow); }
-  .gallery-caption.hover-blue:hover  { background-color: var(--blue); }
-
-  .gallery-caption:hover .gallery-year,
-  .gallery-caption:hover .gallery-focus,
-  .gallery-caption:hover .gallery-title-link,
-  .gallery-caption:hover .caption-dash {
-    color: var(--black);
-    opacity: 1;
+    opacity: 0.8;
   }
 
   /* ---------- NAV ---------- */
@@ -261,18 +274,14 @@ topBarTheme: dark
   /* ---------- MOBILE ---------- */
 
   @media (max-width: 700px) {
-    .gallery-title { font-size: clamp(1.4rem, 7vw, 2.2rem); }
-    .project-gallery { --card-w: 82vw; --cap-h: 96px; }
+    .project-gallery { --card-w: 82vw; }
     /* Caption stacks: title on its own line, year + focus underneath. */
-    .gallery-caption {
-      flex-wrap: wrap;
-      justify-content: center;
+    .slide-caption {
       row-gap: 6px;
       column-gap: 14px;
-      width: 100%;
-      padding: 8px var(--side-pad);
+      padding: 16px var(--side-pad);
     }
-    .gallery-title-link { order: -1; flex-basis: 100%; text-align: center; }
+    .gallery-title-link { order: -1; flex-basis: 100%; }
     .caption-dash { display: none; }
   }
 
@@ -283,13 +292,6 @@ topBarTheme: dark
   <section class="project-gallery" id="project-gallery">
     <h1 class="visually-hidden">Jack Leary — Multidisciplinary Designer</h1>
     <div class="gallery-track" id="gallery-slides"></div>
-    <a href="#" class="gallery-caption" id="gallery-caption">
-      <span class="gallery-year" id="gallery-year"></span>
-      <span class="caption-dash">—</span>
-      <span class="gallery-title-link" id="gallery-title-link"></span>
-      <span class="caption-dash">—</span>
-      <span class="gallery-focus" id="gallery-focus"></span>
-    </a>
   </section>
 
   {% include "top-bar.njk" %}
@@ -336,11 +338,6 @@ topBarTheme: dark
   });
 
   const slidesContainer = document.getElementById("gallery-slides");
-  const captionLinkEl = document.getElementById("gallery-caption");
-  const yearEl = document.getElementById("gallery-year");
-  const titleLinkEl = document.getElementById("gallery-title-link");
-  const focusEl = document.getElementById("gallery-focus");
-
   const galleryEl = document.getElementById("project-gallery");
 
   // ---- True infinite loop ---------------------------------------------
@@ -369,13 +366,43 @@ topBarTheme: dark
       const vi = loop * SLIDES.length + i;
       const div = document.createElement("div");
       div.className = "slide";
-      div.style.backgroundImage = `url("${slide.image}")`;
       div.setAttribute("role", "img");
       div.setAttribute("aria-label", slide.title);
-      // Clicking a peeking neighbour brings it to the center.
-      div.addEventListener("click", () => {
-        if (vi !== virtualIndex) { virtualIndex = vi; showSlide(); }
+
+      const bg = document.createElement("div");
+      bg.className = "slide-bg";
+      bg.style.backgroundImage = `url("${slide.image}")`;
+      div.appendChild(bg);
+
+      // Caption lives on the slide itself now (not a separate element
+      // tracking whichever slide is active) — it just sits there hidden
+      // until hovered (see the CSS). It's a real link straight to the
+      // project page.
+      const cap = document.createElement("a");
+      cap.className = "slide-caption";
+      cap.href = slide.page;
+      cap.innerHTML = `
+        <span class="gallery-year">${slide.year}</span>
+        <span class="caption-dash">—</span>
+        <span class="gallery-title-link ${slide.hover}">${slide.title}</span>
+        <span class="caption-dash">—</span>
+        <span class="gallery-focus">${slide.focus}</span>
+      `;
+      div.appendChild(cap);
+
+      // A peeking neighbour's click brings it to center first — including
+      // a click that landed on its (now-visible-on-hover) caption link, so
+      // you don't accidentally leave the page while just trying to bring
+      // a slide into view. Once a slide IS centered, clicking it (or its
+      // caption) falls through to the link's normal navigation.
+      div.addEventListener("click", (e) => {
+        if (vi !== virtualIndex) {
+          e.preventDefault();
+          virtualIndex = vi;
+          showSlide();
+        }
       });
+
       slidesContainer.appendChild(div);
       slideEls.push(div);
     });
@@ -410,13 +437,6 @@ topBarTheme: dark
   function showSlide() {
     slideEls.forEach((el, i) => el.classList.toggle("active", i === virtualIndex));
     positionTrack();
-    const s = SLIDES[realIndex(virtualIndex)];
-    yearEl.textContent = s.year;
-    titleLinkEl.textContent = s.title;
-    focusEl.textContent = s.focus;
-    captionLinkEl.href = s.page;
-    captionLinkEl.classList.remove("hover-red", "hover-yellow", "hover-blue");
-    captionLinkEl.classList.add(s.hover);
   }
 
   if (SLIDES.length > 0) {
