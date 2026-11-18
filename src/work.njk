@@ -93,7 +93,7 @@ topBarTheme: light
     --red: #eb1c1c;
     --yellow: #f0e100;
     --blue: #48acf0;
-    --side-pad: clamp(12px, 3vw, 50px);
+    --side-pad: clamp(24px, calc(-2.4px + 6.77vw), 100px);
     --font-header: "League Spartan", "Helvetica Neue", Arial, sans-serif;
     --font-body: "League Mono", "Helvetica Neue", Arial, monospace;
   }
@@ -299,11 +299,11 @@ topBarTheme: light
     // Same project data as home-v2-prototype.html — keep these two lists
     // in sync by hand until this gets pulled into a real 11ty data file.
     const PROJECTS = [
-      { slug: "puck-and-chuck",          title: "Puck + Chuck",             year: "2026",      focus: "Brand Identity",          ext: "webp", page: "/projects/puck-and-chuck/", hover: "hover-blue" },
+      { slug: "puck-and-chuck",          title: "Puck + Chuck",             year: "2026",      focus: "Brand Identity",          ext: "webp", page: "/projects/puck-and-chuck/", hover: "hover-red" },
       { slug: "surf",                    title: "Surf",                     year: "2024",      focus: "Editorial Presentation",  ext: "webp", page: "/projects/surf/",         hover: "hover-red" },
-      { slug: "hangul",                  title: "Hangul",                   year: "2026",      focus: "Poster Design",           ext: "webp", page: "/projects/hangul/",       hover: "hover-yellow" },
-      { slug: "great-ideas-of-humanity", title: "Great Ideas of Humanity",  year: "2025",      focus: "Poster Design",           ext: "webp", page: "/projects/great-ideas-of-humanity/",  hover: "hover-blue" },
-      { slug: "over-the-hump",           title: "Over the Hump",            year: "2024-2025", focus: "Social Media Design",     ext: "webp", page: "/projects/over-the-hump/", hover: "hover-blue" },
+      { slug: "hangul",                  title: "Hangul",                   year: "2026",      focus: "Poster Design",           ext: "webp", page: "/projects/hangul/",       hover: "hover-red" },
+      { slug: "great-ideas-of-humanity", title: "Great Ideas of Humanity",  year: "2025",      focus: "Poster Design",           ext: "webp", page: "/projects/great-ideas-of-humanity/",  hover: "hover-red" },
+      { slug: "over-the-hump",           title: "Over the Hump",            year: "2024-2025", focus: "Social Media Design",     ext: "webp", page: "/projects/over-the-hump/", hover: "hover-red" },
       { slug: "cld-wtr",                 title: "CLD WTR",                  year: "2026",      focus: "Brand Identity",          ext: "webp", page: "/projects/cld-wtr/", hover: "hover-red" },
     ];
 

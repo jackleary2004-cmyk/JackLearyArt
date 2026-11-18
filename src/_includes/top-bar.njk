@@ -159,12 +159,15 @@
   .top-bar-nav {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     width: 100%;
     gap: clamp(10px, 2vw, 28px);
   }
+  /* Masthead now holds a single centered logo+name lockup (see
+     .top-bar-wordmark below); the nav row keeps its five links spread
+     edge to edge like before. */
+  .top-bar-masthead { justify-content: center; }
+  .top-bar-nav { justify-content: space-between; }
 
-  .top-bar-masthead span,
   .top-bar-nav a {
     font-family: var(--font-body);
     font-weight: 300;
@@ -176,6 +179,37 @@
     opacity: 0;
     transform: translateY(-6px);
     animation: topBarIn 0.6s ease forwards;
+  }
+
+  /* The masthead lockup — logo + "Jack Leary", larger and centered, a
+     single link straight home (same destination as the logo everywhere
+     else on the site). It's the site's wordmark now, not an About link
+     — "About" lives in the nav row instead (see the markup below). The
+     old "Multidisciplinary Designer" subhead that used to sit next to it
+     has moved to the About page as that page's own subtitle. */
+  .top-bar-wordmark {
+    display: flex;
+    align-items: center;
+    gap: clamp(8px, 1.2vw, 14px);
+    opacity: 0;
+    transform: translateY(-6px);
+    animation: topBarIn 0.6s ease forwards;
+    transition: opacity 0.3s ease;
+  }
+  .top-bar-wordmark:hover { opacity: 0.8; }
+  .top-bar-wordmark span {
+    font-family: var(--font-body);
+    font-weight: 800;
+    font-size: clamp(17px, 2.6vw, 28px);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: inherit;
+  }
+  .top-bar-wordmark .top-bar-logo {
+    height: clamp(26px, 3.2vw, 38px);
+    opacity: 1;
+    animation: none;
   }
 
   /* Nav links: 15% larger than before (was clamp(12px, 1.4vw, 15px)).
@@ -217,9 +251,6 @@
     filter: invert(1);
   }
 
-  .top-bar-masthead > *:nth-child(1) { animation-delay: 0.3s; }
-  .top-bar-masthead > *:nth-child(2) { animation-delay: 0.15s; }
-  .top-bar-masthead > *:nth-child(3) { animation-delay: 0s; }
   .top-bar-nav a:nth-child(1) { animation-delay: 0.3s; }
   .top-bar-nav a:nth-child(2) { animation-delay: 0.2s; }
   .top-bar-nav a:nth-child(3) { animation-delay: 0.1s; }
@@ -247,10 +278,15 @@
       padding-top: 4px;
       padding-bottom: 0;
     }
-    .top-bar-masthead,
     .top-bar-nav { display: contents; }
-    .top-bar-masthead span { display: none; }
-    .top-bar-logo { grid-row: 1; grid-column: 1; }
+    .top-bar-masthead {
+      grid-row: 1;
+      grid-column: 1;
+      justify-content: flex-start; /* overrides the desktop center on mobile */
+    }
+    .top-bar-wordmark { gap: 6px; }
+    .top-bar-wordmark span { font-size: 14px; }
+    .top-bar-wordmark .top-bar-logo { height: 20px; }
     .top-bar-nav a {
       font-size: 13px;
       letter-spacing: 0.08em;
@@ -328,6 +364,10 @@
     color: var(--black);
     text-decoration: underline;
     text-underline-offset: 3px;
+    transition: color 0.25s ease;
+  }
+  .contact-oval .contact-email:hover {
+    color: var(--blue);
   }
 
   .contact-oval .contact-links {
@@ -348,7 +388,8 @@
     transition: opacity 0.25s ease;
   }
   .contact-oval .contact-links a:hover {
-    opacity: 0.55;
+    color: var(--blue);
+    opacity: 0.8;
   }
 
   .contact-close {
@@ -406,14 +447,16 @@
 
 <div class="top-bar{% if topBarTheme == 'dark' %} top-bar--dark{% endif %}" id="topBar">
   <div class="top-bar-masthead">
-    <img class="top-bar-logo" src="/images/logo/logo.webp" alt="Jack Leary logo">
-    <span>Multidisciplinary Designer</span>
+    <a href="/" class="top-bar-wordmark" aria-label="Jack Leary — Home">
+      <img class="top-bar-logo" src="/images/logo/logo.webp" alt="">
+      <span>Jack Leary</span>
+    </a>
   </div>
   <nav class="top-bar-nav" aria-label="Main">
-    <a href="/about/" class="hover-blue{% if topBarSection == 'about' %} is-current{% endif %}"{% if topBarSection == 'about' %} aria-current="page"{% endif %}>Jack Leary</a>
-    <a href="/" class="hover-red{% if topBarSection == 'home' %} is-current{% endif %}"{% if topBarSection == 'home' %} aria-current="page"{% endif %}>Home</a>
-    <a href="/work/" class="hover-blue{% if topBarSection == 'work' %} is-current{% endif %}"{% if topBarSection == 'work' %} aria-current="page"{% endif %}>Work</a>
-    <a href="#contact" class="top-bar-contact hover-red">Contact</a>
+    <a href="/about/" class="hover-yellow{% if topBarSection == 'about' %} is-current{% endif %}"{% if topBarSection == 'about' %} aria-current="page"{% endif %}>About</a>
+    <a href="/" class="hover-yellow{% if topBarSection == 'home' %} is-current{% endif %}"{% if topBarSection == 'home' %} aria-current="page"{% endif %}>Home</a>
+    <a href="/work/" class="hover-yellow{% if topBarSection == 'work' %} is-current{% endif %}"{% if topBarSection == 'work' %} aria-current="page"{% endif %}>Work</a>
+    <a href="#contact" class="top-bar-contact hover-yellow">Contact</a>
     <a href="/playground/" class="hover-yellow{% if topBarSection == 'playground' %} is-current{% endif %}"{% if topBarSection == 'playground' %} aria-current="page"{% endif %}>Playground</a>
   </nav>
 </div>
@@ -430,7 +473,7 @@
       <button class="menu-toggle" id="menuClose">Close</button>
     </div>
     <nav class="menu-links" aria-label="Menu">
-      <a href="/about/"{% if topBarSection == 'about' %} class="is-current" aria-current="page"{% endif %}>Jack Leary</a>
+      <a href="/about/"{% if topBarSection == 'about' %} class="is-current" aria-current="page"{% endif %}>About</a>
       <a href="/"{% if topBarSection == 'home' %} class="is-current" aria-current="page"{% endif %}>Home</a>
       <a href="/work/"{% if topBarSection == 'work' %} class="is-current" aria-current="page"{% endif %}>Work</a>
       <a href="#contact" data-contact>Contact</a>

@@ -82,7 +82,16 @@ topBarTheme: light
     text-transform: uppercase;
     letter-spacing: -0.01em;
     line-height: 1;
-    font-size: clamp(2.6rem, 9vw, 7.5rem);
+    font-size: clamp(2.6rem, 7vw, 5.5rem);
+  }
+  .about-subtitle {
+    margin-top: clamp(10px, 1.6vh, 16px);
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: clamp(12px, 1.4vw, 15px);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--black);
   }
 
   /* ---------- INTRO: photo + bio, side by side ---------- */
@@ -108,7 +117,7 @@ topBarTheme: light
 
   .about-bio {
     flex: 1.4 1 0;
-    font-size: clamp(1.05rem, 1.7vw, 1.3rem);
+    font-size: clamp(1rem, 1.5vw, 1.2rem);
     line-height: 1.65;
   }
   .about-bio p + p {
@@ -182,7 +191,8 @@ topBarTheme: light
   {% include "top-bar.njk" %}
 
   <header class="about-header reveal">
-    <h1>Jack Leary</h1>
+    <h1>About</h1>
+    <p class="about-subtitle">Multidisciplinary Designer</p>
   </header>
 
   <section class="about-intro">

@@ -126,7 +126,7 @@ topBarTheme: dark
     --blue:   #48acf0;
 
     /* Halved from clamp(24px, 6vw, 100px) per latest request. */
-    --side-pad: clamp(12px, 3vw, 50px);
+    --side-pad: clamp(24px, calc(-2.4px + 6.77vw), 100px);
     --font-header: "League Spartan", "Helvetica Neue", Arial, sans-serif;
     --font-body:   "League Mono", "Helvetica Neue", Arial, monospace;
   }
@@ -208,10 +208,10 @@ topBarTheme: dark
      they fade in. Touch devices can't hover, so the active slide gets a
      lighter, permanent darken there instead. */
   @media (hover: hover) and (pointer: fine) {
-    .slide:hover .slide-bg { filter: brightness(0.6); }
+    .slide:hover .slide-bg { filter: brightness(0.75); }
   }
   @media (hover: none), (pointer: coarse) {
-    .slide.active .slide-bg { filter: brightness(0.75); }
+    .slide.active .slide-bg { filter: brightness(0.9); }
   }
 
   /* Year / title / focus now sit directly on the image they describe,
@@ -225,11 +225,8 @@ topBarTheme: dark
     position: absolute;
     inset: 0;
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    align-content: center;
-    gap: clamp(10px, 1.4vw, 18px);
     padding: clamp(14px, 2vw, 26px);
     text-align: center;
     opacity: 0;
@@ -244,14 +241,42 @@ topBarTheme: dark
     .slide.active .slide-caption { opacity: 1; pointer-events: auto; }
   }
 
+  /* The text sizes to content, independent of the full-slide hit area
+     around it (.slide-caption above), so the solid color box on hover
+     only wraps the words themselves, not the whole image. */
+  .slide-caption-box {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: center;
+    gap: clamp(10px, 1.4vw, 18px);
+    padding: clamp(10px, 1.6vh, 16px) clamp(20px, 3vw, 36px);
+    background-color: transparent;
+    border: 1px solid transparent;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+  }
+
+  /* Solid black box behind the caption on hover — keyed off the same
+     hover/active state that reveals the text, just living on its own
+     element so the box hugs the words instead of covering the image. */
+  @media (hover: hover) and (pointer: fine) {
+    .slide:hover .slide-caption-box { background-color: var(--black); border-color: var(--white); }
+  }
+  @media (hover: none), (pointer: coarse) {
+    .slide.active .slide-caption-box { background-color: var(--black); border-color: var(--white); }
+  }
+
+  /* Larger + bolder (was weight 100 / clamp(12px,1.4vw,15px)) per latest
+     request — tracking eased back slightly so it doesn't feel too wide
+     at the bigger size/weight. */
   .gallery-year,
   .gallery-focus,
   .gallery-title-link,
   .caption-dash {
     font-family: var(--font-body);
-    font-weight: 100;
-    font-size: clamp(12px, 1.4vw, 15px);
-    letter-spacing: 0.16em;
+    font-weight: 800;
+    font-size: clamp(15px, 2vw, 22px);
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--white);
     text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
@@ -275,8 +300,9 @@ topBarTheme: dark
 
   @media (max-width: 700px) {
     .project-gallery { --card-w: 82vw; }
+    .slide-caption { padding: 0; }
     /* Caption stacks: title on its own line, year + focus underneath. */
-    .slide-caption {
+    .slide-caption-box {
       row-gap: 6px;
       column-gap: 14px;
       padding: 16px var(--side-pad);
@@ -310,12 +336,12 @@ topBarTheme: dark
   // uses) so the title link picks up one of them on hover, same as WORK/
   // CONTACT/PLAYGROUND do.
   const PROJECTS = [
-    { slug: "puck-and-chuck",           title: "Puck + Chuck",               year: "2026", focus: "Brand Identity", ext: "webp", count: 2, page: "/projects/puck-and-chuck/", hover: "hover-blue" },
+    { slug: "puck-and-chuck",           title: "Puck + Chuck",               year: "2026", focus: "Brand Identity", ext: "webp", count: 2, page: "/projects/puck-and-chuck/", hover: "hover-red" },
     { slug: "surf",                     title: "Surf",                       year: "2024", focus: "Editorial Presentation", ext: "webp", count: 2, page: "/projects/surf/",        hover: "hover-red" },
     { slug: "hangul",                   title: "Hangul",                     year: "2026", focus: "Poster Design", ext: "webp", count: 2, page: "/projects/hangul/",     hover: "hover-red" },
-    { slug: "cld-wtr",                  title: "CLD WTR",                    year: "2026", focus: "Brand Identity", ext: "webp", count: 2, page: "/projects/cld-wtr/", hover: "hover-yellow" },
-    { slug: "over-the-hump",            title: "Over the Hump",              year: "2024-2025", focus: "Social Media Design", ext: "webp", count: 2, page: "/projects/over-the-hump/", hover: "hover-blue" },
-    { slug: "great-ideas-of-humanity",   title: "Great Ideas of Humanity",    year: "2025", focus: "Poster Design", ext: "webp", count: 2, page: "/projects/great-ideas-of-humanity/", hover: "hover-yellow" },
+    { slug: "cld-wtr",                  title: "CLD WTR",                    year: "2026", focus: "Brand Identity", ext: "webp", count: 2, page: "/projects/cld-wtr/", hover: "hover-red" },
+    { slug: "over-the-hump",            title: "Over the Hump",              year: "2024-2025", focus: "Social Media Design", ext: "webp", count: 2, page: "/projects/over-the-hump/", hover: "hover-red" },
+    { slug: "great-ideas-of-humanity",   title: "Great Ideas of Humanity",    year: "2025", focus: "Poster Design", ext: "webp", count: 2, page: "/projects/great-ideas-of-humanity/", hover: "hover-red" },
   ];
 
   // Flatten each project's numbered images into one ordered list of
@@ -382,11 +408,13 @@ topBarTheme: dark
       cap.className = "slide-caption";
       cap.href = slide.page;
       cap.innerHTML = `
-        <span class="gallery-year">${slide.year}</span>
-        <span class="caption-dash">—</span>
-        <span class="gallery-title-link ${slide.hover}">${slide.title}</span>
-        <span class="caption-dash">—</span>
-        <span class="gallery-focus">${slide.focus}</span>
+        <span class="slide-caption-box">
+          <span class="gallery-year">${slide.year}</span>
+          <span class="caption-dash">—</span>
+          <span class="gallery-title-link ${slide.hover}">${slide.title}</span>
+          <span class="caption-dash">—</span>
+          <span class="gallery-focus">${slide.focus}</span>
+        </span>
       `;
       div.appendChild(cap);
 

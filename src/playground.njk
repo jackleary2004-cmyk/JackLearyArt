@@ -95,14 +95,14 @@ topBarTheme: dark
     z-index: 20;
     font-family: var(--font-caption);
     font-weight: 100;
-    font-size: clamp(12px, 1.4vw, 15px);
+    font-size: clamp(13.8px, 1.61vw, 17.25px);
     letter-spacing: 0.16em;
     text-transform: uppercase;
     text-decoration: none;
     color: rgba(255,255,255,0.55);
     transition: color 0.3s ease, font-weight 0.1s ease;
   }
-  .back-link:hover { color: var(--blue); text-decoration: underline; text-underline-offset: 4px; }
+  .back-link:hover { color: var(--yellow); text-decoration: underline; text-underline-offset: 4px; }
 
   .project-header {
     padding: 7rem var(--side-pad) 3.5rem;
@@ -309,7 +309,7 @@ topBarTheme: dark
     <h1>Playground</h1>
   </header>
 
-  <div class="grid-loading" id="gridLoading">loading 14 pieces…</div>
+  <div class="grid-loading" id="gridLoading">loading 15 pieces…</div>
   <div class="playground-grid" id="playgroundGrid"></div>
 
   <div id="lightbox">
@@ -341,6 +341,7 @@ topBarTheme: dark
     { file: "a_place_where_love_goes.mp4", title: "A Place Where Love Goes" },
     { ar: 0.75, file: "flip_it.webp", title: "Flip It!" },
     { ar: 0.75, file: "and_what_about_it.webp", title: "And What About It?" },
+    { ar: 1, file: "fight!_jack-leary.gif", title: "Fight!" },
   ];
   const isVideo = (f) => f.endsWith(".mp4");
 
